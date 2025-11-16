@@ -3,8 +3,9 @@
   "version": "1.0.1",
   "type": "module",
   "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "build": "bun build ./src/index.ts --outdir ./dist --minify"
+    "build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts && tsc"
   },
   "devDependencies": {
     "@types/bun": "latest"
