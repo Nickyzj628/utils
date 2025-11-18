@@ -16,6 +16,7 @@
     "typescript": "^5"
   },
   "repository": {
-    "url": "https://github.com/Nickyzj628/utils"
+    "type": "git",
+    "url": "https://github.com/Nickyzj628/utils.git"
   }
 }
