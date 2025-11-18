@@ -5,10 +5,12 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts && tsc"
+    "build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts && tsc",
+    "docs": "typedoc src/index.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "typedoc": "^0.28.14"
   },
   "peerDependencies": {
     "typescript": "^5"
