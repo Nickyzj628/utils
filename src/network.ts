@@ -88,13 +88,13 @@ export const fetcher = (baseURL = "") => {
  * @example
  * const [error, response] = await to(fetcher().get<Blog>("/blogs/hello-world"));
  */
-export const to = async <T, Error>(
+export const to = async <T, U = Error>(
   promise: Promise<T>,
-): Promise<[null, T] | [Error, undefined]> => {
+): Promise<[null, T] | [U, undefined]> => {
   try {
     const response = await promise;
     return [null, response];
   } catch (error) {
-    return [error as Error, undefined];
+    return [error as U, undefined];
   }
 };
