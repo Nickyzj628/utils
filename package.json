@@ -5,8 +5,9 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts && tsc",
-    "docs": "typedoc src/index.ts"
+    "docs": "typedoc src/index.ts",
+    "build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts && tsc && bun run docs",
+    "publish": "npm version patch && npm publish"
   },
   "devDependencies": {
     "@types/bun": "latest",
