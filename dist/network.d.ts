@@ -29,4 +29,4 @@ export declare const fetcher: (baseURL?: string) => {
  * @example
  * const [error, response] = await to(fetcher().get<Blog>("/blogs/hello-world"));
  */
-export declare const to: <T, Error>(promise: Promise<T>) => Promise<[null, T] | [Error, undefined]>;
+export declare const to: <T, U = Error>(promise: Promise<T>) => Promise<[null, T] | [U, undefined]>;
