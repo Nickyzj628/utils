@@ -1,12 +1,12 @@
 {
   "name": "@nickyzj2023/utils",
-  "version": "1.0.3",
+  "version": "1.0.9",
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts && tsc",
-    "docs": "typedoc src/index.ts"
+    "docs": "typedoc src/index.ts",
+    "build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts && tsc && bun run docs"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -16,6 +16,7 @@
     "typescript": "^5"
   },
   "repository": {
-    "url": "https://github.com/Nickyzj628/utils"
+    "type": "git",
+    "url": "https://github.com/Nickyzj628/utils.git"
   }
 }
