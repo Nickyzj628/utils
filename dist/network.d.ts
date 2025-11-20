@@ -1,6 +1,10 @@
 /**
  * 基于 Fetch API 的请求客户端
  * @param baseURL 接口前缀，如 https://nickyzj.run:3030，也可以不填
+<<<<<<< Updated upstream
+=======
+ * @param defaultOptions 客户端级别的请求选项，方法级别的选项会覆盖这里的相同值
+>>>>>>> Stashed changes
  *
  * @remarks
  * 特性：
@@ -9,13 +13,17 @@
  *
  * @example
  * // 用法1：创建客户端
+<<<<<<< Updated upstream
  * const api = fetcher("https://nickyzj.run:3030");
+=======
+ * const api = fetcher("https://nickyzj.run:3030", { headers: { Authorization: "Bearer token" } });
+>>>>>>> Stashed changes
  * const res = await api.get<Blog>("/blogs/hello-world");
  *
  * // 用法2：直接发送请求
  * const res = await fetcher().get<Blog>("https://nickyzj.run:3030/blogs/hello-world");
  */
-export declare const fetcher: (baseURL?: string) => {
+export declare const fetcher: (baseURL?: string, defaultOptions?: RequestInit) => {
     get: <T>(url: string, options?: Omit<RequestInit, "method">) => Promise<T>;
     post: <T>(url: string, body?: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
     put: <T>(url: string, body?: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
@@ -29,4 +37,4 @@ export declare const fetcher: (baseURL?: string) => {
  * @example
  * const [error, response] = await to(fetcher().get<Blog>("/blogs/hello-world"));
  */
-export declare const to: <T, U = Error>(promise: Promise<T>) => Promise<[null, T] | [U, undefined]>;
+export declare const to: <T, Error>(promise: Promise<T>) => Promise<[null, T] | [Error, undefined]>;
