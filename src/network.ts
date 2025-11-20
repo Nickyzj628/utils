@@ -6,6 +6,7 @@ const cachedRequests = new LRUCache<string, Promise<Response>>();
 /**
  * 基于 Fetch API 的请求客户端
  * @param baseURL 接口前缀，如 https://nickyzj.run:3030，也可以不填
+ * @param defaultOptions 客户端级别的请求选项，方法级别的选项会覆盖这里的相同值
  *
  * @remarks
  * 特性：
@@ -14,13 +15,13 @@ const cachedRequests = new LRUCache<string, Promise<Response>>();
  *
  * @example
  * // 用法1：创建客户端
- * const api = fetcher("https://nickyzj.run:3030");
+ * const api = fetcher("https://nickyzj.run:3030", { headers: { Authorization: "Bearer token" } });
  * const res = await api.get<Blog>("/blogs/hello-world");
  *
  * // 用法2：直接发送请求
  * const res = await fetcher().get<Blog>("https://nickyzj.run:3030/blogs/hello-world");
  */
-export const fetcher = (baseURL = "") => {
+export const fetcher = (baseURL = "", defaultOptions: RequestInit = {}) => {
   const createRequest = async <T>(path: string, options: RequestInit = {}) => {
     // 构建完整 URL
     const url = baseURL ? `${baseURL}${path}` : path;
@@ -29,15 +30,15 @@ export const fetcher = (baseURL = "") => {
     if (isObject(options.body)) {
       options.body = JSON.stringify(options.body);
       options.headers = {
+        ...defaultOptions.headers,
         ...options.headers,
         "Content-Type": "application/json",
       };
     }
 
     const request = () => fetch(url, options);
-    let promise: Promise<Response>;
-
     const canCache = options.method === "GET" || !options.method;
+    let promise: Promise<Response>;
     if (!canCache) {
       promise = request();
     } else {
