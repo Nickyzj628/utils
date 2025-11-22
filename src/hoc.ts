@@ -18,29 +18,29 @@ type CacheEntry = {
  *
  * @example
  * // 异步函数示例
- * const fetchData = withCache(async (setTtl, url: string) => {
+ * const fetchData = withCache(async function (url: string) {
  *   const data = await fetch(url).then((res) => res.json());
- *   setTtl(data.expiresIn);  // 根据实际情况调整过期时间
+ *   this.setTtl(data.expiresIn); // 根据实际情况调整过期时间
  *   return data;
  * });
  *
  * await fetchData(urlA);
  * await fetchData(urlA); // 使用缓存结果
-
  * await fetchData(urlB);
  * await fetchData(urlB); // 使用缓存结果
  *
- * fetchData.clear(); // urlA 和 urlB 的缓存都被清除
- * await fetchData(urlA); // 重新请求数据
- * await fetchData(urlB); // 重新请求数据
+ * fetchData.clear(); // 清除缓存
+ * await fetchData(urlA); // 重新请求
+ * await fetchData(urlB); // 重新请求
  *
  * // 缓存过期前
- * fetchData.updateTtl(180);  // 更新 ttl 并为所有未过期缓存续期
+ * await sleep();
+ * fetchData.updateTtl(180);  // 更新 ttl 并为所有未过期的缓存续期
  * await fetchData(urlA); // 使用缓存结果
  * await fetchData(urlB); // 使用缓存结果
  */
 export const withCache = <Args extends any[], Result>(
-  fn: (setTtl: SetTtl, ...args: Args) => Result,
+  fn: (this: { setTtl: SetTtl }, ...args: Args) => Result,
   ttlSeconds = -1,
 ) => {
   const cache = new Map<string, CacheEntry>();
@@ -49,14 +49,19 @@ export const withCache = <Args extends any[], Result>(
     const key = JSON.stringify(args);
     const now = Date.now();
     const entry = cache.get(key);
+
     // 命中缓存且未过期
     if (entry && now < entry.expiresAt) {
       return entry.value;
     }
 
-    const setTtl: SetTtl = (seconds) => (ttlSeconds = seconds);
+    // 创建上下文，包含 setTtl 方法
+    const thisArg = {
+      setTtl: (seconds: number) => (ttlSeconds = seconds),
+    };
+
     const expiresAt = ttlSeconds === -1 ? Infinity : now + ttlSeconds * 1000;
-    const result = fn(setTtl, ...args);
+    const result = fn.apply(thisArg, args);
 
     // 异步函数：缓存 Promise 的 resolved 值
     if (result instanceof Promise) {
