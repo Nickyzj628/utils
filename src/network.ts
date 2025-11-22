@@ -34,10 +34,13 @@ import { mergeObjects } from "./object";
  * await sleep(1000);
  * await getBlogs("/blogs");  // 不请求，使用缓存结果
  */
-export const fetcher = (baseURL = "", defaultOptions: RequestInit = {}) => {
+export const fetcher = (
+  baseURL = "",
+  defaultOptions: BunFetchRequestInit = {},
+) => {
   const createRequest = async <T>(
     path: string,
-    requestOptions: RequestInit = {},
+    requestOptions: BunFetchRequestInit = {},
   ) => {
     // 构建完整 URL
     const url = baseURL ? `${baseURL}${path}` : path;
@@ -49,6 +52,7 @@ export const fetcher = (baseURL = "", defaultOptions: RequestInit = {}) => {
     if (isObject(options.body)) {
       options.body = JSON.stringify(options.body);
       options.headers = {
+        ...options.headers,
         "Content-Type": "application/json",
       };
     }
@@ -64,24 +68,24 @@ export const fetcher = (baseURL = "", defaultOptions: RequestInit = {}) => {
   };
 
   return {
-    get: <T>(url: string, options: Omit<RequestInit, "method"> = {}) =>
+    get: <T>(url: string, options: Omit<BunFetchRequestInit, "method"> = {}) =>
       createRequest<T>(url, { ...options, method: "GET" }),
 
     post: <T>(
       url: string,
       body: any,
-      options: Omit<RequestInit, "method" | "body"> = {},
+      options: Omit<BunFetchRequestInit, "method" | "body"> = {},
     ) => createRequest<T>(url, { ...options, method: "POST", body }),
 
     put: <T>(
       url: string,
       body: any,
-      options: Omit<RequestInit, "method" | "body"> = {},
+      options: Omit<BunFetchRequestInit, "method" | "body"> = {},
     ) => createRequest<T>(url, { ...options, method: "PUT", body }),
 
     delete: <T>(
       url: string,
-      options: Omit<RequestInit, "method" | "body"> = {},
+      options: Omit<BunFetchRequestInit, "method" | "body"> = {},
     ) => createRequest<T>(url, { ...options, method: "DELETE" }),
   };
 };
