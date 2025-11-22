@@ -1,7 +1,7 @@
+import { withCache } from "./hoc";
 import { isObject } from "./is";
-import LRUCache from "./lru-cache";
-
-const cachedRequests = new LRUCache<string, Promise<Response>>();
+import { mergeObjects } from "./object";
+import { sleep } from "./time";
 
 /**
  * 基于 Fetch API 的请求客户端
@@ -10,8 +10,10 @@ const cachedRequests = new LRUCache<string, Promise<Response>>();
  *
  * @remarks
  * 特性：
+ * - 合并客户端级别、方法级别的请求选项
  * - 在 body 里直接传递对象
- * - 能够缓存 GET 请求
+ * - 可选择使用 to() 处理返回结果为 [Error, Response]
+ * - 可选择使用 withCache() 缓存请求结果
  *
  * @example
  * // 用法1：创建客户端
@@ -20,38 +22,38 @@ const cachedRequests = new LRUCache<string, Promise<Response>>();
  *
  * // 用法2：直接发送请求
  * const res = await fetcher().get<Blog>("https://nickyzj.run:3030/blogs/hello-world");
+ *
+ * // 安全处理返回结果
+ * const [error, data] = await to(fetcher().get<Blog>("/blogs/hello-world"));
+ * if (error) {
+ *   console.error(error);
+ *   return;
+ * }
+ *
+ * // 缓存请求结果
+ * const getBlogs = withCache(fetcher().get);
  */
 export const fetcher = (baseURL = "", defaultOptions: RequestInit = {}) => {
-  const createRequest = async <T>(path: string, options: RequestInit = {}) => {
+  const createRequest = async <T>(
+    path: string,
+    requestOptions: RequestInit = {},
+  ) => {
     // 构建完整 URL
     const url = baseURL ? `${baseURL}${path}` : path;
 
-    // 处理 body 为对象的情况
+    // 合并 options
+    const options = mergeObjects(defaultOptions, requestOptions);
+
+    // 转换 body 为字符串
     if (isObject(options.body)) {
       options.body = JSON.stringify(options.body);
       options.headers = {
-        ...defaultOptions.headers,
-        ...options.headers,
         "Content-Type": "application/json",
       };
     }
 
-    const request = () => fetch(url, options);
-    const canCache = options.method === "GET" || !options.method;
-    let promise: Promise<Response>;
-    if (!canCache) {
-      promise = request();
-    } else {
-      let tempPromise = cachedRequests.get(url);
-      if (!tempPromise) {
-        tempPromise = request();
-        cachedRequests.set(url, tempPromise);
-      }
-      promise = tempPromise;
-    }
-
-    // 必须使用 clone() 消费一个新的响应体，否则下次从 cache 中获取的响应体会报错（无法被重复消费）
-    const response = (await promise).clone();
+    // 发送请求
+    const response = await fetch(url, options);
     if (!response.ok) {
       throw new Error(response.statusText);
     }
@@ -66,18 +68,20 @@ export const fetcher = (baseURL = "", defaultOptions: RequestInit = {}) => {
 
     post: <T>(
       url: string,
-      body?: any,
+      body: any,
       options: Omit<RequestInit, "method" | "body"> = {},
     ) => createRequest<T>(url, { ...options, method: "POST", body }),
 
     put: <T>(
       url: string,
-      body?: any,
+      body: any,
       options: Omit<RequestInit, "method" | "body"> = {},
     ) => createRequest<T>(url, { ...options, method: "PUT", body }),
 
-    delete: <T>(url: string, options: Omit<RequestInit, "method"> = {}) =>
-      createRequest<T>(url, { ...options, method: "DELETE" }),
+    delete: <T>(
+      url: string,
+      options: Omit<RequestInit, "method" | "body"> = {},
+    ) => createRequest<T>(url, { ...options, method: "DELETE" }),
   };
 };
 
@@ -99,3 +103,8 @@ export const to = async <T, U = Error>(
     return [error as U, undefined];
   }
 };
+
+const getBlogs = withCache(fetcher("https://nickyzj.run:3030").get);
+await getBlogs("/blogs");
+await sleep(1000);
+await getBlogs("/blogs");
