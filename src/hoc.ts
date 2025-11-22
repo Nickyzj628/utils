@@ -49,13 +49,13 @@ export const withCache = <Args extends any[], Result>(
     const key = JSON.stringify(args);
     const now = Date.now();
     const entry = cache.get(key);
-
     // 命中缓存且未过期
     if (entry && now < entry.expiresAt) {
       return entry.value;
     }
 
     const setTtl: SetTtl = (seconds) => (ttlSeconds = seconds);
+    const expiresAt = ttlSeconds === -1 ? Infinity : now + ttlSeconds * 1000;
     const result = fn(setTtl, ...args);
 
     // 异步函数：缓存 Promise 的 resolved 值
@@ -63,7 +63,7 @@ export const withCache = <Args extends any[], Result>(
       const promise = result.then((resolved) => {
         cache.set(key, {
           value: resolved,
-          expiresAt: Date.now() + ttlSeconds * 1000,
+          expiresAt,
         });
         return resolved;
       });
@@ -71,7 +71,7 @@ export const withCache = <Args extends any[], Result>(
       // 将 promise 先塞进去避免重复请求
       cache.set(key, {
         value: promise,
-        expiresAt: now + ttlSeconds * 1000,
+        expiresAt,
       });
 
       return promise as Result;
@@ -80,7 +80,7 @@ export const withCache = <Args extends any[], Result>(
     // 同步函数缓存
     cache.set(key, {
       value: result,
-      expiresAt: now + ttlSeconds * 1000,
+      expiresAt,
     });
 
     return result;
