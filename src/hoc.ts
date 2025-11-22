@@ -55,12 +55,13 @@ export const withCache = <Args extends any[], Result>(
       return entry.value;
     }
 
+    let expiresAt = ttlSeconds === -1 ? Infinity : now + ttlSeconds * 1000;
+
     // 创建上下文，包含 setTtl 方法
     const thisArg = {
-      setTtl: (seconds: number) => (ttlSeconds = seconds),
+      setTtl: (ttl: number) => (expiresAt = now + ttl * 1000),
     };
 
-    const expiresAt = ttlSeconds === -1 ? Infinity : now + ttlSeconds * 1000;
     const result = fn.apply(thisArg, args);
 
     // 异步函数：缓存 Promise 的 resolved 值
