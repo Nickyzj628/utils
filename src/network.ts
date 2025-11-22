@@ -1,7 +1,5 @@
-import { withCache } from "./hoc";
 import { isObject } from "./is";
 import { mergeObjects } from "./object";
-import { sleep } from "./time";
 
 /**
  * 基于 Fetch API 的请求客户端
@@ -24,14 +22,17 @@ import { sleep } from "./time";
  * const res = await fetcher().get<Blog>("https://nickyzj.run:3030/blogs/hello-world");
  *
  * // 安全处理返回结果
- * const [error, data] = await to(fetcher().get<Blog>("/blogs/hello-world"));
+ * const [error, data] = await to(api.get<Blog>("/blogs/hello-world"));
  * if (error) {
  *   console.error(error);
  *   return;
  * }
  *
  * // 缓存请求结果
- * const getBlogs = withCache(fetcher().get);
+ * const getBlogs = withCache(api.get);
+ * await getBlogs("/blogs");
+ * await sleep(1000);
+ * await getBlogs("/blogs");  // 不请求，使用缓存结果
  */
 export const fetcher = (baseURL = "", defaultOptions: RequestInit = {}) => {
   const createRequest = async <T>(
@@ -103,8 +104,3 @@ export const to = async <T, U = Error>(
     return [error as U, undefined];
   }
 };
-
-const getBlogs = withCache(fetcher("https://nickyzj.run:3030").get);
-await getBlogs("/blogs");
-await sleep(1000);
-await getBlogs("/blogs");

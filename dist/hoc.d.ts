@@ -12,28 +12,30 @@ type SetTtl = (seconds: number) => void;
  *
  * @example
  * // 异步函数示例
- * const fetchData = withCache(async (setTtl, url: string) => {
+ * const fetchData = withCache(async function (url: string) {
  *   const data = await fetch(url).then((res) => res.json());
- *   setTtl(data.expiresIn);  // 根据实际情况调整过期时间
+ *   this.setTtl(data.expiresIn); // 根据实际情况调整过期时间
  *   return data;
  * });
  *
  * await fetchData(urlA);
  * await fetchData(urlA); // 使用缓存结果
-
  * await fetchData(urlB);
  * await fetchData(urlB); // 使用缓存结果
  *
- * fetchData.clear(); // urlA 和 urlB 的缓存都被清除
- * await fetchData(urlA); // 重新请求数据
- * await fetchData(urlB); // 重新请求数据
+ * fetchData.clear(); // 清除缓存
+ * await fetchData(urlA); // 重新请求
+ * await fetchData(urlB); // 重新请求
  *
  * // 缓存过期前
- * fetchData.updateTtl(180);  // 更新 ttl 并为所有未过期缓存续期
+ * await sleep();
+ * fetchData.updateTtl(180);  // 更新 ttl 并为所有未过期的缓存续期
  * await fetchData(urlA); // 使用缓存结果
  * await fetchData(urlB); // 使用缓存结果
  */
-export declare const withCache: <Args extends any[], Result>(fn: (setTtl: SetTtl, ...args: Args) => Result, ttlSeconds?: number) => {
+export declare const withCache: <Args extends any[], Result>(fn: (this: {
+    setTtl: SetTtl;
+}, ...args: Args) => Result, ttlSeconds?: number) => {
     (...args: Args): Result;
     clear(): void;
     updateTtl(seconds: number): void;

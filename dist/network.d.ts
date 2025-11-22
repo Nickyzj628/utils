@@ -5,8 +5,10 @@
  *
  * @remarks
  * 特性：
+ * - 合并客户端级别、方法级别的请求选项
  * - 在 body 里直接传递对象
- * - 能够缓存 GET 请求
+ * - 可选择使用 to() 处理返回结果为 [Error, Response]
+ * - 可选择使用 withCache() 缓存请求结果
  *
  * @example
  * // 用法1：创建客户端
@@ -15,12 +17,25 @@
  *
  * // 用法2：直接发送请求
  * const res = await fetcher().get<Blog>("https://nickyzj.run:3030/blogs/hello-world");
+ *
+ * // 安全处理返回结果
+ * const [error, data] = await to(api.get<Blog>("/blogs/hello-world"));
+ * if (error) {
+ *   console.error(error);
+ *   return;
+ * }
+ *
+ * // 缓存请求结果
+ * const getBlogs = withCache(api.get);
+ * await getBlogs("/blogs");
+ * await sleep(1000);
+ * await getBlogs("/blogs");  // 不请求，使用缓存结果
  */
 export declare const fetcher: (baseURL?: string, defaultOptions?: RequestInit) => {
     get: <T>(url: string, options?: Omit<RequestInit, "method">) => Promise<T>;
-    post: <T>(url: string, body?: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
-    put: <T>(url: string, body?: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
-    delete: <T>(url: string, options?: Omit<RequestInit, "method">) => Promise<T>;
+    post: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
+    put: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
+    delete: <T>(url: string, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
 };
 /**
  * Go 语言风格的异步处理方式
