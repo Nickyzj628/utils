@@ -31,11 +31,11 @@
  * await sleep(1000);
  * await getBlogs("/blogs");  // 不请求，使用缓存结果
  */
-export declare const fetcher: (baseURL?: string, defaultOptions?: RequestInit) => {
-    get: <T>(url: string, options?: Omit<RequestInit, "method">) => Promise<T>;
-    post: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
-    put: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
-    delete: <T>(url: string, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
+export declare const fetcher: (baseURL?: string, defaultOptions?: BunFetchRequestInit) => {
+    get: <T>(url: string, options?: Omit<BunFetchRequestInit, "method">) => Promise<T>;
+    post: <T>(url: string, body: any, options?: Omit<BunFetchRequestInit, "method" | "body">) => Promise<T>;
+    put: <T>(url: string, body: any, options?: Omit<BunFetchRequestInit, "method" | "body">) => Promise<T>;
+    delete: <T>(url: string, options?: Omit<BunFetchRequestInit, "method" | "body">) => Promise<T>;
 };
 /**
  * Go 语言风格的异步处理方式
