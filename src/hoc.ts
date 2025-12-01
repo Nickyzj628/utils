@@ -1,9 +1,9 @@
-type SetTtl = (seconds: number) => void;
-
 type CacheEntry = {
   value: any;
   expiresAt: number; // 时间戳（毫秒）
 };
+
+export type SetTtl = (seconds: number) => void;
 
 /**
  * 创建一个带缓存的高阶函数

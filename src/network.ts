@@ -1,7 +1,7 @@
 import { isObject } from "./is";
 import { mergeObjects } from "./object";
 
-type RequestInit = BunFetchRequestInit & {
+export type RequestInit = BunFetchRequestInit & {
   parser?: (response: Response) => Promise<any>;
 };
 

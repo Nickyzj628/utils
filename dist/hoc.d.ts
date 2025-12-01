@@ -1,4 +1,4 @@
-type SetTtl = (seconds: number) => void;
+export type SetTtl = (seconds: number) => void;
 /**
  * 创建一个带缓存的高阶函数
  *
@@ -40,4 +40,3 @@ export declare const withCache: <Args extends any[], Result>(fn: (this: {
     clear(): void;
     updateTtl(seconds: number): void;
 };
-export {};

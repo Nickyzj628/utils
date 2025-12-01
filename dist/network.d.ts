@@ -1,4 +1,4 @@
-type RequestInit = BunFetchRequestInit & {
+export type RequestInit = BunFetchRequestInit & {
     parser?: (response: Response) => Promise<any>;
 };
 /**
@@ -49,4 +49,3 @@ export declare const fetcher: (baseURL?: string, defaultOptions?: RequestInit) =
  * const [error, response] = await to(fetcher().get<Blog>("/blogs/hello-world"));
  */
 export declare const to: <T, U = Error>(promise: Promise<T>) => Promise<[null, T] | [U, undefined]>;
-export {};
