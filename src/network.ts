@@ -1,6 +1,10 @@
 import { isObject } from "./is";
 import { mergeObjects } from "./object";
 
+type RequestInit = BunFetchRequestInit & {
+  parser?: (response: Response) => Promise<any>;
+};
+
 /**
  * 基于 Fetch API 的请求客户端
  * @param baseURL 接口前缀，如 https://nickyzj.run:3030，也可以不填
@@ -34,19 +38,16 @@ import { mergeObjects } from "./object";
  * await sleep(1000);
  * await getBlogs("/blogs");  // 不请求，使用缓存结果
  */
-export const fetcher = (
-  baseURL = "",
-  defaultOptions: BunFetchRequestInit = {},
-) => {
+export const fetcher = (baseURL = "", defaultOptions: RequestInit = {}) => {
   const createRequest = async <T>(
     path: string,
-    requestOptions: BunFetchRequestInit = {},
+    requestOptions: RequestInit = {},
   ) => {
     // 构建完整 URL
     const url = baseURL ? `${baseURL}${path}` : path;
 
     // 合并 options
-    const options = mergeObjects(defaultOptions, requestOptions);
+    const { parser, ...options } = mergeObjects(defaultOptions, requestOptions);
 
     // 转换 body 为字符串
     if (isObject(options.body)) {
@@ -63,29 +64,29 @@ export const fetcher = (
       throw new Error(response.statusText);
     }
 
-    const data = await response.json();
+    const data = await (parser?.(response) ?? response.json());
     return data as T;
   };
 
   return {
-    get: <T>(url: string, options: Omit<BunFetchRequestInit, "method"> = {}) =>
+    get: <T>(url: string, options: Omit<RequestInit, "method"> = {}) =>
       createRequest<T>(url, { ...options, method: "GET" }),
 
     post: <T>(
       url: string,
       body: any,
-      options: Omit<BunFetchRequestInit, "method" | "body"> = {},
+      options: Omit<RequestInit, "method" | "body"> = {},
     ) => createRequest<T>(url, { ...options, method: "POST", body }),
 
     put: <T>(
       url: string,
       body: any,
-      options: Omit<BunFetchRequestInit, "method" | "body"> = {},
+      options: Omit<RequestInit, "method" | "body"> = {},
     ) => createRequest<T>(url, { ...options, method: "PUT", body }),
 
     delete: <T>(
       url: string,
-      options: Omit<BunFetchRequestInit, "method" | "body"> = {},
+      options: Omit<RequestInit, "method" | "body"> = {},
     ) => createRequest<T>(url, { ...options, method: "DELETE" }),
   };
 };

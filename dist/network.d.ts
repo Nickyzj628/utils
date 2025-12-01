@@ -1,3 +1,6 @@
+type RequestInit = BunFetchRequestInit & {
+    parser?: (response: Response) => Promise<any>;
+};
 /**
  * 基于 Fetch API 的请求客户端
  * @param baseURL 接口前缀，如 https://nickyzj.run:3030，也可以不填
@@ -31,11 +34,11 @@
  * await sleep(1000);
  * await getBlogs("/blogs");  // 不请求，使用缓存结果
  */
-export declare const fetcher: (baseURL?: string, defaultOptions?: BunFetchRequestInit) => {
-    get: <T>(url: string, options?: Omit<BunFetchRequestInit, "method">) => Promise<T>;
-    post: <T>(url: string, body: any, options?: Omit<BunFetchRequestInit, "method" | "body">) => Promise<T>;
-    put: <T>(url: string, body: any, options?: Omit<BunFetchRequestInit, "method" | "body">) => Promise<T>;
-    delete: <T>(url: string, options?: Omit<BunFetchRequestInit, "method" | "body">) => Promise<T>;
+export declare const fetcher: (baseURL?: string, defaultOptions?: RequestInit) => {
+    get: <T>(url: string, options?: Omit<RequestInit, "method">) => Promise<T>;
+    post: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
+    put: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
+    delete: <T>(url: string, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
 };
 /**
  * Go 语言风格的异步处理方式
@@ -46,3 +49,4 @@ export declare const fetcher: (baseURL?: string, defaultOptions?: BunFetchReques
  * const [error, response] = await to(fetcher().get<Blog>("/blogs/hello-world"));
  */
 export declare const to: <T, U = Error>(promise: Promise<T>) => Promise<[null, T] | [U, undefined]>;
+export {};
