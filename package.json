@@ -5,7 +5,7 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "docs": "typedoc src/index.ts",
+    "docs": "typedoc src/index.ts --plugin typedoc-material-theme",
     "build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts && tsc && bun run docs"
   },
   "devDependencies": {
@@ -20,6 +20,7 @@
     "url": "https://github.com/Nickyzj628/utils.git"
   },
   "dependencies": {
-    "es-toolkit": "^1.42.0"
+    "es-toolkit": "^1.42.0",
+    "typedoc-material-theme": "^1.4.1"
   }
 }
