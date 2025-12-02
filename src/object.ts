@@ -50,3 +50,116 @@ export const mergeObjects = <
 
   return result as T & U;
 };
+
+// --- mapKeys ---
+
+// 这里的 DeepMapKeys 只能承诺 key 是 string，无法推断出 key 的具体字面量变化
+// 因为 TS 不支持根据任意函数反推 Key 的字面量类型
+export type DeepMapKeys<T> =
+  T extends Array<infer U>
+    ? Array<DeepMapKeys<U>>
+    : T extends object
+      ? { [key: string]: DeepMapKeys<T[keyof T]> }
+      : T;
+
+/**
+ * 递归处理对象里的 key
+ *
+ * @remarks
+ * 无法完整推导出类型，只能做到有递归，key 全为 string，value 为同层级的所有类型的联合
+ *
+ * @template T 要转换的对象
+ *
+ * @example
+ * const obj = { a: { b: 1 } };
+ * const result = mapKeys(obj, (key) => key.toUpperCase());
+ * console.log(result); // { A: { B: 1 } }
+ */
+export const mapKeys = <T>(
+  obj: T,
+  getNewKey: (key: string) => string,
+): DeepMapKeys<T> => {
+  // 递归处理数组
+  if (Array.isArray(obj)) {
+    return obj.map((item) => mapKeys(item, getNewKey)) as any;
+  }
+
+  // 处理普通对象
+  if (isObject(obj)) {
+    const keys = Object.keys(obj);
+    return keys.reduce(
+      (result, key) => {
+        const newKey = getNewKey(key);
+        const value = (obj as any)[key];
+        result[newKey] = mapKeys(value, getNewKey);
+        return result;
+      },
+      {} as Record<string, any>,
+    ) as DeepMapKeys<T>;
+  }
+
+  // 处理非数组/对象
+  return obj as any;
+};
+
+// --- mapValues ---
+
+// 这里的 DeepMapValues 尝试保留 key，但将 value 类型替换为 R
+// 注意：如果原 value 是对象，我们递归处理结构，而不是把整个对象变成 R
+export type DeepMapValues<T, R> =
+  T extends Array<infer U>
+    ? Array<DeepMapValues<U, R>>
+    : T extends object
+      ? { [K in keyof T]: T[K] extends object ? DeepMapValues<T[K], R> : R }
+      : R;
+
+/**
+ * 递归处理对象里的 value
+ *
+ * @remarks
+ * 无法完整推导出类型，所有 value 最终都会变为 any
+ *
+ * @template T 要转换的对象
+ * @template R 转换后的值类型，为 any，无法进一步推导
+ *
+ * @example
+ * const obj = { a: 1, b: { c: 2 } };
+ * const result = mapValues(obj, (value, key) => isPrimitive(value) ? value + 1 : value);
+ * console.log(result); // { a: 2, b: { c: 3 } }
+ */
+export const mapValues = <T, R = any>(
+  obj: T,
+  getNewValue: (value: any, key: string | number) => R,
+): DeepMapValues<T, R> => {
+  // 处理数组
+  if (Array.isArray(obj)) {
+    return obj.map((item, index) => {
+      // 如果元素是对象，则递归处理
+      if (isObject(item)) {
+        return mapValues(item, getNewValue);
+      }
+      // 如果元素是原始值，则直接应用 getNewValue（此时 key 为数组下标）
+      return getNewValue(item, index);
+    }) as any;
+  }
+
+  // 处理普通对象
+  if (isObject(obj)) {
+    const keys = Object.keys(obj);
+    return keys.reduce((result, key) => {
+      const value = (obj as any)[key];
+      // 如果值为对象或数组，则递归处理
+      if (!isPrimitive(value)) {
+        result[key] = mapValues(value, getNewValue);
+      }
+      // 否则直接应用 getNewValue
+      else {
+        result[key] = getNewValue(value, key);
+      }
+      return result;
+    }, {} as any) as DeepMapValues<T, R>;
+  }
+
+  // 处理非数组/对象
+  return obj as any;
+};
