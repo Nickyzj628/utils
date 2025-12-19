@@ -19,3 +19,7 @@ export const isPrimitive = (value: any): value is Primitive => {
     (typeof value !== "object" && typeof value !== "function")
   );
 };
+
+export const isFalsy = (value: any) => {
+  return !value;
+};

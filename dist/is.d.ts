@@ -9,3 +9,4 @@ export declare const isObject: (value: any) => value is object;
  * @returns 如果是原始值，返回 true，否则返回 false
  */
 export declare const isPrimitive: (value: any) => value is Primitive;
+export declare const isFalsy: (value: any) => boolean;
