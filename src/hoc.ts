@@ -1,6 +1,6 @@
 type CacheEntry = {
-  value: any;
-  expiresAt: number; // 时间戳（毫秒）
+	value: any;
+	expiresAt: number; // 时间戳（毫秒）
 };
 
 export type SetTtl = (seconds: number) => void;
@@ -40,76 +40,78 @@ export type SetTtl = (seconds: number) => void;
  * await fetchData(urlB); // 使用缓存结果
  */
 export const withCache = <Args extends any[], Result>(
-  fn: (this: { setTtl: SetTtl }, ...args: Args) => Result,
-  ttlSeconds = -1,
+	fn: (this: { setTtl: SetTtl }, ...args: Args) => Result,
+	ttlSeconds = -1,
 ) => {
-  const cache = new Map<string, CacheEntry>();
+	const cache = new Map<string, CacheEntry>();
 
-  const wrapped = (...args: Args): Result => {
-    const key = JSON.stringify(args);
-    const now = Date.now();
-    const entry = cache.get(key);
+	const wrapped = (...args: Args): Result => {
+		const key = JSON.stringify(args);
+		const now = Date.now();
+		const entry = cache.get(key);
 
-    // 命中缓存且未过期
-    if (entry && now < entry.expiresAt) {
-      return entry.value;
-    }
+		// 命中缓存且未过期
+		if (entry && now < entry.expiresAt) {
+			return entry.value;
+		}
 
-    let expiresAt = ttlSeconds === -1 ? Infinity : now + ttlSeconds * 1000;
+		let expiresAt = ttlSeconds === -1 ? Infinity : now + ttlSeconds * 1000;
 
-    // 创建上下文，包含 setTtl 方法
-    const thisArg = {
-      setTtl: (ttl: number) => (expiresAt = now + ttl * 1000),
-    };
+		// 创建上下文，包含 setTtl 方法
+		const thisArg = {
+			setTtl: (ttl: number) => {
+				expiresAt = now + ttl * 1000;
+			},
+		};
 
-    const result = fn.apply(thisArg, args);
+		const result = fn.apply(thisArg, args);
 
-    // 异步函数：缓存 Promise 的 resolved 值
-    if (result instanceof Promise) {
-      const promise = result.then((resolved) => {
-        cache.set(key, {
-          value: resolved,
-          expiresAt,
-        });
-        return resolved;
-      });
+		// 异步函数：缓存 Promise 的 resolved 值
+		if (result instanceof Promise) {
+			const promise = result.then((resolved) => {
+				cache.set(key, {
+					value: resolved,
+					expiresAt,
+				});
+				return resolved;
+			});
 
-      // 将 promise 先塞进去避免重复请求
-      cache.set(key, {
-        value: promise,
-        expiresAt,
-      });
+			// 将 promise 先塞进去避免重复请求
+			cache.set(key, {
+				value: promise,
+				expiresAt,
+			});
 
-      return promise as Result;
-    }
+			return promise as Result;
+		}
 
-    // 同步函数缓存
-    cache.set(key, {
-      value: result,
-      expiresAt,
-    });
+		// 同步函数缓存
+		cache.set(key, {
+			value: result,
+			expiresAt,
+		});
 
-    return result;
-  };
+		return result;
+	};
 
-  /** 手动清除缓存 */
-  wrapped.clear = () => cache.clear();
+	/** 手动清除缓存 */
+	wrapped.clear = () => cache.clear();
 
-  /** 更新 TTL，同时刷新所有未过期缓存的时间 */
-  wrapped.updateTtl = (seconds: number) => {
-    // 更新默认 TTL
-    ttlSeconds = seconds;
+	/** 更新 TTL，同时刷新所有未过期缓存的时间 */
+	wrapped.updateTtl = (seconds: number) => {
+		// 更新默认 TTL
+		ttlSeconds = seconds;
 
-    // 给未过期缓存续期
-    const now = Date.now();
-    const newExpiresAt = now + seconds * 1000;
-    for (const [key, entry] of cache.entries()) {
-      if (entry.expiresAt > now) {
-        entry.expiresAt = newExpiresAt;
-        cache.set(key, entry);
-      }
-    }
-  };
+		// 给未过期缓存续期
+		const now = Date.now();
+		const newExpiresAt = now + seconds * 1000;
+		for (const [key, entry] of cache.entries()) {
+			if (entry.expiresAt > now) {
+				entry.expiresAt = newExpiresAt;
+				cache.set(key, entry);
+			}
+		}
+	};
 
-  return wrapped;
+	return wrapped;
 };

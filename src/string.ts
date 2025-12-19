@@ -2,7 +2,7 @@
  * 下划线命名法转为驼峰命名法
  *
  * @example
- * snakeToCamel("user_name") // 'userName'
+ * snakeToCamel("user_name") // "userName"
  */
 export const snakeToCamel = (str: string) => {
 	return str.replace(/_([a-zA-Z])/g, (match, pattern) => pattern.toUpperCase());
@@ -12,7 +12,7 @@ export const snakeToCamel = (str: string) => {
  * 驼峰命名法转为下划线命名法
  *
  * @example
- * camelToSnake("shouldComponentUpdate") // 'should_component_update'
+ * camelToSnake("shouldComponentUpdate") // "should_component_update"
  */
 export const camelToSnake = (str: string) => {
 	return str.replace(
@@ -25,7 +25,7 @@ export const camelToSnake = (str: string) => {
  * 字符串首字母大写
  *
  * @example
- * capitalize("hello") // 'Hello'
+ * capitalize("hello") // "Hello"
  */
 export const capitalize = (s: string) => {
 	return s.charAt(0).toUpperCase() + s.slice(1);
@@ -35,7 +35,7 @@ export const capitalize = (s: string) => {
  * 字符串首字母小写
  *
  * @example
- * decapitalize("Hello") // 'hello'
+ * decapitalize("Hello") // "hello"
  */
 export const decapitalize = (s: string) => {
 	return s.charAt(0).toLowerCase() + s.slice(1);

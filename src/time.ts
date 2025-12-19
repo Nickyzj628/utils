@@ -5,7 +5,7 @@
  * await sleep(1000); // 等待 1 秒执行后续代码
  */
 export const sleep = async (time = 150) => {
-  return new Promise((resolve) => {
-    setTimeout(resolve, time);
-  });
+	return new Promise((resolve) => {
+		setTimeout(resolve, time);
+	});
 };

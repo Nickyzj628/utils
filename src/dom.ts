@@ -6,5 +6,5 @@
  * timeLog("Hello", "World"); // 14:30:00 Hello World
  */
 export const timeLog = (...args: any[]) => {
-  console.log(`${new Date().toLocaleTimeString()}`, ...args);
+	console.log(`${new Date().toLocaleTimeString()}`, ...args);
 };
