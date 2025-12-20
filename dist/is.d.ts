@@ -1,4 +1,5 @@
 export type Primitive = number | string | boolean | symbol | bigint | undefined | null;
+export type Falsy = false | 0 | -0 | 0n | "" | null | undefined;
 /**
  * 检测传入的值是否为**普通对象**
  * @returns 如果是普通对象，返回 true，否则返回 false
@@ -12,8 +13,8 @@ export declare const isPrimitive: (value: any) => value is Primitive;
 /**
  * 检测传入的值是否为**false值**（false、0、''、null、undefined、NaN等）
  */
-export declare const isFalsy: (value: any) => boolean;
+export declare const isFalsy: (value: any) => value is Falsy;
 /**
  * 检测传入的值是否为**空值**（null、undefined）
  */
-export declare const isNil: (value: any) => boolean;
+export declare const isNil: (value: any) => value is null | undefined;
