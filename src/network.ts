@@ -1,4 +1,4 @@
-import { isObject } from "./is";
+import { isNil, isObject } from "./is";
 import { mergeObjects } from "./object";
 
 export type RequestInit = BunFetchRequestInit & {
@@ -56,6 +56,9 @@ export const fetcher = (baseURL = "", baseOptions: RequestInit = {}) => {
 		// 转换 params 为查询字符串
 		if (isObject(params)) {
 			Object.entries(params).forEach(([key, value]) => {
+				if (isNil(value)) {
+					return;
+				}
 				url.searchParams.append(key, value.toString());
 			});
 		}

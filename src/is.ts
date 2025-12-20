@@ -33,3 +33,10 @@ export const isPrimitive = (value: any): value is Primitive => {
 export const isFalsy = (value: any) => {
 	return !value;
 };
+
+/**
+ * 检测传入的值是否为**空值**（null、undefined）
+ */
+export const isNil = (value: any) => {
+	return value === null || value === undefined;
+};

@@ -13,3 +13,7 @@ export declare const isPrimitive: (value: any) => value is Primitive;
  * 检测传入的值是否为**false值**（false、0、''、null、undefined、NaN等）
  */
 export declare const isFalsy: (value: any) => boolean;
+/**
+ * 检测传入的值是否为**空值**（null、undefined）
+ */
+export declare const isNil: (value: any) => boolean;
