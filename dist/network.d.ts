@@ -1,5 +1,5 @@
 export type RequestInit = BunFetchRequestInit & {
-    params?: Record<string, string>;
+    params?: Record<string, any>;
     parser?: (response: Response) => Promise<any>;
 };
 /**
