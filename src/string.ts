@@ -1,3 +1,5 @@
+import { fetcher } from "./network";
+
 /**
  * 下划线命名法转为驼峰命名法
  *
@@ -52,8 +54,15 @@ export const imageUrlToBase64 = async (imageUrl: string) => {
 		throw new Error("图片地址必须以http或https开头");
 	}
 
-	const response = await fetch(imageUrl);
-	const arrayBuffer = await response.arrayBuffer();
-	const base64 = Buffer.from(arrayBuffer).toString("base64");
-	return `data:image/jpeg;base64,${base64}`;
+	let mime = "";
+	const response = await fetcher().get<ArrayBuffer>(imageUrl, {
+		parser: (response) => {
+			mime = response.headers.get("Content-Type") || "image/jpeg";
+			return response.arrayBuffer();
+		},
+	});
+	const buffer = Buffer.from(response);
+
+	const base64 = buffer.toString("base64");
+	return `data:${mime};base64,${base64}`;
 };
