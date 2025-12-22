@@ -26,3 +26,10 @@ export declare const capitalize: (s: string) => string;
  * decapitalize("Hello") // "hello"
  */
 export declare const decapitalize: (s: string) => string;
+/**
+ * 图片地址转 base64 数据
+ *
+ * @example
+ * imageUrlToBase64("https://example.com/image.jpg"); // "data:image/jpeg;base64,..."
+ */
+export declare const imageUrlToBase64: (imageUrl: string) => Promise<string>;

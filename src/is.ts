@@ -11,7 +11,10 @@ export type Falsy = false | 0 | -0 | 0n | "" | null | undefined;
 
 /**
  * 检测传入的值是否为**普通对象**
- * @returns 如果是普通对象，返回 true，否则返回 false
+ *
+ * @example
+ * const obj = { a: 1 };
+ * isObject(obj); // true
  */
 export const isObject = (value: any): value is object => {
 	return value?.constructor === Object;
@@ -19,7 +22,10 @@ export const isObject = (value: any): value is object => {
 
 /**
  * 检测传入的值是否为**原始值**（number、string、boolean、symbol、bigint、undefined、null）
- * @returns 如果是原始值，返回 true，否则返回 false
+ *
+ * @example
+ * isPrimitive(1);  // true
+ * isPrimitive([]); // false
  */
 export const isPrimitive = (value: any): value is Primitive => {
 	return (
@@ -30,14 +36,34 @@ export const isPrimitive = (value: any): value is Primitive => {
 };
 
 /**
- * 检测传入的值是否为**false值**（false、0、''、null、undefined、NaN等）
+ * 检测传入的值是否为**假值**（false、0、''、null、undefined、NaN等）
+ *
+ * @example
+ * isFalsy(""); // true
+ * isFalsy(1); // false
  */
 export const isFalsy = (value: any): value is Falsy => {
 	return !value;
 };
 
 /**
+ * 检测传入的值是否为**真值**
+ *
+ * @example
+ * isTruthy(1); // true
+ * isTruthy(""); // false
+ */
+export const isTruthy = (value: any): value is any => {
+	return !!value;
+};
+
+/**
  * 检测传入的值是否为**空值**（null、undefined）
+ *
+ * @example
+ * isNil(null); // true
+ * isNil(undefined); // true
+ * isNil(1); // false
  */
 export const isNil = (value: any): value is null | undefined => {
 	return value === null || value === undefined;

@@ -40,3 +40,20 @@ export const capitalize = (s: string) => {
 export const decapitalize = (s: string) => {
 	return s.charAt(0).toLowerCase() + s.slice(1);
 };
+
+/**
+ * 图片地址转 base64 数据
+ *
+ * @example
+ * imageUrlToBase64("https://example.com/image.jpg"); // "data:image/jpeg;base64,..."
+ */
+export const imageUrlToBase64 = async (imageUrl: string) => {
+	if (!imageUrl.startsWith("http")) {
+		throw new Error("图片地址必须以http或https开头");
+	}
+
+	const response = await fetch(imageUrl);
+	const arrayBuffer = await response.arrayBuffer();
+	const base64 = Buffer.from(arrayBuffer).toString("base64");
+	return `data:image/jpeg;base64,${base64}`;
+};
