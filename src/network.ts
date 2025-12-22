@@ -75,6 +75,11 @@ export const fetcher = (baseURL = "", baseOptions: RequestInit = {}) => {
 		// 发送请求
 		const response = await fetch(url, options);
 		if (!response.ok) {
+			// 如果后端给了报错详情，则先解析再抛出
+			const contentType = response.headers.get("Content-Type");
+			if (contentType?.startsWith("application/json")) {
+				throw await response.json();
+			}
 			throw new Error(response.statusText);
 		}
 
@@ -111,13 +116,12 @@ export const fetcher = (baseURL = "", baseOptions: RequestInit = {}) => {
  * @example
  * const [error, response] = await to(fetcher().get<Blog>("/blogs/hello-world"));
  */
-export const to = async <T, U = Error>(
+export const to = async <T, E = Error>(
 	promise: Promise<T>,
-): Promise<[null, T] | [U, undefined]> => {
+): Promise<[null, T] | [E, undefined]> => {
 	try {
-		const response = await promise;
-		return [null, response];
-	} catch (error) {
-		return [error as U, undefined];
+		return [null, await promise];
+	} catch (e) {
+		return [e as E, undefined];
 	}
 };
