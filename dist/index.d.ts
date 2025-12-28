@@ -1,4 +1,5 @@
 export * from "./dom";
+export * from "./function";
 export * from "./hoc";
 export * from "./is";
 export * from "./network";
