@@ -17,10 +17,14 @@
     "rules": {
       "recommended": true,
       "correctness": {
-        "noUnusedVariables": "info"
+        "noUnusedVariables": "info",
+        "noUnusedFunctionParameters": "info"
       },
       "suspicious": {
         "noExplicitAny": "info"
+      },
+      "style": {
+        "noNonNullAssertion": "info"
       }
     }
   },
