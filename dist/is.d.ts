@@ -7,7 +7,7 @@ export type Falsy = false | 0 | -0 | 0n | "" | null | undefined;
  * const obj = { a: 1 };
  * isObject(obj); // true
  */
-export declare const isObject: (value: any) => value is object;
+export declare const isObject: (value: any) => value is Record<string, any>;
 /**
  * 检测传入的值是否为**原始值**（number、string、boolean、symbol、bigint、undefined、null）
  *

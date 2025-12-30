@@ -16,7 +16,7 @@ export type Falsy = false | 0 | -0 | 0n | "" | null | undefined;
  * const obj = { a: 1 };
  * isObject(obj); // true
  */
-export const isObject = (value: any): value is object => {
+export const isObject = (value: any): value is Record<string, any> => {
 	return value?.constructor === Object;
 };
 
