@@ -42,16 +42,16 @@ export declare const imageUrlToBase64: (imageUrl: string) => Promise<string>;
  *   Hello,
  *        world!
  * `, {
- *  escapeNewlines: false,
+ *  disableNewLineReplace: false,
  * });
  */
 export declare const compactStr: (text?: string, options?: {
-    /** 最大保留长度，设为 0 或 Infinity 则不截断，默认 100 */
+    /** 最大保留长度，设为 0 或 Infinity 则不截断，默认 Infinity */
     maxLength?: number;
     /** 是否将换行符替换为字面量 \n，默认开启 */
-    escapeNewlines?: boolean;
+    disableNewLineReplace?: boolean;
     /** 是否合并连续的空格/制表符为一个空格，默认开启 */
-    collapseWhitespace?: boolean;
-    /** 截断后的后缀，默认为“...” */
+    disableWhitespaceCollapse?: boolean;
+    /** 截断后的后缀，默认为 "..." */
     omission?: string;
 }) => string;
