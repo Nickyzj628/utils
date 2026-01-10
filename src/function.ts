@@ -15,22 +15,22 @@
  * ),
  */
 export const loopUntil = async <T>(
-  fn: (count: number) => Promise<T>,
-  options?: {
-    /** 最大循环次数，默认 5 次 */
-    maxRetries?: number;
-    /** 停止循环条件，默认立即停止 */
-    shouldStop?: (result: T) => boolean;
-  },
+	fn: (count: number) => Promise<T>,
+	options?: {
+		/** 最大循环次数，默认 5 次 */
+		maxRetries?: number;
+		/** 停止循环条件，默认立即停止 */
+		shouldStop?: (result: T) => boolean;
+	},
 ): Promise<T> => {
-  const { maxRetries = 5, shouldStop = () => true } = options ?? {};
+	const { maxRetries = 5, shouldStop = () => true } = options ?? {};
 
-  for (let i = 0; i < maxRetries; i++) {
-    const result = await fn(i);
-    if (shouldStop(result)) {
-      return result;
-    }
-  }
+	for (let i = 0; i < maxRetries; i++) {
+		const result = await fn(i);
+		if (shouldStop(result)) {
+			return result;
+		}
+	}
 
-  throw new Error("超过了最大循环次数（maxRetires）且未满足停止执行条件");
+	throw new Error(`超过了最大循环次数（${maxRetries}）且未满足停止执行条件`);
 };
