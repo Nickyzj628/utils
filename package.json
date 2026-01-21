@@ -1,26 +1,26 @@
 {
-  "name": "@nickyzj2023/utils",
-  "version": "1.0.34",
-  "type": "module",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "docs": "typedoc src/index.ts --plugin typedoc-material-theme",
-    "build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts && tsc && bun run docs"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.3.8",
-    "@types/bun": "latest",
-    "typedoc": "^0.28.14"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Nickyzj628/utils.git"
-  },
-  "dependencies": {
-    "typedoc-material-theme": "^1.4.1"
-  }
+	"name": "@nickyzj2023/utils",
+	"version": "1.0.35",
+	"type": "module",
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"docs": "typedoc src/index.ts --plugin typedoc-material-theme",
+		"build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts && tsc && bun run docs"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.11",
+		"@types/bun": "latest",
+		"typedoc": "^0.28.16"
+	},
+	"peerDependencies": {
+		"typescript": "^5.8.2"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Nickyzj628/utils.git"
+	},
+	"dependencies": {
+		"typedoc-material-theme": "^1.4.1"
+	}
 }
