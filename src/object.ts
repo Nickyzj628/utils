@@ -128,17 +128,28 @@ export type DeepMapValues<T, R> =
 export const mapValues = <T, R = any>(
 	obj: T,
 	getNewValue: (value: any, key: string | number) => R,
+	options?: {
+		/** 过滤函数，返回 true 表示保留该字段 */
+		filter?: (value: any, key: string | number) => boolean;
+	},
 ): DeepMapValues<T, R> => {
+	const { filter } = options ?? {};
+
 	// 处理数组
 	if (Array.isArray(obj)) {
-		return obj.map((item, index) => {
+		const mappedArray = obj.map((item, index) => {
 			// 如果元素是对象，则递归处理
 			if (isObject(item)) {
-				return mapValues(item, getNewValue);
+				return mapValues(item, getNewValue, options);
 			}
 			// 如果元素是原始值，则直接应用 getNewValue（此时 key 为数组下标）
 			return getNewValue(item, index);
-		}) as any;
+		});
+		// 如果有过滤器，则过滤一遍元素
+		if (filter) {
+			return mappedArray.filter((item, index) => filter(item, index)) as any;
+		}
+		return mappedArray as any;
 	}
 
 	// 处理普通对象
@@ -146,16 +157,18 @@ export const mapValues = <T, R = any>(
 		const keys = Object.keys(obj);
 		return keys.reduce((result, key) => {
 			const value = (obj as any)[key];
+			let newValue: any;
 			// 如果值为对象或数组，则递归处理
 			if (isObject(value) || Array.isArray(value)) {
-				result[key] = mapValues(value, getNewValue);
+				newValue = mapValues(value, getNewValue, options);
 			}
 			// 否则直接应用 getNewValue
 			else {
-				const newValue = getNewValue(value, key);
-				if (newValue !== undefined) {
-					result[key] = newValue;
-				}
+				newValue = getNewValue(value, key);
+			}
+			// 如果存在过滤器，则看情况保留该字段
+			if (!filter || filter(newValue, key)) {
+				result[key] = newValue;
 			}
 			return result;
 		}, {} as any) as DeepMapValues<T, R>;

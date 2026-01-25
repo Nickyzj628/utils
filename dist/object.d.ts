@@ -44,4 +44,7 @@ export type DeepMapValues<T, R> = T extends Array<infer U> ? Array<DeepMapValues
  * const result = mapValues(obj, (value, key) => isPrimitive(value) ? value + 1 : value);
  * console.log(result); // { a: 2, b: { c: 3 } }
  */
-export declare const mapValues: <T, R = any>(obj: T, getNewValue: (value: any, key: string | number) => R) => DeepMapValues<T, R>;
+export declare const mapValues: <T, R = any>(obj: T, getNewValue: (value: any, key: string | number) => R, options?: {
+    /** 过滤函数，返回 true 表示保留该字段 */
+    filter?: (value: any, key: string | number) => boolean;
+}) => DeepMapValues<T, R>;
