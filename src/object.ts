@@ -152,7 +152,10 @@ export const mapValues = <T, R = any>(
 			}
 			// 否则直接应用 getNewValue
 			else {
-				result[key] = getNewValue(value, key);
+				const newValue = getNewValue(value, key);
+				if (newValue !== undefined) {
+					result[key] = newValue;
+				}
 			}
 			return result;
 		}, {} as any) as DeepMapValues<T, R>;
