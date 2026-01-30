@@ -1,6 +1,6 @@
 import { fetcher } from "./network";
 
-type SnakeToCamel<S extends string> =
+export type SnakeToCamel<S extends string> =
 	S extends `${infer P1}_${infer P2}${infer P3}`
 		? `${P1}${Capitalize<SnakeToCamel<`${P2}${P3}`>>}`
 		: S;
@@ -17,7 +17,7 @@ export const snakeToCamel = <S extends string>(str: S): SnakeToCamel<S> => {
 	) as SnakeToCamel<S>;
 };
 
-type CamelToSnake<S extends string> =
+export type CamelToSnake<S extends string> =
 	S extends `${infer P1}${infer P2}${infer Rest}`
 		? P2 extends Capitalize<P2>
 			? `${P1}_${Lowercase<P2>}${CamelToSnake<Rest>}`
@@ -37,7 +37,7 @@ export const camelToSnake = <S extends string>(str: S): CamelToSnake<S> => {
 	) as CamelToSnake<S>;
 };
 
-type Capitalize<S extends string> = S extends `${infer P1}${infer Rest}`
+export type Capitalize<S extends string> = S extends `${infer P1}${infer Rest}`
 	? P1 extends Capitalize<P1>
 		? S
 		: `${Uppercase<P1>}${Rest}`
@@ -53,11 +53,12 @@ export const capitalize = <S extends string>(s: S): Capitalize<S> => {
 	return (s.charAt(0).toUpperCase() + s.slice(1)) as Capitalize<S>;
 };
 
-type Decapitalize<S extends string> = S extends `${infer P1}${infer Rest}`
-	? P1 extends Lowercase<P1>
-		? P1
-		: `${Lowercase<P1>}${Rest}`
-	: S;
+export type Decapitalize<S extends string> =
+	S extends `${infer P1}${infer Rest}`
+		? P1 extends Lowercase<P1>
+			? P1
+			: `${Lowercase<P1>}${Rest}`
+		: S;
 
 /**
  * 字符串首字母小写
