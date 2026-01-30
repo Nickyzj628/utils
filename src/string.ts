@@ -1,14 +1,28 @@
 import { fetcher } from "./network";
 
+type SnakeToCamel<S extends string> =
+	S extends `${infer P1}_${infer P2}${infer P3}`
+		? `${P1}${Capitalize<SnakeToCamel<`${P2}${P3}`>>}`
+		: S;
+
 /**
  * 下划线命名法转为驼峰命名法
  *
  * @example
  * snakeToCamel("user_name") // "userName"
  */
-export const snakeToCamel = (str: string) => {
-	return str.replace(/_([a-zA-Z])/g, (match, pattern) => pattern.toUpperCase());
+export const snakeToCamel = <S extends string>(str: S): SnakeToCamel<S> => {
+	return str.replace(/_([a-zA-Z])/g, (match, pattern) =>
+		pattern.toUpperCase(),
+	) as SnakeToCamel<S>;
 };
+
+type CamelToSnake<S extends string> =
+	S extends `${infer P1}${infer P2}${infer Rest}`
+		? P2 extends Capitalize<P2>
+			? `${P1}_${Lowercase<P2>}${CamelToSnake<Rest>}`
+			: `${P1}${CamelToSnake<`${P2}${Rest}`>}`
+		: S;
 
 /**
  * 驼峰命名法转为下划线命名法
@@ -16,12 +30,18 @@ export const snakeToCamel = (str: string) => {
  * @example
  * camelToSnake("shouldComponentUpdate") // "should_component_update"
  */
-export const camelToSnake = (str: string) => {
+export const camelToSnake = <S extends string>(str: S): CamelToSnake<S> => {
 	return str.replace(
 		/([A-Z])/g,
 		(match, pattern) => `_${pattern.toLowerCase()}`,
-	);
+	) as CamelToSnake<S>;
 };
+
+type Capitalize<S extends string> = S extends `${infer P1}${infer Rest}`
+	? P1 extends Capitalize<P1>
+		? S
+		: `${Uppercase<P1>}${Rest}`
+	: S;
 
 /**
  * 字符串首字母大写
@@ -29,9 +49,15 @@ export const camelToSnake = (str: string) => {
  * @example
  * capitalize("hello") // "Hello"
  */
-export const capitalize = (s: string) => {
-	return s.charAt(0).toUpperCase() + s.slice(1);
+export const capitalize = <S extends string>(s: S): Capitalize<S> => {
+	return (s.charAt(0).toUpperCase() + s.slice(1)) as Capitalize<S>;
 };
+
+type Decapitalize<S extends string> = S extends `${infer P1}${infer Rest}`
+	? P1 extends Lowercase<P1>
+		? P1
+		: `${Lowercase<P1>}${Rest}`
+	: S;
 
 /**
  * 字符串首字母小写
@@ -39,8 +65,8 @@ export const capitalize = (s: string) => {
  * @example
  * decapitalize("Hello") // "hello"
  */
-export const decapitalize = (s: string) => {
-	return s.charAt(0).toLowerCase() + s.slice(1);
+export const decapitalize = <S extends string>(s: S): Decapitalize<S> => {
+	return (s.charAt(0).toLowerCase() + s.slice(1)) as Decapitalize<S>;
 };
 
 /**
