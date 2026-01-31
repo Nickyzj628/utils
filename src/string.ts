@@ -1,8 +1,10 @@
 import { fetcher } from "./network";
 
 export type SnakeToCamel<S extends string> =
-	S extends `${infer P1}_${infer P2}${infer P3}`
-		? `${P1}${Capitalize<SnakeToCamel<`${P2}${P3}`>>}`
+	S extends `${infer Before}_${infer After}`
+		? After extends `${infer First}${infer Rest}`
+			? `${Before}${Uppercase<First>}${SnakeToCamel<Rest>}`
+			: Before
 		: S;
 
 /**
@@ -18,11 +20,11 @@ export const snakeToCamel = <S extends string>(str: S): SnakeToCamel<S> => {
 };
 
 export type CamelToSnake<S extends string> =
-	S extends `${infer P1}${infer P2}${infer Rest}`
-		? P2 extends Capitalize<P2>
-			? `${P1}_${Lowercase<P2>}${CamelToSnake<Rest>}`
-			: `${P1}${CamelToSnake<`${P2}${Rest}`>}`
-		: S;
+	S extends `${infer First}${infer Rest}`
+		? Rest extends Uncapitalize<Rest>
+			? `${Lowercase<First>}${CamelToSnake<Rest>}`
+			: `${Lowercase<First>}_${CamelToSnake<Rest>}`
+		: Lowercase<S>;
 
 /**
  * 驼峰命名法转为下划线命名法
