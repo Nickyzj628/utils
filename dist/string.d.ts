@@ -33,10 +33,19 @@ export declare const decapitalize: <S extends string>(s: S) => Decapitalize<S>;
 /**
  * 图片地址转 base64 数据
  *
+ * @param imageUrl 图片地址
+ * @param options 可选配置
+ * @param options.quality 压缩比率，默认 0.92
+ *
  * @example
- * imageUrlToBase64("https://example.com/image.jpg"); // "data:image/jpeg;base64,..."
+ * imageUrlToBase64("https://example.com/image.gif"); // "data:image/gif;base64,..."
+ *
+ * @example
+ * imageUrlToBase64("https://example.com/image.jpg", { quality: 0.8 }); // 压缩至 80% 质量
  */
-export declare const imageUrlToBase64: (imageUrl: string) => Promise<string>;
+export declare const imageUrlToBase64: (imageUrl: string, { quality }?: {
+    quality?: number;
+}) => Promise<string>;
 /**
  * 将字符串压缩为单行精简格式
  *

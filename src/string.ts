@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import { fetcher } from "./network";
 
 export type SnakeToCamel<S extends string> =
@@ -75,25 +76,46 @@ export const decapitalize = <S extends string>(s: S): Decapitalize<S> => {
 /**
  * 图片地址转 base64 数据
  *
+ * @param imageUrl 图片地址
+ * @param options 可选配置
+ * @param options.quality 压缩比率，默认 0.92
+ *
  * @example
- * imageUrlToBase64("https://example.com/image.jpg"); // "data:image/jpeg;base64,..."
+ * imageUrlToBase64("https://example.com/image.gif"); // "data:image/gif;base64,..."
+ *
+ * @example
+ * imageUrlToBase64("https://example.com/image.jpg", { quality: 0.8 }); // 压缩至 80% 质量
  */
-export const imageUrlToBase64 = async (imageUrl: string) => {
+export const imageUrlToBase64 = async (
+	imageUrl: string,
+	{ quality = 0.92 }: { quality?: number } = {},
+) => {
 	if (!imageUrl.startsWith("http")) {
 		throw new Error("图片地址必须以http或https开头");
 	}
 
 	let mime = "";
 	const response = await fetcher().get<ArrayBuffer>(imageUrl, {
-		parser: (response) => {
+		parser: async (response) => {
 			mime = response.headers.get("Content-Type") || "image/jpeg";
 			return response.arrayBuffer();
 		},
 	});
-	const buffer = Buffer.from(response);
 
-	const base64 = buffer.toString("base64");
-	return `data:${mime};base64,${base64}`;
+	const buffer = Buffer.from(response);
+	let compressedBuffer: Buffer;
+
+	if (mime === "image/png") {
+		compressedBuffer = await sharp(buffer)
+			.png({ compressionLevel: Math.round(quality * 9) })
+			.toBuffer();
+	} else if (mime === "image/gif") {
+		compressedBuffer = await sharp(buffer).gif().toBuffer();
+	} else {
+		compressedBuffer = await sharp(buffer).jpeg({ quality }).toBuffer();
+	}
+
+	return `data:${mime};base64,${compressedBuffer.toString("base64")}`;
 };
 
 /**

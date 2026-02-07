@@ -1,6 +1,6 @@
 {
 	"name": "@nickyzj2023/utils",
-	"version": "1.0.42",
+	"version": "1.0.43",
 	"type": "module",
 	"module": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -21,6 +21,7 @@
 		"url": "https://github.com/Nickyzj628/utils.git"
 	},
 	"dependencies": {
+		"sharp": "^0.34.5",
 		"typedoc-material-theme": "^1.4.1"
 	}
 }
