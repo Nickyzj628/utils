@@ -53,3 +53,5 @@ export declare const fetcher: (baseURL?: string, baseOptions?: RequestInit) => {
  * const [error, response] = await to(fetcher().get<Blog>("/blogs/hello-world"));
  */
 export declare const to: <T, E = Error>(promise: Promise<T>) => Promise<[null, T] | [E, undefined]>;
+/** 从 url 响应头获取真实链接 */
+export declare const getRealURL: (originURL: string) => Promise<string>;
