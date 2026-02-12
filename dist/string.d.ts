@@ -35,7 +35,7 @@ export declare const decapitalize: <S extends string>(s: S) => Decapitalize<S>;
  *
  * @param imageUrl 图片地址
  * @param options 可选配置
- * @param options.quality 压缩比率，默认 0.92
+ * @param options.quality 压缩比率，默认 0.92（仅在浏览器支持 canvas 压缩时有效）
  *
  * @example
  * imageUrlToBase64("https://example.com/image.gif"); // "data:image/gif;base64,..."

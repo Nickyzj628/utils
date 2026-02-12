@@ -1,12 +1,12 @@
 {
   "name": "@nickyzj2023/utils",
-  "version": "1.0.45",
+  "version": "1.0.46",
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "docs": "typedoc src/index.ts --plugin typedoc-material-theme",
-    "build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts --packages external && tsc && bun run docs"
+    "build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts --packages external"
   },
   "dependencies": {
     "sharp": "^0.34.5"

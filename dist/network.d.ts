@@ -1,4 +1,4 @@
-export type RequestInit = BunFetchRequestInit & {
+export type RequestInit = globalThis.RequestInit & {
     params?: Record<string, any>;
     parser?: (response: Response) => Promise<any>;
 };

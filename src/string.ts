@@ -1,6 +1,3 @@
-import sharp from "sharp";
-import { fetcher } from "./network";
-
 export type SnakeToCamel<S extends string> =
 	S extends `${infer Before}_${infer After}`
 		? After extends `${infer First}${infer Rest}`
@@ -74,48 +71,134 @@ export const decapitalize = <S extends string>(s: S): Decapitalize<S> => {
 };
 
 /**
+ * 将 ArrayBuffer 转换为 base64 字符串
+ * 兼容浏览器、Bun 和 Node.js
+ */
+const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
+	const bytes = new Uint8Array(buffer);
+	let binary = "";
+	for (let i = 0; i < bytes.byteLength; i++) {
+		binary += String.fromCharCode(bytes[i]!);
+	}
+	return btoa(binary);
+};
+
+/**
+ * 图片压缩选项
+ */
+export type ImageCompressionOptions = {
+	/** 压缩比率，默认 0.92 */
+	quality?: number;
+	/**
+	 * 自定义压缩函数，用于非浏览器环境（Node.js/Bun）
+	 * 如果提供，将使用此函数替代默认的 canvas 压缩
+	 * @param arrayBuffer 图片的 ArrayBuffer 数据
+	 * @param mime 图片的 MIME 类型
+	 * @param quality 压缩质量
+	 * @returns 压缩后的 base64 字符串
+	 */
+	compressor?: (
+		arrayBuffer: ArrayBuffer,
+		mime: string,
+		quality: number,
+	) => Promise<string> | string;
+};
+
+/**
  * 图片地址转 base64 数据
  *
  * @param imageUrl 图片地址
  * @param options 可选配置
  * @param options.quality 压缩比率，默认 0.92
+ * @param options.compressor 自定义压缩函数，用于 Node.js/Bun 环境
  *
  * @example
- * imageUrlToBase64("https://example.com/image.gif"); // "data:image/gif;base64,..."
+ * // 基本用法（浏览器自动使用 Canvas 压缩）
+ * imageUrlToBase64("https://example.com/image.jpg");
  *
  * @example
- * imageUrlToBase64("https://example.com/image.jpg", { quality: 0.8 }); // 压缩至 80% 质量
+ * // Node.js/Bun 使用 sharp 压缩
+ * import sharp from "sharp";
+ *
+ * imageUrlToBase64("https://example.com/image.jpg", {
+ *   quality: 0.8,
+ *   compressor: async (buffer, mime, quality) => {
+ *     const compressed = await sharp(Buffer.from(buffer))
+ *       .jpeg({ quality: Math.round(quality * 100) })
+ *       .toBuffer();
+ *     return `data:${mime};base64,${compressed.toString("base64")}`;
+ *   }
+ * });
  */
 export const imageUrlToBase64 = async (
 	imageUrl: string,
-	{ quality = 0.92 }: { quality?: number } = {},
-) => {
+	options: ImageCompressionOptions = {},
+): Promise<string> => {
+	const { quality = 0.92, compressor } = options;
+
 	if (!imageUrl.startsWith("http")) {
 		throw new Error("图片地址必须以http或https开头");
 	}
 
-	let mime = "";
-	const response = await fetcher().get<ArrayBuffer>(imageUrl, {
-		parser: async (response) => {
-			mime = response.headers.get("Content-Type") || "image/jpeg";
-			return response.arrayBuffer();
-		},
-	});
-
-	const buffer = Buffer.from(response);
-	let compressedBuffer: Buffer;
-
-	if (mime === "image/png") {
-		compressedBuffer = await sharp(buffer)
-			.png({ compressionLevel: Math.round(quality * 9) })
-			.toBuffer();
-	} else if (mime === "image/gif") {
-		compressedBuffer = await sharp(buffer).gif().toBuffer();
-	} else {
-		compressedBuffer = await sharp(buffer).jpeg({ quality }).toBuffer();
+	// 使用 fetch 获取图片数据
+	const response = await fetch(imageUrl);
+	if (!response.ok) {
+		throw new Error(`获取图片失败: ${response.statusText}`);
 	}
 
-	return `data:${mime};base64,${compressedBuffer.toString("base64")}`;
+	const mime = response.headers.get("Content-Type") || "image/jpeg";
+	const arrayBuffer = await response.arrayBuffer();
+
+	// 对于非 JPEG/PNG 图片，直接返回 base64，不做压缩
+	if (mime !== "image/jpeg" && mime !== "image/png") {
+		const base64 = arrayBufferToBase64(arrayBuffer);
+		return `data:${mime};base64,${base64}`;
+	}
+
+	// 如果提供了自定义压缩函数（用于 Node.js/Bun 环境），使用它
+	if (compressor) {
+		return await compressor(arrayBuffer, mime, quality);
+	}
+
+	// 浏览器环境：使用 OffscreenCanvas 压缩（Chrome 69+, Firefox 105+, Safari 16.4+）
+	if (typeof OffscreenCanvas !== "undefined") {
+		let bitmap: ImageBitmap | null = null;
+
+		try {
+			const blob = new Blob([arrayBuffer], { type: mime });
+			bitmap = await createImageBitmap(blob);
+
+			const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+			const ctx = canvas.getContext("2d");
+			if (!ctx) {
+				throw new Error("无法获取 canvas context");
+			}
+
+			ctx.drawImage(bitmap, 0, 0);
+			bitmap.close();
+			bitmap = null;
+
+			// OffscreenCanvas 使用 convertToBlob 获取压缩后的图片
+			const compressedBlob = await canvas.convertToBlob({
+				type: mime,
+				quality: quality,
+			});
+
+			// 将 Blob 转换为 base64
+			const compressedArrayBuffer = await compressedBlob.arrayBuffer();
+			const base64 = arrayBufferToBase64(compressedArrayBuffer);
+			return `data:${mime};base64,${base64}`;
+		} catch {
+			// Canvas 压缩失败，返回原始 base64
+			bitmap?.close();
+			const base64 = arrayBufferToBase64(arrayBuffer);
+			return `data:${mime};base64,${base64}`;
+		}
+	}
+
+	// 非浏览器环境且没有提供压缩器，直接返回原始 base64
+	const base64 = arrayBufferToBase64(arrayBuffer);
+	return `data:${mime};base64,${base64}`;
 };
 
 /**
