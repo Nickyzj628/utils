@@ -2,7 +2,7 @@ import { isNil, isObject } from "../is";
 import { mergeObjects } from "../object";
 
 // Bun 特有的 fetch 选项
-type BunFetchOptions = {
+export type BunFetchOptions = {
 	/** 代理服务器配置（仅 Bun 支持） */
 	proxy?: string;
 };

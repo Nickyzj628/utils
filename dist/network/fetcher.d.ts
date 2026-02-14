@@ -1,4 +1,4 @@
-type BunFetchOptions = {
+export type BunFetchOptions = {
     /** 代理服务器配置（仅 Bun 支持） */
     proxy?: string;
 };
@@ -54,4 +54,3 @@ export declare const fetcher: (baseURL?: string, baseOptions?: RequestInit) => {
     put: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
     delete: <T>(url: string, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
 };
-export {};
