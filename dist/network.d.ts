@@ -1,4 +1,8 @@
-export type RequestInit = globalThis.RequestInit & {
+type BunFetchOptions = {
+    /** 代理服务器配置（仅 Bun 支持） */
+    proxy?: string;
+};
+export type RequestInit = globalThis.RequestInit & BunFetchOptions & {
     params?: Record<string, any>;
     parser?: (response: Response) => Promise<any>;
 };
@@ -14,6 +18,7 @@ export type RequestInit = globalThis.RequestInit & {
  * - 在 body 里传递对象，自动 JSON.stringify
  * - 可选择使用 to() 转换请求结果为 [Error, Response]
  * - 可选择使用 withCache() 缓存请求结果
+ * - 支持 proxy 选项（仅在 Bun 环境有效）
  *
  * @example
  *
@@ -23,6 +28,11 @@ export type RequestInit = globalThis.RequestInit & {
  * // 用法2：创建实例
  * const api = fetcher("https://nickyzj.run:3030", { headers: { Authorization: "Bearer token" } });
  * const res = await api.get<Blog>("/blogs/hello-world", { headers: {...}, params: { page: 1 } });  // 与实例相同的 headers 会覆盖上去，params 会转成 ?page=1 跟到 url 后面
+ *
+ * // 用法3：使用代理（仅 Bun 环境）
+ * const api = fetcher("https://api.example.com", {
+ *   proxy: "http://127.0.0.1:7890"
+ * });
  *
  * // 安全处理请求结果
  * const [error, data] = await to(api.get<Blog>("/blogs/hello-world"));
@@ -55,3 +65,4 @@ export declare const fetcher: (baseURL?: string, baseOptions?: RequestInit) => {
 export declare const to: <T, E = Error>(promise: Promise<T>) => Promise<[null, T] | [E, undefined]>;
 /** 从 url 响应头获取真实链接 */
 export declare const getRealURL: (originURL: string) => Promise<string>;
+export {};

@@ -31,21 +31,48 @@ export type Decapitalize<S extends string> = S extends `${infer P1}${infer Rest}
  */
 export declare const decapitalize: <S extends string>(s: S) => Decapitalize<S>;
 /**
+ * 图片压缩选项
+ */
+export type ImageCompressionOptions = {
+    /** 压缩比率，默认 0.92 */
+    quality?: number;
+    /**
+     * 自定义压缩函数，用于非浏览器环境（Node.js/Bun）
+     * 如果提供，将使用此函数替代默认的 canvas 压缩
+     * @param arrayBuffer 图片的 ArrayBuffer 数据
+     * @param mime 图片的 MIME 类型
+     * @param quality 压缩质量
+     * @returns 压缩后的 base64 字符串
+     */
+    compressor?: (arrayBuffer: ArrayBuffer, mime: string, quality: number) => Promise<string> | string;
+};
+/**
  * 图片地址转 base64 数据
  *
  * @param imageUrl 图片地址
  * @param options 可选配置
- * @param options.quality 压缩比率，默认 0.92（仅在浏览器支持 canvas 压缩时有效）
+ * @param options.quality 压缩比率，默认 0.92
+ * @param options.compressor 自定义压缩函数，用于 Node.js/Bun 环境
  *
  * @example
- * imageUrlToBase64("https://example.com/image.gif"); // "data:image/gif;base64,..."
+ * // 基本用法（浏览器自动使用 Canvas 压缩）
+ * imageUrlToBase64("https://example.com/image.jpg");
  *
  * @example
- * imageUrlToBase64("https://example.com/image.jpg", { quality: 0.8 }); // 压缩至 80% 质量
+ * // Node.js/Bun 使用 sharp 压缩
+ * import sharp from "sharp";
+ *
+ * imageUrlToBase64("https://example.com/image.jpg", {
+ *   quality: 0.8,
+ *   compressor: async (buffer, mime, quality) => {
+ *     const compressed = await sharp(Buffer.from(buffer))
+ *       .jpeg({ quality: Math.round(quality * 100) })
+ *       .toBuffer();
+ *     return `data:${mime};base64,${compressed.toString("base64")}`;
+ *   }
+ * });
  */
-export declare const imageUrlToBase64: (imageUrl: string, { quality }?: {
-    quality?: number;
-}) => Promise<string>;
+export declare const imageUrlToBase64: (imageUrl: string, options?: ImageCompressionOptions) => Promise<string>;
 /**
  * 将字符串压缩为单行精简格式
  *
