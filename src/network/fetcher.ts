@@ -1,5 +1,5 @@
-import { isNil, isObject } from "./is";
-import { mergeObjects } from "./object";
+import { isNil, isObject } from "../is";
+import { mergeObjects } from "../object";
 
 // Bun 特有的 fetch 选项
 type BunFetchOptions = {
@@ -120,39 +120,4 @@ export const fetcher = (baseURL = "", baseOptions: RequestInit = {}) => {
 		delete: <T>(url: string, options?: Omit<RequestInit, "method" | "body">) =>
 			myFetch<T>(url, { ...options, method: "DELETE" }),
 	};
-};
-
-/**
- * Go 语言风格的异步处理方式
- * @param promise 一个能被 await 的异步函数
- * @returns 如果成功，返回 [null, 异步函数结果]，否则返回 [Error, undefined]
- *
- * @example
- * const [error, response] = await to(fetcher().get<Blog>("/blogs/hello-world"));
- */
-export const to = async <T, E = Error>(
-	promise: Promise<T>,
-): Promise<[null, T] | [E, undefined]> => {
-	try {
-		return [null, await promise];
-	} catch (e) {
-		return [e as E, undefined];
-	}
-};
-
-/** 从 url 响应头获取真实链接 */
-export const getRealURL = async (originURL: string) => {
-	const [error, response] = await to(
-		fetch(originURL, {
-			method: "HEAD", // 用 HEAD 减少数据传输
-			redirect: "manual", // 手动处理重定向
-		}),
-	);
-
-	if (error) {
-		return originURL;
-	}
-
-	const location = response.headers.get("location");
-	return location || originURL;
 };

@@ -3,11 +3,10 @@ export {
 	type Capitalize,
 	camelToSnake,
 	capitalize,
-	compactStr,
 	type Decapitalize,
 	decapitalize,
-	type ImageCompressionOptions,
-	imageUrlToBase64,
 	type SnakeToCamel,
 	snakeToCamel,
-} from "./string/index";
+} from "./case";
+
+export { compactStr } from "./compact";
