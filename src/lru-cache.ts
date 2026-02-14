@@ -17,10 +17,10 @@ class LRUCache<K, V> {
 	}
 
 	get(key: K): V | undefined {
-		const value = this.cache.get(key);
-		if (!value) {
+		if (!this.cache.has(key)) {
 			return undefined;
 		}
+		const value = this.cache.get(key)!;
 		// 重置缓存顺序
 		this.cache.delete(key);
 		this.cache.set(key, value);
