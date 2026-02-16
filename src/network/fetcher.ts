@@ -78,7 +78,7 @@ export const fetcher = (baseURL = "", baseOptions: RequestInit = {}) => {
 		}
 
 		// 转换 body 为字符串
-		if (isObject(options.body)) {
+		if (isObject(options.body) || Array.isArray(options.body)) {
 			options.body = JSON.stringify(options.body);
 			options.headers = {
 				...options.headers,
