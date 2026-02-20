@@ -16,23 +16,27 @@ export interface LogOptions {
 
 /**
  * 带额外信息的 console.log
- * @param message - 日志消息
+ * @param message - 日志消息，支持单条消息或消息数组
  * @param options - 配置选项
  *
  * @example
- * log("调试信息"); // "调试信息"
- * log("调试信息", { time: true }); // "[14:30:00] 调试信息"
- * log("调试信息", { time: true, fileName: true }); // "[14:30:00] [index.ts:15] 调试信息"
+ * log("调试信息"); // "[14:30:00] [index.ts:15] 调试信息"
+ * log("调试信息", { time: false }); // "[index.ts:15] 调试信息"
+ * log("调试信息", { fileName: false }); // "[14:30:00] 调试信息"
+ * log("调试信息", { time: false, fileName: false }); // "调试信息"
+ * log(["消息1", "消息2"]); // "[14:30:00] [index.ts:15] 消息1 消息2"
  */
-export const log = (message: any, options?: LogOptions) => {
+export const log = (message: any | any[], options?: LogOptions) => {
 	const { time = true, fileName = true } = options ?? {};
 
 	const parts: any[] = [];
 
+	// 添加时间前缀
 	if (time) {
 		parts.push(`[${new Date().toLocaleTimeString()}]`);
 	}
 
+	// 添加调用者文件名前缀
 	if (fileName) {
 		/**
 		 * Error
@@ -57,6 +61,12 @@ export const log = (message: any, options?: LogOptions) => {
 		}
 	}
 
-	parts.push(message);
+	// 添加调用者原始消息
+	if (Array.isArray(message)) {
+		parts.push(...message);
+	} else {
+		parts.push(message);
+	}
+
 	console.log(...parts);
 };
