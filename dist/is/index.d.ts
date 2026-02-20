@@ -1,5 +1,4 @@
-export { type Falsy, isFalsy } from "./isFalsy";
-export { isNil } from "./isNil";
-export { isObject } from "./isObject";
-export { isPrimitive, type Primitive } from "./isPrimitive";
-export { isTruthy } from "./isTruthy";
+export * from "./is-falsy";
+export * from "./is-nil";
+export * from "./is-object";
+export * from "./is-primitive";

@@ -1,1 +1,1 @@
-export { randomInt } from "./randomInt";
+export * from "./random-int";

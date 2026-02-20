@@ -1,1 +1,1 @@
-export { type SetTtl, withCache } from "./withCache";
+export * from "./with-cache";

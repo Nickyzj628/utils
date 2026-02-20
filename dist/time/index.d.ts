@@ -1,3 +1,3 @@
-export { debounce } from "./debounce";
-export { sleep } from "./sleep";
-export { throttle } from "./throttle";
+export * from "./debounce";
+export * from "./sleep";
+export * from "./throttle";

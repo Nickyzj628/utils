@@ -1,1 +1,1 @@
-export { timeLog } from "./timeLog";
+export * from "./log";

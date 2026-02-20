@@ -1,3 +1,3 @@
-export { type DeepMapKeys, mapKeys } from "./mapKeys";
-export { type DeepMapValues, mapValues } from "./mapValues";
-export { mergeObjects } from "./mergeObjects";
+export * from "./map-keys";
+export * from "./map-values";
+export * from "./merge-objects";

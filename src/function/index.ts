@@ -1,1 +1,1 @@
-export { loopUntil } from "./loopUntil";
+export * from "./loop-until";
