@@ -1,13 +1,20 @@
 {
   "name": "@nickyzj2023/utils",
-  "version": "1.0.56",
+  "version": "1.0.57",
   "repository": {
     "type": "git",
     "url": "https://github.com/Nickyzj628/utils.git"
   },
   "type": "module",
+  "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "files": [
     "dist"
   ],
@@ -23,6 +30,6 @@
   },
   "scripts": {
     "docs": "typedoc src/index.ts --plugin typedoc-material-theme",
-    "build": "tsup src/index.ts --format esm --dts --minify --out-dir dist && pnpm docs"
+    "build": "tsup src/index.ts --format esm --dts --minify --out-dir dist && pnpm run docs"
   }
 }
