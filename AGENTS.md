@@ -4,13 +4,13 @@ This file contains essential information for AI coding agents working on this pr
 
 ## Project Overview
 
-这是一个前端工具库（Frontend Utility Library），提供常用的 TypeScript/JavaScript 工具函数，帮助开发者简化日常开发任务。项目使用 Bun 作为运行时和包管理器，发布到 npm 仓库 `@nickyzj2023/utils`。
+这是一个前端工具库（Frontend Utility Library），提供常用的 TypeScript/JavaScript 工具函数，帮助开发者简化日常开发任务。项目使用 pnpm 作为包管理器，发布到 npm 仓库 `@nickyzj2023/utils`。
 
 ## Technology Stack
 
-- **Runtime**: [Bun](https://bun.com) v1.3.2+ - 快速的 JavaScript 运行时和包管理器
+- **Package Manager**: [pnpm](https://pnpm.io) - 快速的、节省磁盘空间的包管理器
 - **Language**: TypeScript 5.9.3+
-- **Build Tool**: Bun 内置打包器 + TypeScript 编译器
+- **Build Tool**: tsup + TypeScript 编译器
 - **Linting/Formatting**: Biome 2.3.14
 - **Documentation**: TypeDoc 0.28.16 + Material Theme
 - **Dependencies**: 零运行时依赖，仅开发依赖
@@ -66,7 +66,7 @@ This file contains essential information for AI coding agents working on this pr
 ├── package.json           # 包配置
 ├── tsconfig.json          # TypeScript 配置
 ├── biome.json             # Biome 代码规范配置
-├── bun.lock               # Bun 锁定文件
+├── pnpm-lock.yaml         # pnpm 锁定文件
 └── .gitignore             # Git 忽略规则
 ```
 
@@ -74,14 +74,14 @@ This file contains essential information for AI coding agents working on this pr
 
 ```bash
 # 完整构建（打包 + 类型声明 + 文档）
-bun run build
+pnpm build
 
 # 仅生成文档
-bun run docs
+pnpm docs
 ```
 
 构建流程：
-1. `bun build --target=bun --outdir ./dist --minify ./src/index.ts --packages external` - 使用 Bun 打包并压缩
+1. `tsup src/index.ts --format esm --dts --minify --out-dir dist` - 使用 tsup 打包并压缩
 2. `tsc` - 生成 TypeScript 类型声明文件（.d.ts）
 3. `typedoc src/index.ts --plugin typedoc-material-theme` - 生成 API 文档
 
@@ -134,7 +134,7 @@ bun run docs
 ## Testing
 
 **当前项目没有测试框架配置**。如需添加测试，建议使用：
-- Bun 内置测试运行器（`bun:test`）
+- Node.js 测试框架如 Vitest 或 Jest
 
 ## Publishing
 
@@ -153,7 +153,7 @@ bun run docs
 ## Development Workflow
 
 1. 修改源代码（`src/` 目录）
-2. 运行 `bun run build` 构建项目
+2. 运行 `pnpm build` 构建项目
 3. 检查生成的类型声明文件（`dist/*.d.ts`）
 4. 查看文档（`docs/` 目录或启动本地服务器查看）
 5. 提交更改
@@ -161,7 +161,6 @@ bun run docs
 ## Important Notes
 
 - 项目使用 ES Module（`"type": "module"`），不支持 CommonJS
-- 构建目标为 Bun 运行时（`--target=bun`）
-- `imageUrlToBase64` 功能在浏览器环境使用 OffscreenCanvas 压缩，在 Node.js/Bun 环境尝试使用 sharp（可选依赖）
-- `fetcher` 函数基于 Fetch API，在 Bun 环境下支持 `proxy` 选项
+- `imageUrlToBase64` 功能在浏览器环境使用 OffscreenCanvas 压缩，在 Node.js 环境尝试使用 sharp（可选依赖）
+- `fetcher` 函数基于 Fetch API，支持 `proxy` 选项
 - 所有工具函数均为纯函数，无副作用

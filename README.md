@@ -12,8 +12,6 @@ yarn add @nickyzj2023/utils
 # pnpm
 pnpm add @nickyzj2023/utils
 
-# bun
-bun add @nickyzj2023/utils
 ```
 
 使用方式：
@@ -32,4 +30,4 @@ if (error) {
 console.log(data);
 ```
 
-This project was created using `bun init` in bun v1.3.2. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+

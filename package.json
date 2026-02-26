@@ -1,6 +1,6 @@
 {
   "name": "@nickyzj2023/utils",
-  "version": "1.0.55",
+  "version": "1.0.56",
   "repository": {
     "type": "git",
     "url": "https://github.com/Nickyzj628/utils.git"
@@ -8,9 +8,13 @@
   "type": "module",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
-    "@biomejs/biome": "^2.4.3",
-    "@types/bun": "^1.3.9",
+    "@biomejs/biome": "^2.4.4",
+    "@types/node": "^25.3.2",
+    "tsup": "^8.5.1",
     "typedoc": "^0.28.17",
     "typedoc-material-theme": "^1.4.1"
   },
@@ -19,6 +23,6 @@
   },
   "scripts": {
     "docs": "typedoc src/index.ts --plugin typedoc-material-theme",
-    "build": "bun build --target=bun --outdir ./dist --minify ./src/index.ts --packages external && tsc && bun run docs"
+    "build": "tsup src/index.ts --format esm --dts --minify --out-dir dist && pnpm docs"
   }
 }

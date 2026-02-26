@@ -1,6 +1,6 @@
 /**
  * 将 ArrayBuffer 转换为 base64 字符串
- * 兼容浏览器、Bun 和 Node.js
+ * 兼容浏览器和 Node.js
  */
 const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
 	const bytes = new Uint8Array(buffer);
@@ -91,7 +91,7 @@ export type ImageCompressionOptions = {
  * @param options.compressor 自定义压缩函数，用于覆盖默认压缩行为
  *
  * @example
- * // 基本用法（浏览器自动使用 Canvas 压缩，Node.js/Bun 自动检测并使用 sharp）
+ * // 基本用法（浏览器自动使用 Canvas 压缩，Node.js 自动检测并使用 sharp）
  * imageUrlToBase64("https://example.com/image.jpg");
  *
  * @example
@@ -184,7 +184,7 @@ export const imageUrlToBase64 = async (
 		}
 	}
 
-	// Node.js/Bun 环境：尝试使用 sharp 进行压缩
+	// Node.js 环境：尝试使用 sharp 进行压缩
 	const sharp = await tryImportSharp();
 	if (sharp) {
 		try {
