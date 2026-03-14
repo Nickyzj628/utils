@@ -8,159 +8,173 @@ This file contains essential information for AI coding agents working on this pr
 
 ## Technology Stack
 
-- **Package Manager**: [pnpm](https://pnpm.io) - 快速的、节省磁盘空间的包管理器
+- **Package Manager**: [pnpm](https://pnpm.io)
 - **Language**: TypeScript 5.9.3+
-- **Build Tool**: tsup + TypeScript 编译器
-- **Linting/Formatting**: Biome 2.3.14
-- **Documentation**: TypeDoc 0.28.16 + Material Theme
+- **Build Tool**: tsdown (ESM bundler with type declarations)
+- **Linting/Formatting**: Biome 2.4.4
+- **Documentation**: TypeDoc 0.28.17 + Material Theme
 - **Dependencies**: 零运行时依赖，仅开发依赖
-
-## Project Structure
-
-```
-.
-├── src/                    # 源代码目录
-│   ├── index.ts           # 入口文件，导出所有模块
-│   ├── dom/               # DOM 相关工具
-│   │   ├── index.ts       # 模块导出
-│   │   └── timeLog.ts     # 带时间的 console.log
-│   ├── function/          # 函数控制工具
-│   │   ├── index.ts       # 模块导出
-│   │   └── loopUntil.ts   # 循环执行直到满足条件
-│   ├── hoc/               # 高阶函数
-│   │   ├── index.ts       # 模块导出
-│   │   └── withCache.ts   # 带缓存的高阶函数
-│   ├── is/                # 类型判断工具
-│   │   ├── index.ts       # 模块导出
-│   │   ├── isFalsy.ts     # 假值判断
-│   │   ├── isNil.ts       # 空值判断
-│   │   ├── isObject.ts    # 普通对象判断
-│   │   ├── isPrimitive.ts # 原始值判断
-│   │   └── isTruthy.ts    # 真值判断
-│   ├── network/           # 网络请求工具
-│   │   ├── index.ts       # 模块导出
-│   │   ├── fetcher.ts     # 基于 Fetch API 的请求客户端
-│   │   ├── getRealURL.ts  # 从响应头获取真实链接
-│   │   ├── image.ts       # 图片 URL 转 Base64
-│   │   └── to.ts          # Go 语言风格的异步处理
-│   ├── number/            # 数字工具
-│   │   ├── index.ts       # 模块导出
-│   │   └── randomInt.ts   # 生成随机整数
-│   ├── object/            # 对象操作工具
-│   │   ├── index.ts       # 模块导出
-│   │   ├── mapKeys.ts     # 递归处理对象 key
-│   │   ├── mapValues.ts   # 递归处理对象 value
-│   │   └── mergeObjects.ts # 深度合并对象
-│   ├── string/            # 字符串处理工具
-│   │   ├── index.ts       # 模块导出
-│   │   ├── case.ts        # 命名法转换（snake/camel/capitalize）
-│   │   └── compact.ts     # 字符串压缩为单行
-│   ├── time/              # 时间控制工具
-│   │   ├── index.ts       # 模块导出
-│   │   ├── debounce.ts    # 防抖函数
-│   │   ├── sleep.ts       # 延迟执行
-│   │   └── throttle.ts    # 节流函数
-│   └── lru-cache.ts       # LRU 缓存实现（默认导出）
-├── dist/                  # 构建输出目录（包含 .js 和 .d.ts 文件）
-├── docs/                  # TypeDoc 生成的文档网站
-├── package.json           # 包配置
-├── tsconfig.json          # TypeScript 配置
-├── biome.json             # Biome 代码规范配置
-├── pnpm-lock.yaml         # pnpm 锁定文件
-└── .gitignore             # Git 忽略规则
-```
 
 ## Build Commands
 
 ```bash
-# 完整构建（打包 + 类型声明 + 文档）
+# 完整构建（打包 + 类型声明）
 pnpm build
 
 # 仅生成文档
 pnpm docs
+
+# 代码检查（格式 + 静态分析）
+pnpm biome check .
+
+# 自动修复格式问题
+pnpm biome format --write .
+
+# 类型检查
+pnpm tsc --noEmit
 ```
 
-构建流程：
-1. `tsup src/index.ts --format esm --dts --minify --out-dir dist` - 使用 tsup 打包并压缩
-2. `tsc` - 生成 TypeScript 类型声明文件（.d.ts）
-3. `typedoc src/index.ts --plugin typedoc-material-theme` - 生成 API 文档
+注意：项目没有配置测试框架，无法运行单元测试。
+
+## Project Structure
+
+```
+src/
+├── index.ts           # 入口文件，导出所有模块
+├── dom/               # DOM 相关工具
+├── function/          # 函数控制工具
+├── hoc/               # 高阶函数
+├── is/                # 类型判断工具
+├── network/           # 网络请求工具
+├── number/            # 数字工具
+├── object/            # 对象操作工具
+├── string/            # 字符串处理工具
+├── time/              # 时间控制工具
+└── lru-cache.ts       # LRU 缓存实现
+dist/                  # 构建输出目录
+docs/                  # TypeDoc 生成的文档
+```
 
 ## Code Style Guidelines
 
-项目使用 **Biome** 进行代码格式化和静态检查，配置见 `biome.json`：
+项目使用 **Biome** 进行代码格式化和静态检查，配置见 `biome.json`。
 
-- **缩进**: Tab（非空格）
-- **引号**: 双引号（double）
-- **规则**:
-  - 启用推荐规则
-  - 允许未使用的变量和函数参数（`noUnusedVariables: off`, `noUnusedFunctionParameters: off`）
-  - 允许显式使用 `any` 类型（`noExplicitAny: off`）
-  - 允许非空断言（`noNonNullAssertion: off`）
-  - 不强制使用模板字符串（`useTemplate: off`）
+### 格式化规则
 
-### 代码规范
+- **缩进**: Tab（不是空格）
+- **引号**: 双引号（double quotes）
+- **每行末尾**: 不保留多余空格
+- **语句末尾**: 使用分号
 
-1. **注释语言**: 使用中文编写 JSDoc 注释
-2. **导出方式**: 所有工具函数使用命名导出（named exports）
-3. **类型定义**: 
-   - 工具类型（如 `Primitive`, `Falsy`, `SnakeToCamel`）与实现放在同一文件
-   - 复杂类型使用 TypeScript 模板字面量类型进行转换
-4. **函数风格**: 
-   - 优先使用箭头函数
-   - 泛型函数使用 `<T>` 语法
-   - 类型守卫函数返回 `value is Type`
+### Biome 配置要点
+
+```json
+{
+  "formatter": { "indentStyle": "tab" },
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedVariables": "off",
+        "noUnusedFunctionParameters": "off"
+      },
+      "suspicious": { "noExplicitAny": "off" },
+      "style": {
+        "noNonNullAssertion": "off",
+        "useTemplate": "off"
+      }
+    }
+  }
+}
+```
+
+## 代码规范
+
+### 命名规范
+
+- **文件名**: 使用 kebab-case（如 `is-primitive.ts`、`debounce.ts`）
+- **函数名**: 使用 camelCase（如 `debounce`、`mergeObjects`）
+- **类型名**: 使用 PascalCase（如 `Primitive`、`RequestInit`）
+- **常量**: 使用 PascalCase（如 `SetTtl`）
+
+### 导入规范
+
+- 使用相对路径导入同模块文件（如 `import { isNil } from "../is"`）
+- 使用路径别名时保持一致性
+- 导入顺序：外部库 -> 内部模块 -> 类型导入
+
+### 导出规范
+
+- 所有工具函数使用命名导出（named exports）
+- 入口文件使用 `export * from "./module"` 集中导出
+- 类型与实现放同一文件，按需导出
+
+### 类型定义
+
+- 工具类型（如 `Primitive`、`Falsy`）与实现放在同一文件
+- 复杂类型使用 TypeScript 模板字面量类型
+- 类型守卫函数返回 `value is Type` 形式
+
+### 函数风格
+
+- 优先使用箭头函数
+- 泛型函数使用 `<T>` 语法
+- 函数参数支持默认值的放在后面
+
+### JSDoc 注释
+
+- 使用 **中文** 编写注释
+- 每个导出函数/类型添加 JSDoc 注释
+- 包含 `@example` 代码示例
+- 复杂逻辑添加 `@remarks` 说明
+
+### 错误处理
+
+- 网络请求使用 Go 语言风格：`const [error, data] = await to(promise)`
+- 抛出 Error 时包含有意义的错误信息
+- 不捕获可能的异常，让调用方处理
 
 ## Module Organization
 
-项目按功能领域划分模块，每个模块是一个子目录：
-
-| 模块 | 功能描述 | 主要导出 |
-|------|---------|---------|
-| `is` | 类型判断 | `isObject`, `isPrimitive`, `isFalsy`, `isTruthy`, `isNil`, `Primitive`, `Falsy` |
-| `network` | 网络请求 | `fetcher`, `to`, `getRealURL`, `imageUrlToBase64`, `RequestInit`, `ImageCompressionOptions` |
-| `object` | 对象操作 | `mergeObjects`, `mapKeys`, `mapValues`, `DeepMapKeys`, `DeepMapValues` |
-| `string` | 字符串处理 | `snakeToCamel`, `camelToSnake`, `capitalize`, `decapitalize`, `compactStr` |
-| `time` | 时间控制 | `sleep`, `debounce`, `throttle` |
-| `function` | 函数控制 | `loopUntil` |
-| `hoc` | 高阶函数 | `withCache`, `SetTtl` |
-| `lru-cache` | 缓存实现 | `LRUCache`（默认导出） |
-| `dom` | DOM 工具 | `timeLog` |
-| `number` | 数字工具 | `randomInt` |
-
 每个模块目录结构：
 - `index.ts` - 集中导出该模块的所有功能
-- 具体实现文件（如 `sleep.ts`, `debounce.ts` 等）
+- 具体实现文件（如 `debounce.ts`、`sleep.ts`）
 
-## Testing
-
-**当前项目没有测试框架配置**。如需添加测试，建议使用：
-- Node.js 测试框架如 Vitest 或 Jest
-
-## Publishing
-
-项目发布到 npm 仓库：
-- 包名: `@nickyzj2023/utils`
-- 版本: 见 `package.json` 中的 `version` 字段
-- 入口: `dist/index.js`（ES Module）
-- 类型: `dist/index.d.ts`
-
-## Security Considerations
-
-1. **敏感信息**: `.npmrc` 文件包含 npm 认证令牌，已在 `.gitignore` 中配置忽略
-2. **网络请求**: `fetcher` 函数会解析 JSON 错误响应，注意潜在的安全风险
-3. **动态导入**: `imageUrlToBase64` 使用动态导入尝试加载 `sharp`，避免在浏览器环境报错
+| 模块 | 主要导出 |
+|------|---------|
+| `is` | `isObject`, `isPrimitive`, `isFalsy`, `isTruthy`, `isNil` |
+| `network` | `fetcher`, `to`, `getRealURL`, `imageUrlToBase64` |
+| `object` | `mergeObjects`, `mapKeys`, `mapValues` |
+| `string` | `snakeToCamel`, `camelToSnake`, `capitalize`, `compactStr` |
+| `time` | `sleep`, `debounce`, `throttle` |
+| `function` | `loopUntil` |
+| `hoc` | `withCache` |
+| `dom` | `timeLog` |
+| `number` | `randomInt` |
 
 ## Development Workflow
 
 1. 修改源代码（`src/` 目录）
-2. 运行 `pnpm build` 构建项目
-3. 检查生成的类型声明文件（`dist/*.d.ts`）
-4. 查看文档（`docs/` 目录或启动本地服务器查看）
+2. 运行 `pnpm biome check .` 检查代码
+3. 运行 `pnpm build` 构建项目
+4. 检查生成的类型声明文件（`dist/*.d.ts`）
 5. 提交更改
+
+## Publishing
+
+- 包名: `@nickyzj2023/utils`
+- 入口: `dist/index.mjs`（ES Module）
+- 类型: `dist/index.d.mts`
+
+## Security Considerations
+
+1. **敏感信息**: `.npmrc` 包含 npm 令牌，已在 `.gitignore` 中忽略
+2. **网络请求**: `fetcher` 函数会解析 JSON 错误响应
+3. **动态导入**: `imageUrlToBase64` 使用动态导入尝试加载 `sharp`
 
 ## Important Notes
 
 - 项目使用 ES Module（`"type": "module"`），不支持 CommonJS
-- `imageUrlToBase64` 功能在浏览器环境使用 OffscreenCanvas 压缩，在 Node.js 环境尝试使用 sharp（可选依赖）
-- `fetcher` 函数基于 Fetch API，支持 `proxy` 选项
-- 所有工具函数均为纯函数，无副作用
+- `imageUrlToBase64` 在浏览器使用 OffscreenCanvas，在 Node.js 尝试 sharp
+- `fetcher` 基于 Fetch API，支持 `proxy` 选项
+- 所有工具函数尽量设计为纯函数，无副作用
