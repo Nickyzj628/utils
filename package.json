@@ -1,35 +1,35 @@
 {
-  "name": "@nickyzj2023/utils",
-  "version": "1.0.58",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Nickyzj628/utils.git"
-  },
-  "type": "module",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "devDependencies": {
-    "@biomejs/biome": "^2.4.4",
-    "@types/node": "^25.3.2",
-    "tsup": "^8.5.1",
-    "typedoc": "^0.28.17",
-    "typedoc-material-theme": "^1.4.1"
-  },
-  "peerDependencies": {
-    "typescript": "^5.9.3"
-  },
-  "scripts": {
-    "docs": "typedoc src/index.ts --plugin typedoc-material-theme",
-    "build": "tsup src/index.ts --format esm --dts --minify --out-dir dist && pnpm run docs"
-  }
+	"name": "@nickyzj2023/utils",
+	"version": "1.0.58",
+	"type": "module",
+	"main": "dist/index.mjs",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.mts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.mts",
+			"import": "./dist/index.mjs"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsdown && pnpm run docs",
+		"docs": "typedoc src/index.ts --plugin typedoc-material-theme"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Nickyzj628/utils.git"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.4",
+		"@types/node": "^25.5.0",
+		"tsdown": "^0.21.2",
+		"typedoc": "^0.28.17",
+		"typedoc-material-theme": "^1.4.1"
+	},
+	"peerDependencies": {
+		"typescript": "^5.9.3"
+	}
 }

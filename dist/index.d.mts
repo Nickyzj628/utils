@@ -1,17 +1,18 @@
+//#region src/dom/log.d.ts
 /**
  * log 配置选项
  */
 interface LogOptions {
-    /**
-     * 是否显示时间
-     * @default true
-     */
-    time?: boolean;
-    /**
-     * 是否显示调用者文件名
-     * @default true
-     */
-    fileName?: boolean;
+  /**
+   * 是否显示时间
+   * @default true
+   */
+  time?: boolean;
+  /**
+   * 是否显示调用者文件名
+   * @default true
+   */
+  fileName?: boolean;
 }
 /**
  * 带额外信息的 console.log
@@ -26,7 +27,8 @@ interface LogOptions {
  * log(["消息1", "消息2"]); // "[14:30:00] [index.ts:15] 消息1 消息2"
  */
 declare const log: (message: any | any[], options?: LogOptions) => void;
-
+//#endregion
+//#region src/function/loop-until.d.ts
 /**
  * 循环执行函数，直到符合停止条件
  *
@@ -55,15 +57,15 @@ declare const log: (message: any | any[], options?: LogOptions) => void;
  * ),
  */
 declare const loopUntil: <T>(fn: (count: number) => T | Promise<T>, options?: {
-    /**
-     * 最大循环次数
-     * @default 5
-     */
-    maxRetries?: number;
-    /** 停止循环条件。如果未传递，则执行 maxRetries 次后退出并返回最后结果 */
-    shouldStop?: (result: T) => boolean;
+  /**
+   * 最大循环次数
+   * @default 5
+   */
+  maxRetries?: number; /** 停止循环条件。如果未传递，则执行 maxRetries 次后退出并返回最后结果 */
+  shouldStop?: (result: T) => boolean;
 }) => Promise<T>;
-
+//#endregion
+//#region src/hoc/with-cache.d.ts
 type SetTtl = (seconds: number) => void;
 /**
  * 创建一个带缓存的高阶函数
@@ -100,13 +102,14 @@ type SetTtl = (seconds: number) => void;
  * await fetchData(urlB); // 使用缓存结果
  */
 declare const withCache: <Args extends any[], Result>(fn: (this: {
-    setTtl: SetTtl;
+  setTtl: SetTtl;
 }, ...args: Args) => Result, ttlSeconds?: number) => {
-    (...args: Args): Result;
-    clear(): void;
-    updateTtl(seconds: number): void;
+  (...args: Args): Result;
+  clear(): void;
+  updateTtl(seconds: number): void;
 };
-
+//#endregion
+//#region src/is/is-falsy.d.ts
 type Falsy = false | 0 | -0 | 0n | "" | null | undefined;
 /**
  * 检测传入的值是否为**假值**（false、0、''、null、undefined、NaN等）
@@ -116,7 +119,8 @@ type Falsy = false | 0 | -0 | 0n | "" | null | undefined;
  * isFalsy(1); // false
  */
 declare const isFalsy: (value: any) => value is Falsy;
-
+//#endregion
+//#region src/is/is-nil.d.ts
 /**
  * 检测传入的值是否为**空值**（null、undefined）
  *
@@ -126,7 +130,8 @@ declare const isFalsy: (value: any) => value is Falsy;
  * isNil(1); // false
  */
 declare const isNil: (value: any) => value is null | undefined;
-
+//#endregion
+//#region src/is/is-object.d.ts
 /**
  * 检测传入的值是否为**普通对象**
  *
@@ -135,7 +140,8 @@ declare const isNil: (value: any) => value is null | undefined;
  * isObject(obj); // true
  */
 declare const isObject: (value: any) => value is Record<string, any>;
-
+//#endregion
+//#region src/is/is-primitive.d.ts
 type Primitive = number | string | boolean | symbol | bigint | undefined | null;
 /**
  * 检测传入的值是否为**原始值**（number、string、boolean、symbol、bigint、undefined、null）
@@ -145,14 +151,14 @@ type Primitive = number | string | boolean | symbol | bigint | undefined | null;
  * isPrimitive([]); // false
  */
 declare const isPrimitive: (value: any) => value is Primitive;
-
+//#endregion
+//#region src/network/fetcher.d.ts
 type FetchOptions = {
-    /** 代理服务器配置 */
-    proxy?: string;
+  /** 代理服务器配置 */proxy?: string;
 };
 type RequestInit = globalThis.RequestInit & FetchOptions & {
-    params?: Record<string, any>;
-    parser?: (response: Response) => Promise<any>;
+  params?: Record<string, any>;
+  parser?: (response: Response) => Promise<any>;
 };
 /**
  * 基于 Fetch API 的请求客户端
@@ -197,36 +203,37 @@ type RequestInit = globalThis.RequestInit & FetchOptions & {
  * await getBlogs("/blogs");  // 不发请求，使用缓存
  */
 declare const fetcher: (baseURL?: string, baseOptions?: RequestInit) => {
-    get: <T>(url: string, options?: Omit<RequestInit, "method">) => Promise<T>;
-    post: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
-    put: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
-    delete: <T>(url: string, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
+  get: <T>(url: string, options?: Omit<RequestInit, "method">) => Promise<T>;
+  post: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
+  put: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
+  delete: <T>(url: string, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
 };
-
+//#endregion
+//#region src/network/get-real-url.d.ts
 /** 从 url 响应头获取真实链接 */
 declare const getRealURL: (originURL: string) => Promise<string>;
-
+//#endregion
+//#region src/network/image.d.ts
 /**
  * 图片压缩选项
  */
 type ImageCompressionOptions = {
-    /** 压缩比率，默认 0.92 */
-    quality?: number;
-    /**
-     * 自定义压缩函数，用于覆盖默认压缩行为
-     * @param arrayBuffer 图片的 ArrayBuffer 数据
-     * @param mime 图片的 MIME 类型
-     * @param quality 压缩质量
-     * @returns 压缩后的 base64 字符串
-     */
-    compressor?: (arrayBuffer: ArrayBuffer, mime: string, quality: number) => Promise<string> | string;
-    /**
-     * 自定义 fetch 函数，用于使用自己封装的请求库读取图片
-     * 必须返回符合 Web 标准的 Response 对象
-     * @param url 图片地址
-     * @returns Promise<Response>
-     */
-    fetcher?: (url: string) => Promise<Response>;
+  /** 压缩比率，默认 0.92 */quality?: number;
+  /**
+   * 自定义压缩函数，用于覆盖默认压缩行为
+   * @param arrayBuffer 图片的 ArrayBuffer 数据
+   * @param mime 图片的 MIME 类型
+   * @param quality 压缩质量
+   * @returns 压缩后的 base64 字符串
+   */
+  compressor?: (arrayBuffer: ArrayBuffer, mime: string, quality: number) => Promise<string> | string;
+  /**
+   * 自定义 fetch 函数，用于使用自己封装的请求库读取图片
+   * 必须返回符合 Web 标准的 Response 对象
+   * @param url 图片地址
+   * @returns Promise<Response>
+   */
+  fetcher?: (url: string) => Promise<Response>;
 };
 /**
  * 图片地址转 base64 数据
@@ -265,7 +272,8 @@ type ImageCompressionOptions = {
  * });
  */
 declare const imageUrlToBase64: (imageUrl: string, options?: ImageCompressionOptions) => Promise<string>;
-
+//#endregion
+//#region src/network/to.d.ts
 /**
  * Go 语言风格的异步处理方式
  * @param promise 一个能被 await 的异步函数
@@ -275,7 +283,8 @@ declare const imageUrlToBase64: (imageUrl: string, options?: ImageCompressionOpt
  * const [error, response] = await to(fetcher().get<Blog>("/blogs/hello-world"));
  */
 declare const to: <T, E = Error>(promise: Promise<T>) => Promise<[null, T] | [E, undefined]>;
-
+//#endregion
+//#region src/number/random-int.d.ts
 /**
  * 在指定闭区间内生成随机整数
  *
@@ -283,9 +292,10 @@ declare const to: <T, E = Error>(promise: Promise<T>) => Promise<[null, T] | [E,
  * randomInt(1, 10);    // 1 <= x <= 10
  */
 declare const randomInt: (min: number, max: number) => number;
-
+//#endregion
+//#region src/object/map-keys.d.ts
 type DeepMapKeys<T> = T extends Array<infer U> ? Array<DeepMapKeys<U>> : T extends object ? {
-    [key: string]: DeepMapKeys<T[keyof T]>;
+  [key: string]: DeepMapKeys<T[keyof T]>;
 } : T;
 /**
  * 递归处理对象里的 key
@@ -301,10 +311,9 @@ type DeepMapKeys<T> = T extends Array<infer U> ? Array<DeepMapKeys<U>> : T exten
  * console.log(result); // { A: { B: 1 } }
  */
 declare const mapKeys: <T>(obj: T, getNewKey: (key: string) => string) => DeepMapKeys<T>;
-
-type DeepMapValues<T, R> = T extends Array<infer U> ? Array<DeepMapValues<U, R>> : T extends object ? {
-    [K in keyof T]: T[K] extends object ? DeepMapValues<T[K], R> : R;
-} : R;
+//#endregion
+//#region src/object/map-values.d.ts
+type DeepMapValues<T, R> = T extends Array<infer U> ? Array<DeepMapValues<U, R>> : T extends object ? { [K in keyof T]: T[K] extends object ? DeepMapValues<T[K], R> : R } : R;
 /**
  * 递归处理对象里的 value
  *
@@ -320,10 +329,10 @@ type DeepMapValues<T, R> = T extends Array<infer U> ? Array<DeepMapValues<U, R>>
  * console.log(result); // { a: 2, b: { c: 3 } }
  */
 declare const mapValues: <T, R = any>(obj: T, getNewValue: (value: any, key: string | number) => R, options?: {
-    /** 过滤函数，返回 true 表示保留该字段 */
-    filter?: (value: any, key: string | number) => boolean;
+  /** 过滤函数，返回 true 表示保留该字段 */filter?: (value: any, key: string | number) => boolean;
 }) => DeepMapValues<T, R>;
-
+//#endregion
+//#region src/object/merge-objects.d.ts
 /**
  * 深度合并两个对象，规则如下：
  * 1. 原始值覆盖：如果两个值都是原始类型，则用后者覆盖;
@@ -336,7 +345,8 @@ declare const mapValues: <T, R = any>(obj: T, getNewValue: (value: any, key: str
  * @param {U} obj2 要合并的第二个对象
  */
 declare const mergeObjects: <T extends Record<string, any>, U extends Record<string, any>>(obj1: T, obj2: U) => T & U;
-
+//#endregion
+//#region src/string/case.d.ts
 type SnakeToCamel<S extends string> = S extends `${infer Before}_${infer After}` ? After extends `${infer First}${infer Rest}` ? `${Before}${Uppercase<First>}${SnakeToCamel<Rest>}` : Before : S;
 /**
  * 下划线命名法转为驼峰命名法
@@ -369,7 +379,8 @@ type Decapitalize<S extends string> = S extends `${infer P1}${infer Rest}` ? P1 
  * decapitalize("Hello") // "hello"
  */
 declare const decapitalize: <S extends string>(s: S) => Decapitalize<S>;
-
+//#endregion
+//#region src/string/compact.d.ts
 /**
  * 将字符串压缩为单行精简格式
  *
@@ -383,16 +394,31 @@ declare const decapitalize: <S extends string>(s: S) => Decapitalize<S>;
  * });
  */
 declare const compactStr: (text?: string, options?: {
-    /** 最大保留长度，设为 0 或 Infinity 则不截断，默认 Infinity */
-    maxLength?: number;
-    /** 是否将换行符替换为字面量 \n，默认开启 */
-    disableNewLineReplace?: boolean;
-    /** 是否合并连续的空格/制表符为一个空格，默认开启 */
-    disableWhitespaceCollapse?: boolean;
-    /** 截断后的后缀，默认为 "..." */
-    omission?: string;
+  /** 最大保留长度，设为 0 或 Infinity 则不截断，默认 Infinity */maxLength?: number; /** 是否将换行符替换为字面量 \n，默认开启 */
+  disableNewLineReplace?: boolean; /** 是否合并连续的空格/制表符为一个空格，默认开启 */
+  disableWhitespaceCollapse?: boolean; /** 截断后的后缀，默认为 "..." */
+  omission?: string;
 }) => string;
-
+//#endregion
+//#region src/string/qs.d.ts
+/**
+ * 针对 URL 查询字符串的解析和序列化
+ * @example
+ * qs.parse("?a=1&b=2") // { a: 1, b: 2 }
+ * qs.stringify({ a: 1, b: 2 }, { addQueryPrefix: true }) // "?a=1&b=2"
+ */
+declare const qs: {
+  /** queryString -> queryParams */parse: (queryString: string) => Record<string, any>;
+  stringify: (params: Record<string, any>, options?: {
+    /**
+     * 是否在结果前添加“?”
+     * @default false
+     */
+    addQueryPrefix: boolean;
+  }) => string;
+};
+//#endregion
+//#region src/time/debounce.d.ts
 /**
  * 防抖：在指定时间内只执行最后一次调用
  * @param fn 要防抖的函数
@@ -413,7 +439,8 @@ declare const compactStr: (text?: string, options?: {
  * search('hello'); // 300ms 后执行
  */
 declare const debounce: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (...args: Parameters<T>) => void;
-
+//#endregion
+//#region src/time/sleep.d.ts
 /**
  * 延迟一段时间再执行后续代码
  * @param time 延迟时间，默认 150ms
@@ -421,7 +448,8 @@ declare const debounce: <T extends (...args: any[]) => any>(fn: T, delay?: numbe
  * await sleep(1000); // 等待 1 秒执行后续代码
  */
 declare const sleep: (time?: number) => Promise<unknown>;
-
+//#endregion
+//#region src/time/throttle.d.ts
 /**
  * 节流函数 - 在指定时间间隔内最多执行一次调用
  * @param fn 要节流的函数
@@ -442,5 +470,5 @@ declare const sleep: (time?: number) => Promise<unknown>;
  * window.addEventListener('scroll', handleScroll);
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
-
-export { type CamelToSnake, type Capitalize, type Decapitalize, type DeepMapKeys, type DeepMapValues, type Falsy, type FetchOptions, type ImageCompressionOptions, type LogOptions, type Primitive, type RequestInit, type SetTtl, type SnakeToCamel, camelToSnake, capitalize, compactStr, debounce, decapitalize, fetcher, getRealURL, imageUrlToBase64, isFalsy, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+//#endregion
+export { CamelToSnake, Capitalize, Decapitalize, DeepMapKeys, DeepMapValues, Falsy, FetchOptions, ImageCompressionOptions, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, compactStr, debounce, decapitalize, fetcher, getRealURL, imageUrlToBase64, isFalsy, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
