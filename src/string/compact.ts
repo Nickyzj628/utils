@@ -2,25 +2,35 @@
  * 将字符串压缩为单行精简格式
  *
  * @example
- * // "Hello, world."
- * compactStr(`
- *   Hello,
- *        world!
- * `, {
- *  disableNewLineReplace: false,
- * });
+ * // "Hello\nworld"
+ * compactStr(`Hello,
+ *
+ *  world
+ *
+ * !`);
+ *
+ * @example
+ * // "Hello...world" (maxLength: 15)
+ * compactStr("Hello, beautiful world!", { maxLength: 15 });
  */
 export const compactStr = (
 	text: string = "",
 	options?: {
-		/** 最大保留长度，设为 0 或 Infinity 则不截断，默认 Infinity */
+		/**
+		 * 最大保留长度，超过该长度使用 "..." 替代
+		  @default Infinity
+		 */
 		maxLength?: number;
-		/** 是否将换行符替换为字面量 \n，默认开启 */
+		/**
+		 * 是否将换行符替换为字面量"\n"
+		 * @default false
+		 */
 		disableNewLineReplace?: boolean;
-		/** 是否合并连续的空格/制表符为一个空格，默认开启 */
-		disableWhitespaceCollapse?: boolean;
-		/** 截断后的后缀，默认为 "..." */
-		omission?: string;
+		/**
+		 * 是否合并连续的换行符/制表符为单个
+		 * @default false
+		 */
+		disableCollapse?: boolean;
 	},
 ): string => {
 	if (!text) return "";
@@ -28,13 +38,17 @@ export const compactStr = (
 	const {
 		maxLength = Infinity,
 		disableNewLineReplace = false,
-		disableWhitespaceCollapse = false,
-		omission = "...",
+		disableCollapse = false,
 	} = options ?? {};
 
 	let result = text;
 
-	// 处理换行符
+	// 先合并连续的换行符和制表符
+	if (!disableCollapse) {
+		result = result.replace(/[\n\t]+/g, "\n");
+	}
+
+	// 处理换行符为字面量“\n”
 	if (!disableNewLineReplace) {
 		result = result.replace(/\r?\n/g, "\\n");
 	} else {
@@ -42,14 +56,11 @@ export const compactStr = (
 	}
 
 	// 合并连续空格
-	if (!disableWhitespaceCollapse) {
-		result = result.replace(/\s+/g, " ");
-	}
-	result = result.trim();
+	result = result.replace(/\s+/g, " ").trim();
 
 	// 截断多出来的文字
 	if (maxLength > 0 && result.length > maxLength) {
-		return result.slice(0, maxLength) + omission;
+		return result.slice(0, maxLength) + "...";
 	}
 
 	return result;
