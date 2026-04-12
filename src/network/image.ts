@@ -39,7 +39,7 @@ const compressWithSharp = async (
 	mime: string,
 	quality: number,
 ): Promise<string> => {
-	const buffer = Buffer.from(arrayBuffer);
+	const buffer = new Uint8Array(arrayBuffer);
 	let sharpInstance = sharp(buffer);
 
 	// 根据 MIME 类型设置压缩选项
@@ -52,7 +52,13 @@ const compressWithSharp = async (
 	}
 
 	const compressedBuffer = await sharpInstance.toBuffer();
-	return `data:${mime};base64,${compressedBuffer.toString("base64")}`;
+	const base64 = arrayBufferToBase64(
+		compressedBuffer.buffer.slice(
+			compressedBuffer.byteOffset,
+			compressedBuffer.byteOffset + compressedBuffer.byteLength,
+		),
+	);
+	return `data:${mime};base64,${base64}`;
 };
 
 /**
