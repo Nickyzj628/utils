@@ -1,6 +1,6 @@
 {
 	"name": "@nickyzj2023/utils",
-	"version": "1.0.61",
+	"version": "1.0.62",
 	"type": "module",
 	"main": "dist/index.mjs",
 	"module": "dist/index.mjs",
@@ -16,7 +16,8 @@
 	],
 	"scripts": {
 		"build": "tsdown",
-		"docs": "typedoc src/index.ts --plugin typedoc-material-theme"
+		"docs": "typedoc src/index.ts --plugin typedoc-material-theme",
+		"check": "biome check --write src/"
 	},
 	"repository": {
 		"type": "git",

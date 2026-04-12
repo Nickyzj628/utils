@@ -541,6 +541,39 @@ declare const qs: {
  */
 declare const debounce: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (...args: Parameters<T>) => void;
 //#endregion
+//#region src/time/lock-queue.d.ts
+/**
+ * 排队锁
+ *
+ * @remarks
+ * 使用场景如：同时给大模型发送多条消息，使其依次回复
+ *
+ * @example
+ * const queue = new LockQueue();
+ * const messages = [];
+ *
+ * const chatCompletions = async () => {
+ *  // 等待前一个队列释放
+ *  const release = await queue.waitInQueue();
+ *
+ *  const message = await requestLLM();
+ *  messages.push(message);
+ *  sendMessage(message);
+ *
+ *  // 释放队列
+ *  release();
+ * };
+ *
+ * chatCompletions();
+ * chatCompletions();
+ * chatCompletions();
+ */
+declare class LockQueue {
+  queue: Promise<any>;
+  constructor();
+  waitInQueue(): Promise<(value?: any) => void>;
+}
+//#endregion
 //#region src/time/sleep.d.ts
 /**
  * 延迟一段时间再执行后续代码
@@ -572,4 +605,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { CamelToSnake, Capitalize, Decapitalize, DeepMapKeys, DeepMapValues, Falsy, ImageCompressionOptions, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, compactStr, debounce, decapitalize, fetcher, getRealURL, imageUrlToBase64, isFalsy, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { CamelToSnake, Capitalize, Decapitalize, DeepMapKeys, DeepMapValues, Falsy, ImageCompressionOptions, LockQueue, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, compactStr, debounce, decapitalize, fetcher, getRealURL, imageUrlToBase64, isFalsy, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };

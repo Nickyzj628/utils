@@ -60,7 +60,7 @@ export const compactStr = (
 
 	// 截断多出来的文字
 	if (maxLength > 0 && result.length > maxLength) {
-		return result.slice(0, maxLength) + "...";
+		return `${result.slice(0, maxLength)}...`;
 	}
 
 	return result;

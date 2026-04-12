@@ -18,6 +18,12 @@
 			"recommended": true,
 			"suspicious": {
 				"noExplicitAny": "off"
+			},
+			"style": {
+				"noNonNullAssertion": "info"
+			},
+			"correctness": {
+				"noUnusedFunctionParameters": "off"
 			}
 		}
 	},
