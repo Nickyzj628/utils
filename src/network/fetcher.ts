@@ -1,4 +1,3 @@
-import { log } from "../dom";
 import { isNil, isObject } from "../is";
 import { mergeObjects } from "../object";
 

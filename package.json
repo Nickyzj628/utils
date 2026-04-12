@@ -23,10 +23,10 @@
     "url": "https://github.com/Nickyzj628/utils.git"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.4",
-    "@types/node": "^25.5.0",
-    "tsdown": "^0.21.2",
-    "typedoc": "^0.28.17",
+    "@biomejs/biome": "^2.4.11",
+    "@types/node": "^25.6.0",
+    "tsdown": "^0.21.7",
+    "typedoc": "^0.28.19",
     "typedoc-material-theme": "^1.4.1"
   },
   "peerDependencies": {
