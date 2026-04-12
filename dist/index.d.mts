@@ -296,7 +296,7 @@ declare const to: <T, E = Error>(promise: Promise<T>) => Promise<[null, T] | [E,
  */
 declare const randomInt: (min: number, max: number) => number;
 //#endregion
-//#region src/object/map-keys.d.ts
+//#region src/object/map.d.ts
 type DeepMapKeys<T> = T extends Array<infer U> ? Array<DeepMapKeys<U>> : T extends object ? {
   [key: string]: DeepMapKeys<T[keyof T]>;
 } : T;
@@ -314,8 +314,6 @@ type DeepMapKeys<T> = T extends Array<infer U> ? Array<DeepMapKeys<U>> : T exten
  * console.log(result); // { A: { B: 1 } }
  */
 declare const mapKeys: <T>(obj: T, getNewKey: (key: string) => string) => DeepMapKeys<T>;
-//#endregion
-//#region src/object/map-values.d.ts
 type DeepMapValues<T, R> = T extends Array<infer U> ? Array<DeepMapValues<U, R>> : T extends object ? { [K in keyof T]: T[K] extends object ? DeepMapValues<T[K], R> : R } : R;
 /**
  * 递归处理对象里的 value
@@ -335,7 +333,7 @@ declare const mapValues: <T, R = any>(obj: T, getNewValue: (value: any, key: str
   /** 过滤函数，返回 true 表示保留该字段 */filter?: (value: any, key: string | number) => boolean;
 }) => DeepMapValues<T, R>;
 //#endregion
-//#region src/object/merge-objects.d.ts
+//#region src/object/merge.d.ts
 /**
  * 深度合并两个对象，规则如下：
  * 1. 原始值覆盖：如果两个值都是原始类型，则用后者覆盖;
@@ -348,6 +346,92 @@ declare const mapValues: <T, R = any>(obj: T, getNewValue: (value: any, key: str
  * @param {U} obj2 要合并的第二个对象
  */
 declare const mergeObjects: <T extends Record<string, any>, U extends Record<string, any>>(obj1: T, obj2: U) => T & U;
+//#endregion
+//#region src/object/omit.d.ts
+/**
+ * 从对象中排除指定的键，返回不包含这些键的新对象
+ *
+ * @typeParam T - 源对象的类型
+ * @typeParam K - 要排除的键，必须是源对象的键之一
+ *
+ * @param obj - 源对象
+ * @param keys - 要排除的键名数组
+ * @returns 不包含指定键的新对象
+ *
+ * @example
+ * const user = {
+ *  id: 1,
+ *  name: "Alice",
+ *  age: 25,
+ *  password: "secret"
+ * };
+ * // { id: 1, name: "Alice", age: 25 }
+ * const safeUser = omit(user, ["password"]);
+ */
+declare const omit: <T extends Record<string, any>, K extends keyof T>(obj: T, keys: readonly K[]) => Omit<T, K>;
+/**
+ * 从对象中排除满足条件的键值对，返回不包含这些键的新对象
+ *
+ * @typeParam T - 源对象的类型
+ *
+ * @param obj - 源对象
+ * @param shouldOmit - 判断函数，接收键和值，返回 `true` 则排除该键值对
+ * @returns 不包含满足条件的键值对的新对象
+ *
+ * @example
+ * const user = {
+ *  id: 1,
+ *  name: "Alice",
+ *  age: 25,
+ *  password: "secret"
+ * };
+ * // { name: "Alice", password: "secret" }
+ * const stringFields = omitBy(user, (key, value) => typeof value === "number");
+ */
+declare const omitBy: <T extends Record<string, any>>(obj: T, shouldOmit: (key: keyof T, value: T[keyof T]) => boolean) => Partial<T>;
+//#endregion
+//#region src/object/pick.d.ts
+/**
+ * 从对象中选取指定的键，返回仅包含这些键的新对象
+ *
+ * @typeParam T - 源对象的类型
+ * @typeParam K - 要选取的键，必须是源对象的键之一
+ *
+ * @param obj - 源对象
+ * @param keys - 要选取的键名数组
+ * @returns 仅包含指定键的新对象
+ *
+ * @example
+ * const user = {
+ *  id: 1,
+ *  name: "Alice",
+ *  age: 25,
+ *  password: "secret"
+ * };
+ * // { id: 1, name: "Alice", age: 25 }
+ * const safeUser = pick(user, ["id", "name", "age"]);
+ */
+declare const pick: <T extends Record<string, any>, K extends keyof T>(obj: T, keys: readonly K[]) => Pick<T, K>;
+/**
+ * 从对象中选取满足条件的键值对，返回仅包含这些键的新对象
+ *
+ * @typeParam T - 源对象的类型
+ *
+ * @param obj - 源对象
+ * @param shouldPick - 判断函数，返回 `true` 时保留该字段
+ * @returns 仅包含满足条件的键值对的新对象
+ *
+ * @example
+ * const user = {
+ *  id: 1,
+ *  name: "Alice",
+ *  age: 25,
+ *  password: "secret"
+ * };
+ * // { id: 1, age: 25 }
+ * const numericFields = pickBy(user, (key, value) => typeof value === "number");
+ */
+declare const pickBy: <T extends Record<string, any>>(obj: T, shouldPick: (key: keyof T, value: T[keyof T]) => boolean) => Partial<T>;
 //#endregion
 //#region src/string/case.d.ts
 type SnakeToCamel<S extends string> = S extends `${infer Before}_${infer After}` ? After extends `${infer First}${infer Rest}` ? `${Before}${Uppercase<First>}${SnakeToCamel<Rest>}` : Before : S;
@@ -488,4 +572,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { CamelToSnake, Capitalize, Decapitalize, DeepMapKeys, DeepMapValues, Falsy, ImageCompressionOptions, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, compactStr, debounce, decapitalize, fetcher, getRealURL, imageUrlToBase64, isFalsy, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { CamelToSnake, Capitalize, Decapitalize, DeepMapKeys, DeepMapValues, Falsy, ImageCompressionOptions, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, compactStr, debounce, decapitalize, fetcher, getRealURL, imageUrlToBase64, isFalsy, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };

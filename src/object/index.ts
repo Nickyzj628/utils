@@ -1,3 +1,4 @@
-export * from "./map-keys";
-export * from "./map-values";
-export * from "./merge-objects";
+export * from "./map";
+export * from "./merge";
+export * from "./omit";
+export * from "./pick";
