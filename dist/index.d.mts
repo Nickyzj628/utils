@@ -153,53 +153,56 @@ type Primitive = number | string | boolean | symbol | bigint | undefined | null;
 declare const isPrimitive: (value: any) => value is Primitive;
 //#endregion
 //#region src/network/fetcher.d.ts
-type FetchOptions = {
-  /** 代理服务器配置 */proxy?: string;
-};
-type RequestInit = globalThis.RequestInit & FetchOptions & {
+type RequestInit = globalThis.RequestInit & {
+  /**
+   * searchParams 查询参数对象
+   */
   params?: Record<string, any>;
+  /**
+   * 响应解析器，默认的解析方法为 response.json()
+   */
   parser?: (response: Response) => Promise<any>;
 };
 /**
- * 基于 Fetch API 的请求客户端
+ * 基于 Fetch API 的请求实例
  * @param baseURL 接口前缀
- * @param baseOptions 客户端级别的请求体，后续调用时传递相同参数会覆盖上去
+ * @param baseOptions 应用于整个实例的请求体，后续请求都会带上
  *
  * @remarks
  * 特性：
- * - 合并实例、调用时的相同请求体
- * - 在 params 里传递对象，自动转换为 queryString
- * - 在 body 里传递对象，自动 JSON.stringify
- * - 可选择使用 to() 转换请求结果为 [Error, Response]
- * - 可选择使用 withCache() 缓存请求结果
- * - 支持 proxy 选项
+ * - 支持在创建实例、发出请求时合并相同的请求体（后者覆盖前者）
+ * - 支持在 GET 的 params 请求体中传递对象
+ * - 支持在 POST、PUT 的 body 请求体中传递对象
+ * - 可选 to() 函数转换请求结果为 [Error, Response]
+ * - 可选 withCache() 函数缓存请求结果
  *
  * @example
- *
- * // 用法1：直接发送请求
- * const res = await fetcher().get<Blog>("https://nickyzj.run:3030/blogs/hello-world");
- *
- * // 用法2：创建实例
- * const api = fetcher("https://nickyzj.run:3030", { headers: { Authorization: "Bearer token" } });
- * const res = await api.get<Blog>("/blogs/hello-world", { headers: {...}, params: { page: 1 } });  // 与实例相同的 headers 会覆盖上去，params 会转成 ?page=1 跟到 url 后面
- *
- * // 用法3：使用代理
- * const api = fetcher("https://api.example.com", {
- *   proxy: "http://127.0.0.1:7890"
+ * // 直接发请求
+ * const res = await fetcher().get<Blog>("https://nickyzj.run:3030/blogs/hello-world", {
+ *  params: {
+ *    page: 2,
+ *    pageSize: 10,
+ *  }
  * });
  *
- * // 安全处理请求结果
+ * // 创建实例，发请求
+ * const api = fetcher("https://nickyzj.run:3030", {
+ *  headers: {
+ *    Authorization: "Bearer token"
+ *  }
+ * });
+ * const res = await api.get<Blog>("/blogs/hello-world");
+ *
+ * // 安全返回请求结果，不抛异常
  * const [error, data] = await to(api.get<Blog>("/blogs/hello-world"));
  * if (error) {
- *   console.error(error);
- *   return;
+ *  // ...
  * }
- * console.log(data);
+ * // ...
  *
  * // 缓存请求结果
  * const getBlogs = withCache(api.get);
  * await getBlogs("/blogs");
- * await sleep();
  * await getBlogs("/blogs");  // 不发请求，使用缓存
  */
 declare const fetcher: (baseURL?: string, baseOptions?: RequestInit) => {
@@ -485,4 +488,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { CamelToSnake, Capitalize, Decapitalize, DeepMapKeys, DeepMapValues, Falsy, FetchOptions, ImageCompressionOptions, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, compactStr, debounce, decapitalize, fetcher, getRealURL, imageUrlToBase64, isFalsy, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { CamelToSnake, Capitalize, Decapitalize, DeepMapKeys, DeepMapValues, Falsy, ImageCompressionOptions, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, compactStr, debounce, decapitalize, fetcher, getRealURL, imageUrlToBase64, isFalsy, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
