@@ -1,64 +1,14 @@
 /**
  * 将 ArrayBuffer 转换为 base64 字符串
- * 兼容浏览器和 Node.js
+ * @remarks 兼容浏览器和 Node.js
  */
 const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
 	const bytes = new Uint8Array(buffer);
 	let binary = "";
 	for (let i = 0; i < bytes.byteLength; i++) {
-		binary += String.fromCharCode(bytes[i]!);
+		binary += String.fromCharCode(bytes[i] as number);
 	}
 	return btoa(binary);
-};
-
-/**
- * 尝试动态导入 sharp 模块
- * 用于检测用户项目中是否安装了 sharp
- */
-const tryImportSharp = async () => {
-	try {
-		// 动态导入 sharp，避免在浏览器环境中报错
-		// 使用 new Function 避免 TypeScript 编译时解析该模块（sharp 是可选依赖）
-		const dynamicImport = new Function(
-			"modulePath",
-			"return import(modulePath)",
-		);
-		const sharpModule = await dynamicImport("sharp");
-		return sharpModule.default || sharpModule;
-	} catch {
-		return null;
-	}
-};
-
-/**
- * 使用 sharp 压缩图片
- */
-const compressWithSharp = async (
-	sharp: any,
-	arrayBuffer: ArrayBuffer,
-	mime: string,
-	quality: number,
-): Promise<string> => {
-	const buffer = new Uint8Array(arrayBuffer);
-	let sharpInstance = sharp(buffer);
-
-	// 根据 MIME 类型设置压缩选项
-	if (mime === "image/jpeg") {
-		sharpInstance = sharpInstance.jpeg({ quality: Math.round(quality * 100) });
-	} else if (mime === "image/png") {
-		// PNG 使用 compressionLevel (0-9)，将 quality (0-1) 映射到 compressionLevel
-		const compressionLevel = Math.round((1 - quality) * 9);
-		sharpInstance = sharpInstance.png({ compressionLevel });
-	}
-
-	const compressedBuffer = await sharpInstance.toBuffer();
-	const base64 = arrayBufferToBase64(
-		compressedBuffer.buffer.slice(
-			compressedBuffer.byteOffset,
-			compressedBuffer.byteOffset + compressedBuffer.byteLength,
-		),
-	);
-	return `data:${mime};base64,${base64}`;
 };
 
 /**
@@ -149,7 +99,7 @@ export const imageUrlToBase64 = async (
 		return `data:${mime};base64,${base64}`;
 	}
 
-	// 如果提供了自定义压缩函数，优先使用它
+	// 如果提供了自定义压缩函数，则优先使用它
 	if (compressor) {
 		return await compressor(arrayBuffer, mime, quality);
 	}
@@ -185,18 +135,6 @@ export const imageUrlToBase64 = async (
 		} catch {
 			// OffscreenCanvas 压缩失败，返回原始 base64
 			bitmap?.close();
-			const base64 = arrayBufferToBase64(arrayBuffer);
-			return `data:${mime};base64,${base64}`;
-		}
-	}
-
-	// Node.js 环境：尝试使用 sharp 进行压缩
-	const sharp = await tryImportSharp();
-	if (sharp) {
-		try {
-			return await compressWithSharp(sharp, arrayBuffer, mime, quality);
-		} catch {
-			// sharp 压缩失败，返回原始 base64
 			const base64 = arrayBufferToBase64(arrayBuffer);
 			return `data:${mime};base64,${base64}`;
 		}

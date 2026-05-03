@@ -10,7 +10,7 @@
  * !`);
  *
  * @example
- * // "Hello...world" (maxLength: 15)
+ * // "Hello...world"
  * compactStr("Hello, beautiful world!", { maxLength: 15 });
  */
 export const compactStr = (
