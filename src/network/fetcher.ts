@@ -91,7 +91,9 @@ export const fetcher = (baseURL = "", baseOptions: RequestInit = {}) => {
 			const contentType = response.headers.get("Content-Type");
 			if (contentType?.startsWith("application/json")) {
 				const errorData = await response.json();
-				const error = new Error(errorData.error?.message || response.statusText);
+				const error = new Error(
+					errorData.error?.message || response.statusText,
+				);
 				(error as any).data = errorData;
 				throw error;
 			}

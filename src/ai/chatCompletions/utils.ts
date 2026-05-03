@@ -44,6 +44,80 @@ export const request = async (
 };
 
 /**
+ * 发送流式聊天补全请求，返回 OpenAI 原始 SSE 数据块的异步迭代器
+ */
+export const requestStream = async function* (
+	model: ChatCompletions.Model,
+	messages: ChatCompletions.Message[],
+	extraBody: Omit<ChatCompletions.ExtraBody, "toolHandlers" | "stream"> = {},
+): AsyncGenerator<ChatCompletions.StreamResponse> {
+	const { model: modelName, baseURL, apiKey = "" } = model;
+
+	const api = fetcher(baseURL, {
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+		},
+	});
+
+	const resolvedModelName = modelName ?? (await getModelName(api));
+
+	const body = {
+		model: resolvedModelName,
+		messages,
+		...extraBody,
+		stream: true,
+		stream_options: {
+			include_usage: true,
+			...(extraBody.stream_options ?? {}),
+		},
+	};
+
+	// 用 parser 拿到原始 Response，自行读取 body 流
+	const response = await api.post<Response>("/chat/completions", body, {
+		parser: async (res) => res,
+	});
+
+	if (!response.body) {
+		throw new Error("响应没有 body，无法读取流式数据");
+	}
+
+	const reader = response.body.getReader();
+	const decoder = new TextDecoder();
+	let buffer = "";
+
+	try {
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) {
+				break;
+			}
+
+			buffer += decoder.decode(value, { stream: true });
+			const lines = buffer.split("\n");
+			buffer = lines.pop() ?? "";
+
+			for (const line of lines) {
+				const trimmed = line.trim();
+				if (!trimmed.startsWith("data:")) {
+					continue;
+				}
+				const data = trimmed.slice(5).trim();
+				if (data === "[DONE]") {
+					return;
+				}
+				try {
+					yield JSON.parse(data);
+				} catch {
+					// 忽略解析失败的行
+				}
+			}
+		}
+	} finally {
+		reader.releaseLock();
+	}
+};
+
+/**
  * 执行工具调用
  */
 export const executeToolCall = async (
@@ -62,4 +136,20 @@ export const executeToolCall = async (
 	} catch (error) {
 		return `工具“${toolCall.function.name}”处理失败：${extractErrorMessage(error)}`;
 	}
+};
+
+/**
+ * 从 Message.content 中提取文本内容
+ */
+export const extractTextContent = (
+	content: ChatCompletions.Message["content"],
+) => {
+	if (typeof content === "string") {
+		return content;
+	}
+
+	return content
+		.filter((part) => part.type === "text")
+		.map((part) => part.text)
+		.join("\n");
 };

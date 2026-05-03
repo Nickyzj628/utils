@@ -59,7 +59,8 @@ declare namespace ChatCompletions {
   };
   type ExtraBody = {
     /** 工具列表 */tools?: ToolDefinition[]; /** 工具调用函数表，key 为工具名，value 为函数 */
-    toolHandlers?: Record<string, (args: any) => any | Promise<any>>; /** 其他额外参数 */
+    toolHandlers?: Record<string, (args: any) => any | Promise<any>>; /** 是否使用流式传输，启用后函数返回异步迭代器 */
+    stream?: boolean; /** 其他额外参数 */
     [key: string]: any;
   };
   type Result = {
@@ -67,18 +68,48 @@ declare namespace ChatCompletions {
     usage: Usage; /** 原始响应中的其他字段 */
     [key: string]: any;
   };
+  /** 流式响应中的单个 SSE 数据块（OpenAI 原始格式） */
+  type StreamResponse = {
+    id: string;
+    object: "chat.completion.chunk";
+    created: number;
+    model: string;
+    choices: Array<{
+      index: number;
+      delta: {
+        role?: Message["role"];
+        content?: string | null;
+        tool_calls?: Array<{
+          index: number;
+          id?: string;
+          type?: "function";
+          function?: {
+            name?: string;
+            arguments?: string;
+          };
+        }>;
+      };
+      finish_reason: "stop" | "length" | "tool_calls" | "content_filter" | null;
+    }>;
+    usage?: Usage;
+  };
+  /** 流式调用 chatCompletions 时迭代器产出的数据块 */
+  type StreamChunk = {
+    /** 模型流式返回的内容增量（仅在生成过程中出现） */content?: string; /** Token 消耗情况（仅在最后一帧出现） */
+    usage?: Usage;
+  };
 }
 //#endregion
 //#region src/ai/chatCompletions/index.d.ts
 /**
  * 兼容 OpenAI API 的聊天补全函数
  * - 自动处理工具调用
- * - 返回最终回复内容和 token 消耗情况
+ * - 同时支持普通响应和流式响应
  *
  * @param model 模型配置，包含 model、baseURL、apiKey
  * @param messages OpenAI API 兼容的消息数组
- * @param extraBody 可选的额外参数，如 tools、toolHandlers、temperature 等
- * @returns 包含 content、usage 和其他原始字段的对象
+ * @param extraBody 可选的额外参数，如 tools、toolHandlers、temperature、stream 等
+ * @returns 普通模式下返回 `{ content, usage, ... }`；`stream: true` 时返回异步迭代器
  *
  * @example
  * // 最简调用
@@ -109,8 +140,26 @@ declare namespace ChatCompletions {
  *     },
  *   },
  * );
+ *
+ * @example
+ * // 流式传输
+ * const result = await chatCompletions(
+ *   { baseURL: "http://127.0.0.1:11434/v1" },
+ *   [{ role: "user", content: "你好" }],
+ *   { stream: true },
+ * );
+ * for await (const { content, usage } of result) {
+ *   if (content) {
+ *     console.log("流式传输中：", content);
+ *   } else if (usage) {
+ *     console.log("对话结束，消耗：", usage);
+ *   }
+ * }
  */
-declare const chatCompletions: (model: ChatCompletions.Model, messages: ChatCompletions.Message[], extraBody?: ChatCompletions.ExtraBody) => Promise<ChatCompletions.Result>;
+declare function chatCompletions(model: ChatCompletions.Model, messages: ChatCompletions.Message[], extraBody: ChatCompletions.ExtraBody & {
+  stream: true;
+}): Promise<AsyncGenerator<ChatCompletions.StreamChunk>>;
+declare function chatCompletions(model: ChatCompletions.Model, messages: ChatCompletions.Message[], extraBody?: ChatCompletions.ExtraBody): Promise<ChatCompletions.Result>;
 //#endregion
 //#region src/dom/log.d.ts
 /**
@@ -712,4 +761,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { CamelToSnake, Capitalize, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactStr, debounce, decapitalize, extractErrorMessage, fetcher, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { CamelToSnake, Capitalize, type ChatCompletions, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactStr, debounce, decapitalize, extractErrorMessage, fetcher, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };

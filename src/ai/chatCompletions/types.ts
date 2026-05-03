@@ -73,6 +73,8 @@ export namespace ChatCompletions {
 		tools?: ToolDefinition[];
 		/** 工具调用函数表，key 为工具名，value 为函数 */
 		toolHandlers?: Record<string, (args: any) => any | Promise<any>>;
+		/** 是否使用流式传输，启用后函数返回异步迭代器 */
+		stream?: boolean;
 		/** 其他额外参数 */
 		[key: string]: any;
 	};
@@ -84,5 +86,39 @@ export namespace ChatCompletions {
 		usage: Usage;
 		/** 原始响应中的其他字段 */
 		[key: string]: any;
+	};
+
+	/** 流式响应中的单个 SSE 数据块（OpenAI 原始格式） */
+	export type StreamResponse = {
+		id: string;
+		object: "chat.completion.chunk";
+		created: number;
+		model: string;
+		choices: Array<{
+			index: number;
+			delta: {
+				role?: Message["role"];
+				content?: string | null;
+				tool_calls?: Array<{
+					index: number;
+					id?: string;
+					type?: "function";
+					function?: {
+						name?: string;
+						arguments?: string;
+					};
+				}>;
+			};
+			finish_reason: "stop" | "length" | "tool_calls" | "content_filter" | null;
+		}>;
+		usage?: Usage;
+	};
+
+	/** 流式调用 chatCompletions 时迭代器产出的数据块 */
+	export type StreamChunk = {
+		/** 模型流式返回的内容增量（仅在生成过程中出现） */
+		content?: string;
+		/** Token 消耗情况（仅在最后一帧出现） */
+		usage?: Usage;
 	};
 }

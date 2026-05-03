@@ -1,29 +1,156 @@
 import type { ChatCompletions } from "./types";
-import { executeToolCall, request } from "./utils";
+import {
+	executeToolCall,
+	extractTextContent,
+	request,
+	requestStream,
+} from "./utils";
 
 export type { ChatCompletions } from "./types";
 
-/** 从 Message.content 中提取文本内容 */
-const extractTextContent = (content: ChatCompletions.Message["content"]) => {
-	if (typeof content === "string") {
-		return content;
-	}
+const nonStreaming = async (
+	model: ChatCompletions.Model,
+	messages: ChatCompletions.Message[],
+	toolHandlers: Record<string, (args: any) => any | Promise<any>>,
+	restExtraBody: Omit<ChatCompletions.ExtraBody, "toolHandlers" | "stream">,
+): Promise<ChatCompletions.Result> => {
+	// 循环请求，直到模型回复用户
+	while (true) {
+		const response = await request(model, messages, restExtraBody);
 
-	return content
-		.filter((part) => part.type === "text")
-		.map((part) => part.text)
-		.join("\n");
+		const { choices, usage, ...restResponse } = response;
+		const { message } = choices[0] ?? {};
+		if (!message) {
+			throw new Error("模型没有回复任何内容");
+		}
+		messages.push(message);
+
+		const {
+			content = "",
+			tool_calls: toolCalls = [],
+			...restMessage
+		} = message;
+
+		// 响应模型的工具调用请求
+		if (toolCalls.length > 0 && Object.keys(toolHandlers).length > 0) {
+			for (const toolCall of toolCalls) {
+				const result = await executeToolCall(toolCall, toolHandlers);
+				messages.push({
+					role: "tool",
+					content: result,
+					tool_call_id: toolCall.id,
+				});
+			}
+			continue;
+		}
+
+		// 如果没有工具调用，则返回结果
+		return {
+			content: extractTextContent(content),
+			usage,
+			...restResponse,
+			...restMessage,
+		};
+	}
+};
+
+const streaming = async function* (
+	model: ChatCompletions.Model,
+	messages: ChatCompletions.Message[],
+	toolHandlers: Record<string, (args: any) => any | Promise<any>>,
+	restExtraBody: Omit<ChatCompletions.ExtraBody, "toolHandlers" | "stream">,
+): AsyncGenerator<ChatCompletions.StreamChunk> {
+	while (true) {
+		let assistantContent = "";
+		const toolCallsAcc = new Map<number, ChatCompletions.ToolCall>();
+		let finishReason: string | null = null;
+		let usage: ChatCompletions.Usage | undefined;
+
+		for await (const chunk of requestStream(model, messages, restExtraBody)) {
+			if (chunk.usage) {
+				usage = chunk.usage;
+			}
+
+			const choice = chunk.choices?.[0];
+			if (!choice) {
+				continue;
+			}
+
+			const { delta } = choice;
+			const { content, tool_calls: toolCalls } = delta;
+
+			if (content) {
+				assistantContent += content;
+				yield { content };
+			}
+			if (toolCalls) {
+				for (const toolCall of toolCalls) {
+					const existing = toolCallsAcc.get(toolCall.index) ?? {
+						id: "",
+						type: "function" as const,
+						function: { name: "", arguments: "" },
+					};
+					if (toolCall.id) {
+						existing.id = toolCall.id;
+					}
+					if (toolCall.function?.name) {
+						existing.function.name += toolCall.function.name;
+					}
+					if (toolCall.function?.arguments) {
+						existing.function.arguments += toolCall.function.arguments;
+					}
+					toolCallsAcc.set(toolCall.index, existing);
+				}
+			}
+
+			if (choice.finish_reason) {
+				finishReason = choice.finish_reason;
+			}
+		}
+
+		const toolCalls = Array.from(toolCallsAcc.values());
+
+		// 需要执行工具调用：把 assistant + tool 结果回填，然后继续下一轮 streaming
+		if (
+			finishReason === "tool_calls" &&
+			toolCalls.length > 0 &&
+			Object.keys(toolHandlers).length > 0
+		) {
+			messages.push({
+				role: "assistant",
+				content: assistantContent,
+				tool_calls: toolCalls,
+			});
+
+			for (const toolCall of toolCalls) {
+				const result = await executeToolCall(toolCall, toolHandlers);
+				messages.push({
+					role: "tool",
+					content: result,
+					tool_call_id: toolCall.id,
+				});
+			}
+
+			continue;
+		}
+
+		// 对话结束：发出 usage 帧
+		if (usage) {
+			yield { usage };
+		}
+		return;
+	}
 };
 
 /**
  * 兼容 OpenAI API 的聊天补全函数
  * - 自动处理工具调用
- * - 返回最终回复内容和 token 消耗情况
+ * - 同时支持普通响应和流式响应
  *
  * @param model 模型配置，包含 model、baseURL、apiKey
  * @param messages OpenAI API 兼容的消息数组
- * @param extraBody 可选的额外参数，如 tools、toolHandlers、temperature 等
- * @returns 包含 content、usage 和其他原始字段的对象
+ * @param extraBody 可选的额外参数，如 tools、toolHandlers、temperature、stream 等
+ * @returns 普通模式下返回 `{ content, usage, ... }`；`stream: true` 时返回异步迭代器
  *
  * @example
  * // 最简调用
@@ -54,51 +181,41 @@ const extractTextContent = (content: ChatCompletions.Message["content"]) => {
  *     },
  *   },
  * );
+ *
+ * @example
+ * // 流式传输
+ * const result = await chatCompletions(
+ *   { baseURL: "http://127.0.0.1:11434/v1" },
+ *   [{ role: "user", content: "你好" }],
+ *   { stream: true },
+ * );
+ * for await (const { content, usage } of result) {
+ *   if (content) {
+ *     console.log("流式传输中：", content);
+ *   } else if (usage) {
+ *     console.log("对话结束，消耗：", usage);
+ *   }
+ * }
  */
-export const chatCompletions = async (
+export function chatCompletions(
+	model: ChatCompletions.Model,
+	messages: ChatCompletions.Message[],
+	extraBody: ChatCompletions.ExtraBody & { stream: true },
+): Promise<AsyncGenerator<ChatCompletions.StreamChunk>>;
+export function chatCompletions(
+	model: ChatCompletions.Model,
+	messages: ChatCompletions.Message[],
+	extraBody?: ChatCompletions.ExtraBody,
+): Promise<ChatCompletions.Result>;
+export async function chatCompletions(
 	model: ChatCompletions.Model,
 	messages: ChatCompletions.Message[],
 	extraBody: ChatCompletions.ExtraBody = {},
-): Promise<ChatCompletions.Result> => {
-	const { toolHandlers = {}, ...restExtraBody } = extraBody;
+) {
+	const { stream, toolHandlers = {}, ...restExtraBody } = extraBody;
 
-	// 循环请求，直到模型回复用户
-	while (true) {
-		const response = await request(model, messages, restExtraBody);
-
-		const { choices, usage, ...restResponse } = response;
-		const { message } = choices[0] ?? {};
-		if (!message) {
-			throw new Error("模型没有回复任何内容");
-		}
-
-		const {
-			content = "",
-			tool_calls: toolCalls = [],
-			...restMessage
-		} = message;
-
-		messages.push(message);
-
-		// 响应模型的工具调用请求
-		if (toolCalls.length > 0 && Object.keys(toolHandlers).length > 0) {
-			for (const toolCall of toolCalls) {
-				const result = await executeToolCall(toolCall, toolHandlers);
-				messages.push({
-					role: "tool",
-					content: result,
-					tool_call_id: toolCall.id,
-				});
-			}
-			continue;
-		}
-
-		// 没有工具调用或不需要处理，返回最终结果
-		return {
-			content: extractTextContent(content),
-			usage,
-			...restResponse,
-			...restMessage,
-		};
+	if (!stream) {
+		return nonStreaming(model, messages, toolHandlers, restExtraBody);
 	}
-};
+	return streaming(model, messages, toolHandlers, restExtraBody);
+}
