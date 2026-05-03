@@ -1,9 +1,9 @@
-export * from "./dom";
-export * from "./function";
-export * from "./hoc";
-export * from "./is";
-export * from "./network";
-export * from "./number";
-export * from "./object";
-export * from "./string";
-export * from "./time";
+export * as dom from "./dom";
+export * as function from "./function";
+export * as hoc from "./hoc";
+export * as is from "./is";
+export * as network from "./network";
+export * as number from "./number";
+export * as object from "./object";
+export * as string from "./string";
+export * as time from "./time";
