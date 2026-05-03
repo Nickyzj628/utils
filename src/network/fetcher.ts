@@ -90,7 +90,10 @@ export const fetcher = (baseURL = "", baseOptions: RequestInit = {}) => {
 			// 如果后端给了报错详情，则先解析再抛出
 			const contentType = response.headers.get("Content-Type");
 			if (contentType?.startsWith("application/json")) {
-				throw await response.json();
+				const errorData = await response.json();
+				const error = new Error(errorData.error?.message || response.statusText);
+				(error as any).data = errorData;
+				throw error;
 			}
 			throw new Error(response.statusText);
 		}

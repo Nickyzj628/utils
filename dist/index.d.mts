@@ -1,3 +1,120 @@
+//#region src/ai/chatCompletions/types.d.ts
+declare namespace ChatCompletions {
+  type Model = {
+    /** 模型名称（如果不传，会尝试从 /models 读取模型） */model?: string; /** API 基础地址 */
+    baseURL: string; /** API 密钥（本地模型可不传） */
+    apiKey?: string;
+  };
+  type TextContent = {
+    type: "text";
+    text: string;
+  };
+  type ImageContent = {
+    type: "image_url";
+    image_url: {
+      url: string;
+    };
+  };
+  type ContentPart = TextContent | ImageContent;
+  type Message = {
+    role: "system" | "user" | "assistant" | "tool" | "function";
+    content: string | ContentPart[];
+    name?: string;
+    tool_calls?: ToolCall[];
+    tool_call_id?: string;
+  };
+  type ToolCall = {
+    id: string;
+    type: "function";
+    function: {
+      name: string;
+      arguments: string;
+    };
+  };
+  type ToolDefinition = {
+    type: "function";
+    function: {
+      name: string;
+      description?: string;
+      parameters?: Record<string, any>;
+    };
+  };
+  type Usage = {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+  type Response = {
+    id: string;
+    object: "chat.completion";
+    created: number;
+    model: string;
+    choices: Array<{
+      index: number;
+      message: Message;
+      finish_reason: "stop" | "length" | "tool_calls" | "content_filter" | null;
+    }>;
+    usage: Usage;
+    system_fingerprint?: string;
+  };
+  type ExtraBody = {
+    /** 工具列表 */tools?: ToolDefinition[]; /** 工具调用函数表，key 为工具名，value 为函数 */
+    toolHandlers?: Record<string, (args: any) => any | Promise<any>>; /** 其他额外参数 */
+    [key: string]: any;
+  };
+  type Result = {
+    /** 模型的最终回复内容（多模态时取所有 text 拼接） */content: string; /** Token 消耗情况 */
+    usage: Usage; /** 原始响应中的其他字段 */
+    [key: string]: any;
+  };
+}
+//#endregion
+//#region src/ai/chatCompletions/index.d.ts
+/**
+ * 兼容 OpenAI API 的聊天补全函数
+ * - 自动处理工具调用
+ * - 返回最终回复内容和 token 消耗情况
+ *
+ * @param model 模型配置，包含 model、baseURL、apiKey
+ * @param messages OpenAI API 兼容的消息数组
+ * @param extraBody 可选的额外参数，如 tools、toolHandlers、temperature 等
+ * @returns 包含 content、usage 和其他原始字段的对象
+ *
+ * @example
+ * // 最简调用
+ * // 未填写模型名，会自动使用/v1/models的第一个模型
+ * const { content, usage } = await chatCompletions(
+ *   { baseURL: "http://127.0.0.1:11434/v1" },
+ *   [{ role: "user", content: "你好" }],
+ * );
+ * console.log(content); // "你好！有什么我可以帮你的吗？"
+ * console.log(usage);   // { prompt_tokens: 13, completion_tokens: 9, total_tokens: 22 }
+ *
+ * @example
+ * // 工具调用
+ * const { content, usage } = await chatCompletions(
+ *   { baseURL: "http://127.0.0.1:11434/v1", model: "model.gguf", apiKey: "sk-local-no-need-key" },
+ *   [{ role: "user", content: "查询上海天气" }],
+ *   {
+ *     tools: [{
+ *       type: "function",
+ *       function: {
+ *         name: "getWeather",
+ *         description: "查询城市天气情况",
+ *         parameters: { type: "object", properties: { city: { type: "string" } } },
+ *       },
+ *     }],
+ *     toolHandlers: {
+ *       getWeather: (args) => `${args.city}今日晴转多云，25°C`,
+ *     },
+ *   },
+ * );
+ */
+declare const chatCompletions: (model: ChatCompletions.Model, messages: ChatCompletions.Message[], extraBody?: ChatCompletions.ExtraBody) => Promise<ChatCompletions.Result>;
+declare namespace index_d_exports {
+  export { chatCompletions };
+}
+//#endregion
 //#region src/dom/log.d.ts
 /**
  * log 配置选项
@@ -27,6 +144,9 @@ interface LogOptions {
  * log(["消息1", "消息2"]); // "[14:30:00] [index.ts:15] 消息1 消息2"
  */
 declare const log: (message: any | any[], options?: LogOptions) => void;
+declare namespace index_d_exports$1 {
+  export { LogOptions, log };
+}
 //#endregion
 //#region src/function/loop-until.d.ts
 /**
@@ -64,6 +184,9 @@ declare const loopUntil: <T>(fn: (count: number) => T | Promise<T>, options?: {
   maxRetries?: number; /** 停止循环条件。如果未传递，则执行 maxRetries 次后退出并返回最后结果 */
   shouldStop?: (result: T) => boolean;
 }) => Promise<T>;
+declare namespace index_d_exports$2 {
+  export { loopUntil };
+}
 //#endregion
 //#region src/hoc/with-cache.d.ts
 type SetTtl = (seconds: number) => void;
@@ -108,17 +231,9 @@ declare const withCache: <Args extends any[], Result>(fn: (this: {
   clear(): void;
   updateTtl(seconds: number): void;
 };
-//#endregion
-//#region src/is/is-falsy.d.ts
-type Falsy = false | 0 | -0 | 0n | "" | null | undefined;
-/**
- * 检测传入的值是否为**假值**（false、0、''、null、undefined、NaN等）
- *
- * @example
- * isFalsy(""); // true
- * isFalsy(1); // false
- */
-declare const isFalsy: (value: any) => value is Falsy;
+declare namespace index_d_exports$3 {
+  export { SetTtl, withCache };
+}
 //#endregion
 //#region src/is/is-nil.d.ts
 /**
@@ -151,6 +266,9 @@ type Primitive = number | string | boolean | symbol | bigint | undefined | null;
  * isPrimitive([]); // false
  */
 declare const isPrimitive: (value: any) => value is Primitive;
+declare namespace index_d_exports$4 {
+  export { Primitive, isNil, isObject, isPrimitive };
+}
 //#endregion
 //#region src/network/fetcher.d.ts
 type RequestInit = globalThis.RequestInit & {
@@ -286,6 +404,9 @@ declare const imageUrlToBase64: (imageUrl: string, options?: ImageCompressionOpt
  * const [error, response] = await to(fetcher().get<Blog>("/blogs/hello-world"));
  */
 declare const to: <T, E = Error>(promise: Promise<T>) => Promise<[null, T] | [E, undefined]>;
+declare namespace index_d_exports$5 {
+  export { ImageCompressionOptions, RequestInit, fetcher, getRealURL, imageUrlToBase64, to };
+}
 //#endregion
 //#region src/number/random-int.d.ts
 /**
@@ -295,6 +416,9 @@ declare const to: <T, E = Error>(promise: Promise<T>) => Promise<[null, T] | [E,
  * randomInt(1, 10);    // 1 <= x <= 10
  */
 declare const randomInt: (min: number, max: number) => number;
+declare namespace index_d_exports$6 {
+  export { randomInt };
+}
 //#endregion
 //#region src/object/map.d.ts
 type DeepMapKeys<T> = T extends Array<infer U> ? Array<DeepMapKeys<U>> : T extends object ? {
@@ -432,6 +556,9 @@ declare const pick: <T extends Record<string, any>, K extends keyof T>(obj: T, k
  * const numericFields = pickBy(user, (key, value) => typeof value === "number");
  */
 declare const pickBy: <T extends Record<string, any>>(obj: T, shouldPick: (key: keyof T, value: T[keyof T]) => boolean) => Partial<T>;
+declare namespace index_d_exports$7 {
+  export { DeepMapKeys, DeepMapValues, mapKeys, mapValues, mergeObjects, omit, omitBy, pick, pickBy };
+}
 //#endregion
 //#region src/string/case.d.ts
 type SnakeToCamel<S extends string> = S extends `${infer Before}_${infer After}` ? After extends `${infer First}${infer Rest}` ? `${Before}${Uppercase<First>}${SnakeToCamel<Rest>}` : Before : S;
@@ -480,7 +607,7 @@ declare const decapitalize: <S extends string>(s: S) => Decapitalize<S>;
  * !`);
  *
  * @example
- * // "Hello...world" (maxLength: 15)
+ * // "Hello...world"
  * compactStr("Hello, beautiful world!", { maxLength: 15 });
  */
 declare const compactStr: (text?: string, options?: {
@@ -501,6 +628,10 @@ declare const compactStr: (text?: string, options?: {
   disableCollapse?: boolean;
 }) => string;
 //#endregion
+//#region src/string/extract-error-message.d.ts
+/** 从任意异常中提取类似 error.message 的可读文字 */
+declare const extractErrorMessage: (error: unknown) => string;
+//#endregion
 //#region src/string/qs.d.ts
 /**
  * 针对 URL 查询字符串的解析和序列化
@@ -518,6 +649,9 @@ declare const qs: {
     addQueryPrefix: boolean;
   }) => string;
 };
+declare namespace index_d_exports$8 {
+  export { CamelToSnake, Capitalize, Decapitalize, SnakeToCamel, camelToSnake, capitalize, compactStr, decapitalize, extractErrorMessage, qs, snakeToCamel };
+}
 //#endregion
 //#region src/time/debounce.d.ts
 /**
@@ -604,5 +738,8 @@ declare const sleep: (time?: number) => Promise<unknown>;
  * window.addEventListener('scroll', handleScroll);
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
+declare namespace index_d_exports$9 {
+  export { LockQueue, debounce, sleep, throttle };
+}
 //#endregion
-export { CamelToSnake, Capitalize, Decapitalize, DeepMapKeys, DeepMapValues, Falsy, ImageCompressionOptions, LockQueue, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, compactStr, debounce, decapitalize, fetcher, getRealURL, imageUrlToBase64, isFalsy, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { index_d_exports as ai, index_d_exports$1 as dom, index_d_exports$2 as function, index_d_exports$3 as hoc, index_d_exports$4 as is, index_d_exports$5 as network, index_d_exports$6 as number, index_d_exports$7 as object, index_d_exports$8 as string, index_d_exports$9 as time };

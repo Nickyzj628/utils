@@ -1,3 +1,4 @@
+export * as ai from "./ai";
 export * as dom from "./dom";
 export * as function from "./function";
 export * as hoc from "./hoc";
