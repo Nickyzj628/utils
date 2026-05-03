@@ -1,6 +1,8 @@
+# @nickyzj2023/utils
+
 男生自用全新前端工具库，0依赖
 
-安装到你的前端项目里：
+## 安装到你的项目里
 
 ```bash
 # npm
@@ -14,7 +16,7 @@ pnpm add @nickyzj2023/utils
 
 ```
 
-使用方式：
+## 使用方式
 
 ```typescript
 import { fetcher, to } from "@nickyzj2023/utils";
@@ -29,3 +31,7 @@ if (error) {
 
 console.log(data);
 ```
+
+## 完整文档
+
+[点我](https://nickyzj628.github.io/utils/)

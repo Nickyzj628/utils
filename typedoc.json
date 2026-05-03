@@ -1,0 +1,23 @@
+{
+	"$schema": "https://typedoc.org/schema.json",
+	"entryPoints": [
+		"src/ai/index.ts",
+		"src/dom/index.ts",
+		"src/function/index.ts",
+		"src/hoc/index.ts",
+		"src/is/index.ts",
+		"src/network/index.ts",
+		"src/number/index.ts",
+		"src/object/index.ts",
+		"src/string/index.ts",
+		"src/time/index.ts"
+	],
+	"out": "docs",
+	"plugin": ["typedoc-material-theme"],
+	"name": "@nickyzj2023/utils",
+	"readme": "README.md",
+	"navigation": {
+		"includeCategories": true,
+		"includeGroups": false
+	}
+}

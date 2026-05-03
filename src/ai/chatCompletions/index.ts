@@ -1,6 +1,8 @@
 import type { ChatCompletions } from "./types";
 import { executeToolCall, request } from "./utils";
 
+export type { ChatCompletions } from "./types";
+
 /** 从 Message.content 中提取文本内容 */
 const extractTextContent = (content: ChatCompletions.Message["content"]) => {
 	if (typeof content === "string") {

@@ -16,7 +16,7 @@
 	],
 	"scripts": {
 		"build": "tsdown",
-		"docs": "typedoc src/index.ts --plugin typedoc-material-theme",
+		"docs": "typedoc",
 		"check": "biome check --diagnostic-level=error --write src/"
 	},
 	"repository": {
