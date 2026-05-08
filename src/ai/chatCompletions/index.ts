@@ -20,7 +20,6 @@ const nonStreaming = async (
 
 		const { choices, usage, ...restResponse } = response;
 		const { message } = choices?.[0] ?? {};
-		console.log(response);
 		if (!message) {
 			throw new Error("模型没有回复任何内容");
 		}
