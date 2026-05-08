@@ -20,10 +20,32 @@ export namespace ChatCompletions {
 		};
 	};
 
-	export type ContentPart = TextContent | ImageContent;
+	export type AudioContent = {
+		type: "input_audio";
+		audio_url: {
+			url: string;
+		};
+	};
+
+	export type VideoContent = {
+		type: "video_url";
+		video_url: {
+			url: string;
+		};
+	};
+
+	export type ContentPart =
+		| TextContent
+		| ImageContent
+		| AudioContent
+		| VideoContent;
 
 	export type Message = {
 		role: "system" | "user" | "assistant" | "tool" | "function";
+		/** 字节的思考字段 */
+		reasoning_content?: string | null;
+		/** OpenRouter的思考字段 */
+		reasoning?: string | null;
 		content: string | ContentPart[];
 		name?: string;
 		tool_calls?: ToolCall[];
@@ -99,6 +121,10 @@ export namespace ChatCompletions {
 			delta: {
 				role?: Message["role"];
 				content?: string | null;
+				/** 字节的思考字段 */
+				reasoning_content?: string | null;
+				/** OpenRouter的思考字段 */
+				reasoning?: string | null;
 				tool_calls?: Array<{
 					index: number;
 					id?: string;
@@ -116,6 +142,8 @@ export namespace ChatCompletions {
 
 	/** 流式调用 chatCompletions 时迭代器产出的数据块 */
 	export type StreamChunk = {
+		/** 模型流式返回的思考内容增量（仅在生成过程中出现） */
+		reasoningContent?: string;
 		/** 模型流式返回的内容增量（仅在生成过程中出现） */
 		content?: string;
 		/** Token 消耗情况（仅在最后一帧出现） */

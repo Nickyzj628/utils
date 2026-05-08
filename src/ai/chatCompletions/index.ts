@@ -19,7 +19,8 @@ const nonStreaming = async (
 		const response = await request(model, messages, restExtraBody);
 
 		const { choices, usage, ...restResponse } = response;
-		const { message } = choices[0] ?? {};
+		const { message } = choices?.[0] ?? {};
+		console.log(response);
 		if (!message) {
 			throw new Error("模型没有回复任何内容");
 		}
@@ -30,6 +31,9 @@ const nonStreaming = async (
 			tool_calls: toolCalls = [],
 			...restMessage
 		} = message;
+
+		const reasoningContent =
+			restMessage?.reasoning_content || restMessage?.reasoning;
 
 		// 响应模型的工具调用请求
 		if (toolCalls.length > 0 && Object.keys(toolHandlers).length > 0) {
@@ -46,6 +50,7 @@ const nonStreaming = async (
 
 		// 如果没有工具调用，则返回结果
 		return {
+			reasoningContent,
 			content: extractTextContent(content),
 			usage,
 			...restResponse,
@@ -78,6 +83,11 @@ const streaming = async function* (
 
 			const { delta } = choice;
 			const { content, tool_calls: toolCalls } = delta;
+
+			const reasoningContent = delta.reasoning_content || delta.reasoning;
+			if (reasoningContent) {
+				yield { reasoningContent };
+			}
 
 			if (content) {
 				assistantContent += content;
@@ -219,3 +229,10 @@ export async function chatCompletions(
 	}
 	return streaming(model, messages, toolHandlers, restExtraBody);
 }
+
+/**
+ * 辅助定义一个 chatCompletions 支持的模型配置
+ */
+export const defineModel = (
+	config: ChatCompletions.Model,
+): ChatCompletions.Model => config;
