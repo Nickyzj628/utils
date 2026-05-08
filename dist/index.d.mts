@@ -2,7 +2,7 @@
 declare namespace ChatCompletions {
   type Model = {
     /** 模型名称（如果不传，会尝试从 /models 读取模型） */model?: string; /** API 基础地址 */
-    baseURL: string; /** API 密钥（本地模型可不传） */
+    baseUrl: string; /** API 密钥（本地模型可不传） */
     apiKey?: string;
   };
   type TextContent = {
@@ -15,9 +15,23 @@ declare namespace ChatCompletions {
       url: string;
     };
   };
-  type ContentPart = TextContent | ImageContent;
+  type AudioContent = {
+    type: "input_audio";
+    audio_url: {
+      url: string;
+    };
+  };
+  type VideoContent = {
+    type: "video_url";
+    video_url: {
+      url: string;
+    };
+  };
+  type ContentPart = TextContent | ImageContent | AudioContent | VideoContent;
   type Message = {
-    role: "system" | "user" | "assistant" | "tool" | "function";
+    role: "system" | "user" | "assistant" | "tool" | "function"; /** 字节的思考字段 */
+    reasoning_content?: string | null; /** OpenRouter的思考字段 */
+    reasoning?: string | null;
     content: string | ContentPart[];
     name?: string;
     tool_calls?: ToolCall[];
@@ -78,7 +92,9 @@ declare namespace ChatCompletions {
       index: number;
       delta: {
         role?: Message["role"];
-        content?: string | null;
+        content?: string | null; /** 字节的思考字段 */
+        reasoning_content?: string | null; /** OpenRouter的思考字段 */
+        reasoning?: string | null;
         tool_calls?: Array<{
           index: number;
           id?: string;
@@ -95,7 +111,8 @@ declare namespace ChatCompletions {
   };
   /** 流式调用 chatCompletions 时迭代器产出的数据块 */
   type StreamChunk = {
-    /** 模型流式返回的内容增量（仅在生成过程中出现） */content?: string; /** Token 消耗情况（仅在最后一帧出现） */
+    /** 模型流式返回的思考内容增量（仅在生成过程中出现） */reasoningContent?: string; /** 模型流式返回的内容增量（仅在生成过程中出现） */
+    content?: string; /** Token 消耗情况（仅在最后一帧出现） */
     usage?: Usage;
   };
 }
@@ -106,7 +123,7 @@ declare namespace ChatCompletions {
  * - 自动处理工具调用
  * - 同时支持普通响应和流式响应
  *
- * @param model 模型配置，包含 model、baseURL、apiKey
+ * @param model 模型配置，包含 model、baseUrl、apiKey
  * @param messages OpenAI API 兼容的消息数组
  * @param extraBody 可选的额外参数，如 tools、toolHandlers、temperature、stream 等
  * @returns 普通模式下返回 `{ content, usage, ... }`；`stream: true` 时返回异步迭代器
@@ -115,7 +132,7 @@ declare namespace ChatCompletions {
  * // 最简调用
  * // 未填写模型名，会自动使用/v1/models的第一个模型
  * const { content, usage } = await chatCompletions(
- *   { baseURL: "http://127.0.0.1:11434/v1" },
+ *   { baseUrl: "http://127.0.0.1:11434/v1" },
  *   [{ role: "user", content: "你好" }],
  * );
  * console.log(content); // "你好！有什么我可以帮你的吗？"
@@ -124,7 +141,7 @@ declare namespace ChatCompletions {
  * @example
  * // 工具调用
  * const { content, usage } = await chatCompletions(
- *   { baseURL: "http://127.0.0.1:11434/v1", model: "model.gguf", apiKey: "sk-local-no-need-key" },
+ *   { baseUrl: "http://127.0.0.1:11434/v1", model: "model.gguf", apiKey: "sk-local-no-need-key" },
  *   [{ role: "user", content: "查询上海天气" }],
  *   {
  *     tools: [{
@@ -144,7 +161,7 @@ declare namespace ChatCompletions {
  * @example
  * // 流式传输
  * const result = await chatCompletions(
- *   { baseURL: "http://127.0.0.1:11434/v1" },
+ *   { baseUrl: "http://127.0.0.1:11434/v1" },
  *   [{ role: "user", content: "你好" }],
  *   { stream: true },
  * );
@@ -160,6 +177,10 @@ declare function chatCompletions(model: ChatCompletions.Model, messages: ChatCom
   stream: true;
 }): Promise<AsyncGenerator<ChatCompletions.StreamChunk>>;
 declare function chatCompletions(model: ChatCompletions.Model, messages: ChatCompletions.Message[], extraBody?: ChatCompletions.ExtraBody): Promise<ChatCompletions.Result>;
+/**
+ * 辅助定义一个 chatCompletions 支持的模型配置
+ */
+declare const defineModel: (config: ChatCompletions.Model) => ChatCompletions.Model;
 //#endregion
 //#region src/dom/log.d.ts
 /**
@@ -317,7 +338,7 @@ type RequestInit = globalThis.RequestInit & {
 };
 /**
  * 基于 Fetch API 的请求实例
- * @param baseURL 接口前缀
+ * @param baseUrl 接口前缀
  * @param baseOptions 应用于整个实例的请求体，后续请求都会带上
  *
  * @remarks
@@ -357,7 +378,7 @@ type RequestInit = globalThis.RequestInit & {
  * await getBlogs("/blogs");
  * await getBlogs("/blogs");  // 不发请求，使用缓存
  */
-declare const fetcher: (baseURL?: string, baseOptions?: RequestInit) => {
+declare const fetcher: (baseUrl?: string, baseOptions?: RequestInit) => {
   get: <T>(url: string, options?: Omit<RequestInit, "method">) => Promise<T>;
   post: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
   put: <T>(url: string, body: any, options?: Omit<RequestInit, "method" | "body">) => Promise<T>;
@@ -761,4 +782,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { CamelToSnake, Capitalize, type ChatCompletions, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactStr, debounce, decapitalize, extractErrorMessage, fetcher, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { CamelToSnake, Capitalize, type ChatCompletions, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactStr, debounce, decapitalize, defineModel, extractErrorMessage, fetcher, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };

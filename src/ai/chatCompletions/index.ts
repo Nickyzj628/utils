@@ -157,7 +157,7 @@ const streaming = async function* (
  * - 自动处理工具调用
  * - 同时支持普通响应和流式响应
  *
- * @param model 模型配置，包含 model、baseURL、apiKey
+ * @param model 模型配置，包含 model、baseUrl、apiKey
  * @param messages OpenAI API 兼容的消息数组
  * @param extraBody 可选的额外参数，如 tools、toolHandlers、temperature、stream 等
  * @returns 普通模式下返回 `{ content, usage, ... }`；`stream: true` 时返回异步迭代器
@@ -166,7 +166,7 @@ const streaming = async function* (
  * // 最简调用
  * // 未填写模型名，会自动使用/v1/models的第一个模型
  * const { content, usage } = await chatCompletions(
- *   { baseURL: "http://127.0.0.1:11434/v1" },
+ *   { baseUrl: "http://127.0.0.1:11434/v1" },
  *   [{ role: "user", content: "你好" }],
  * );
  * console.log(content); // "你好！有什么我可以帮你的吗？"
@@ -175,7 +175,7 @@ const streaming = async function* (
  * @example
  * // 工具调用
  * const { content, usage } = await chatCompletions(
- *   { baseURL: "http://127.0.0.1:11434/v1", model: "model.gguf", apiKey: "sk-local-no-need-key" },
+ *   { baseUrl: "http://127.0.0.1:11434/v1", model: "model.gguf", apiKey: "sk-local-no-need-key" },
  *   [{ role: "user", content: "查询上海天气" }],
  *   {
  *     tools: [{
@@ -195,7 +195,7 @@ const streaming = async function* (
  * @example
  * // 流式传输
  * const result = await chatCompletions(
- *   { baseURL: "http://127.0.0.1:11434/v1" },
+ *   { baseUrl: "http://127.0.0.1:11434/v1" },
  *   [{ role: "user", content: "你好" }],
  *   { stream: true },
  * );

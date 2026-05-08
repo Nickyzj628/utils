@@ -3,7 +3,7 @@ export namespace ChatCompletions {
 		/** 模型名称（如果不传，会尝试从 /models 读取模型） */
 		model?: string;
 		/** API 基础地址 */
-		baseURL: string;
+		baseUrl: string;
 		/** API 密钥（本地模型可不传） */
 		apiKey?: string;
 	};

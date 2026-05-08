@@ -15,7 +15,7 @@ export type RequestInit = globalThis.RequestInit & {
 
 /**
  * 基于 Fetch API 的请求实例
- * @param baseURL 接口前缀
+ * @param baseUrl 接口前缀
  * @param baseOptions 应用于整个实例的请求体，后续请求都会带上
  *
  * @remarks
@@ -55,10 +55,10 @@ export type RequestInit = globalThis.RequestInit & {
  * await getBlogs("/blogs");
  * await getBlogs("/blogs");  // 不发请求，使用缓存
  */
-export const fetcher = (baseURL = "", baseOptions: RequestInit = {}) => {
+export const fetcher = (baseUrl = "", baseOptions: RequestInit = {}) => {
 	const myFetch = async <T>(path: string, requestOptions: RequestInit = {}) => {
 		// 构建完整 URL
-		const url = new URL(baseURL ? `${baseURL}${path}` : path);
+		const url = new URL(baseUrl ? `${baseUrl}${path}` : path);
 
 		// 合并 options
 		const { params, parser, ...options } = mergeObjects(

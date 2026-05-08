@@ -1,14 +1,9 @@
-import { ProxyAgent, setGlobalDispatcher } from "undici";
 import { chatCompletions, defineModel } from "../ai";
 
-// 显式启用代理
-const proxyAgent = new ProxyAgent("http://127.0.0.1:7890");
-setGlobalDispatcher(proxyAgent);
-
 const model = defineModel({
-	baseURL: "https://openrouter.ai/api/v1",
-	apiKey: "",
-	model: "google/gemma-4-26b-a4b-it",
+	baseUrl: "https://ark.cn-beijing.volces.com/api/v3",
+	model: "doubao-seed-2-0-lite-260428",
+	apiKey: "...",
 });
 
 const result = await chatCompletions(
@@ -30,35 +25,34 @@ const result = await chatCompletions(
 				},
 				{
 					type: "text",
-					// text: "你能看见我发送的图片吗？",
-					text: "你能看见我发送的视频吗？",
+					text: "你能看见我发送的资源吗？",
 				},
 			],
 		},
 	],
 	{
-		// stream: true,
-		// tools: [
-		// 	{
-		// 		type: "function",
-		// 		function: {
-		// 			name: "getWeather",
-		// 			description: "查询城市天气情况",
-		// 			parameters: {
-		// 				type: "object",
-		// 				properties: { city: { type: "string" } },
-		// 			},
-		// 		},
-		// 	},
-		// ],
-		// toolHandlers: {
-		// 	getWeather: (args) => `${args.city}今日晴转多云，25°C`,
-		// },
+		stream: true,
+		tools: [
+			{
+				type: "function",
+				function: {
+					name: "getWeather",
+					description: "查询城市天气情况",
+					parameters: {
+						type: "object",
+						properties: { city: { type: "string" } },
+					},
+				},
+			},
+		],
+		toolHandlers: {
+			getWeather: (args) => `${args.city}今日晴转多云，25°C`,
+		},
 	},
 );
 
-// for await (const { reasoningContent, content, usage } of result) {
-// 	console.log(reasoningContent || content || usage);
-// }
-
 console.log(result);
+
+for await (const { reasoningContent, content, usage } of result) {
+	console.log(reasoningContent || content || usage);
+}

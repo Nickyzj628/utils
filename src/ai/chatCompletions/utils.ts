@@ -24,9 +24,9 @@ export const request = async (
 	messages: ChatCompletions.Message[],
 	extraBody: Omit<ChatCompletions.ExtraBody, "toolHandlers"> = {},
 ): Promise<ChatCompletions.Response> => {
-	const { model: modelName, baseURL, apiKey = "" } = model;
+	const { model: modelName, baseUrl: baseUrl, apiKey = "" } = model;
 
-	const api = fetcher(baseURL, {
+	const api = fetcher(baseUrl, {
 		headers: {
 			Authorization: `Bearer ${apiKey}`,
 		},
@@ -51,9 +51,9 @@ export const requestStream = async function* (
 	messages: ChatCompletions.Message[],
 	extraBody: Omit<ChatCompletions.ExtraBody, "toolHandlers" | "stream"> = {},
 ): AsyncGenerator<ChatCompletions.StreamResponse> {
-	const { model: modelName, baseURL, apiKey = "" } = model;
+	const { model: modelName, baseUrl: baseUrl, apiKey = "" } = model;
 
-	const api = fetcher(baseURL, {
+	const api = fetcher(baseUrl, {
 		headers: {
 			Authorization: `Bearer ${apiKey}`,
 		},
