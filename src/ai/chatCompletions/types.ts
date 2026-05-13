@@ -22,8 +22,12 @@ export namespace ChatCompletions {
 
 	export type AudioContent = {
 		type: "input_audio";
-		audio_url: {
-			url: string;
+		input_audio: {
+			/** 使用公网可访问的音频文件 URL */
+			url?: string;
+			/** 使用 base64 */
+			data?: string;
+			format: string;
 		};
 	};
 
@@ -76,6 +80,7 @@ export namespace ChatCompletions {
 		total_tokens: number;
 	};
 
+	/** 请求非流式 /chat/completions 的响应结果 */
 	export type Response = {
 		id: string;
 		object: "chat.completion";
@@ -101,6 +106,7 @@ export namespace ChatCompletions {
 		[key: string]: any;
 	};
 
+	/** 调用 chatCompletions 返回的结果，流式/非流式通用 */
 	export type Result = {
 		/** 模型的最终回复内容（多模态时取所有 text 拼接） */
 		content: string;
