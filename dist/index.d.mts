@@ -453,6 +453,20 @@ type ImageCompressionOptions = {
  */
 declare const imageUrlToBase64: (imageUrl: string, options?: ImageCompressionOptions) => Promise<string>;
 //#endregion
+//#region src/network/parse-sse.d.ts
+/**
+ * 分段解析 SSE 流式响应内容
+ * @param response Fetch API 返回的响应对象
+ * @returns 可被 `for await () {}` 消费的异步迭代器
+ * @example
+ * const response = await fetch("/chat/completions", { stream: true });
+ * for await (const data of parseSSE(response)) {
+ *     console.log(data.choices);
+ *     console.log(data.usage);
+ * }
+ */
+declare function parseSSE<T = any>(response: Response): AsyncIterableIterator<T>;
+//#endregion
 //#region src/network/to.d.ts
 /**
  * Go 语言风格的异步处理方式
@@ -786,4 +800,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { CamelToSnake, Capitalize, type ChatCompletions, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactStr, debounce, decapitalize, defineModel, extractErrorMessage, fetcher, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { CamelToSnake, Capitalize, type ChatCompletions, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactStr, debounce, decapitalize, defineModel, extractErrorMessage, fetcher, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
