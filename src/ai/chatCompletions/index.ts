@@ -1,10 +1,7 @@
+import { fetcher } from "../../network";
+import { parseSSE } from "../../network/parse-sse";
 import type { ChatCompletions } from "./types";
-import {
-	executeToolCall,
-	extractTextContent,
-	request,
-	requestStream,
-} from "./utils";
+import { executeToolCall, extractTextContent, getModelName } from "./utils";
 
 export type { ChatCompletions } from "./types";
 
@@ -14,9 +11,26 @@ const nonStreaming = async (
 	toolHandlers: Record<string, (args: any) => any | Promise<any>>,
 	restExtraBody: Omit<ChatCompletions.ExtraBody, "toolHandlers" | "stream">,
 ): Promise<ChatCompletions.Result> => {
+	const { baseUrl, apiKey = "", model: modelName } = model;
+
+	const api = fetcher(baseUrl, {
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+		},
+	});
+
+	const body = {
+		model: modelName ?? (await getModelName(api)),
+		messages,
+		...restExtraBody,
+	};
+
 	// 循环请求，直到模型回复用户
 	while (true) {
-		const response = await request(model, messages, restExtraBody);
+		const response = await api.post<ChatCompletions.Response>(
+			"/chat/completions",
+			body,
+		);
 
 		const { choices, usage, ...restResponse } = response;
 		const { message } = choices?.[0] ?? {};
@@ -34,7 +48,7 @@ const nonStreaming = async (
 		const reasoningContent =
 			restMessage?.reasoning_content || restMessage?.reasoning;
 
-		// 响应模型的工具调用请求
+		// 调用工具
 		if (toolCalls.length > 0 && Object.keys(toolHandlers).length > 0) {
 			for (const toolCall of toolCalls) {
 				const result = await executeToolCall(toolCall, toolHandlers);
@@ -47,10 +61,10 @@ const nonStreaming = async (
 			continue;
 		}
 
-		// 如果没有工具调用，则返回结果
+		// 如果没有工具要调用了，则结束本轮对话
 		return {
-			reasoningContent,
 			content: extractTextContent(content),
+			reasoningContent,
 			usage,
 			...restResponse,
 			...restMessage,
@@ -64,13 +78,34 @@ const streaming = async function* (
 	toolHandlers: Record<string, (args: any) => any | Promise<any>>,
 	restExtraBody: Omit<ChatCompletions.ExtraBody, "toolHandlers" | "stream">,
 ): AsyncGenerator<ChatCompletions.StreamChunk> {
+	const { baseUrl, apiKey = "", model: modelName } = model;
+
+	const api = fetcher(baseUrl, {
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+		},
+	});
+
+	const body = {
+		model: modelName ?? (await getModelName(api)),
+		messages,
+		stream: true,
+		...restExtraBody,
+	};
+
+	// 不断请求直到大模型确定回复
 	while (true) {
-		let assistantContent = "";
 		const toolCallsAcc = new Map<number, ChatCompletions.ToolCall>();
+		let fullContent = "";
 		let finishReason: string | null = null;
 		let usage: ChatCompletions.Usage | undefined;
 
-		for await (const chunk of requestStream(model, messages, restExtraBody)) {
+		// 用 parser 拿到原始 Response，使用 pareSSE 逐行读取
+		const response = await api.post<Response>("/chat/completions", body, {
+			parser: async (res) => res,
+		});
+
+		for await (const chunk of parseSSE(response)) {
 			if (chunk.usage) {
 				usage = chunk.usage;
 			}
@@ -89,9 +124,11 @@ const streaming = async function* (
 			}
 
 			if (content) {
-				assistantContent += content;
+				fullContent += content;
 				yield { content };
 			}
+
+			// 流式传输的 toolCall 需要拼接
 			if (toolCalls) {
 				for (const toolCall of toolCalls) {
 					const existing = toolCallsAcc.get(toolCall.index) ?? {
@@ -117,9 +154,8 @@ const streaming = async function* (
 			}
 		}
 
+		// 调用工具
 		const toolCalls = Array.from(toolCallsAcc.values());
-
-		// 需要执行工具调用：把 assistant + tool 结果回填，然后继续下一轮 streaming
 		if (
 			finishReason === "tool_calls" &&
 			toolCalls.length > 0 &&
@@ -127,7 +163,7 @@ const streaming = async function* (
 		) {
 			messages.push({
 				role: "assistant",
-				content: assistantContent,
+				content: fullContent,
 				tool_calls: toolCalls,
 			});
 
@@ -143,11 +179,11 @@ const streaming = async function* (
 			continue;
 		}
 
-		// 对话结束：发出 usage 帧
+		// 如果没有工具要调用了，则结束本轮对话
 		if (usage) {
 			yield { usage };
 		}
-		return;
+		break;
 	}
 };
 
