@@ -186,35 +186,47 @@ declare function chatCompletions(model: ChatCompletions.Model, messages: ChatCom
  */
 declare const defineModel: (config: ChatCompletions.Model) => ChatCompletions.Model;
 //#endregion
-//#region src/dom/log.d.ts
+//#region src/dom/logger.d.ts
 /**
- * log 配置选项
+ * logger 配置选项
  */
-interface LogOptions {
+interface LoggerOptions {
   /**
    * 是否显示时间
    * @default true
    */
-  time?: boolean;
+  withTime?: boolean;
   /**
    * 是否显示调用者文件名
    * @default true
    */
-  fileName?: boolean;
+  withFileName?: boolean;
 }
 /**
  * 带额外信息的 console.log
- * @param message - 日志消息，支持单条消息或消息数组
+ *
+ * **直接调用**：使用默认选项打印消息
+ * @param messages - 日志消息，支持多条
+ *
+ * **预配置**：先传入选项返回 logger 函数，再调用打印
  * @param options - 配置选项
+ * @returns 配置后的 logger 函数
  *
  * @example
- * log("调试信息"); // "[14:30:00] [index.ts:15] 调试信息"
- * log("调试信息", { time: false }); // "[index.ts:15] 调试信息"
- * log("调试信息", { fileName: false }); // "[14:30:00] 调试信息"
- * log("调试信息", { time: false, fileName: false }); // "调试信息"
- * log(["消息1", "消息2"]); // "[14:30:00] [index.ts:15] 消息1 消息2"
+ * // 直接调用（默认显示时间和文件名）
+ * logger("调试信息"); // "[14:30:00] [index.ts:15:2] 调试信息"
+ * logger("消息1", "消息2"); // "[14:30:00] [index.ts:15:2] 消息1 消息2"
+ *
+ * // 预配置后调用
+ * const myLogger = logger({ withTime: true, withFileName: true });
+ * myLogger("一段消息", "另一段消息"); // "[18:59:47] [index.ts:137:2] 一段消息 另一段消息"
+ *
+ * // 关闭时间或文件名
+ * const plainLogger = logger({ withTime: false });
+ * plainLogger("纯文件名前缀"); // "[index.ts:15:2] 纯文件名前缀"
  */
-declare const log: (message: any | any[], options?: LogOptions) => void;
+declare function logger(options?: LoggerOptions): (...messages: any[]) => void;
+declare function logger(...messages: any[]): void;
 //#endregion
 //#region src/function/loop-until.d.ts
 /**
@@ -800,4 +812,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { CamelToSnake, Capitalize, type ChatCompletions, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LogOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactStr, debounce, decapitalize, defineModel, extractErrorMessage, fetcher, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, log, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { CamelToSnake, Capitalize, type ChatCompletions, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactStr, debounce, decapitalize, defineModel, extractErrorMessage, fetcher, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
