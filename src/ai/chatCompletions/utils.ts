@@ -33,6 +33,10 @@ export const executeToolCall = async (
 		const result = await handler(args);
 		return typeof result === "string" ? result : JSON.stringify(result);
 	} catch (error) {
+		// 需要在宿主代码中自行处理异常时可设置 Error.name = CustomError
+		if (error instanceof Error && error.name === "CustomError") {
+			throw error;
+		}
 		return `工具“${toolCall.function.name}”处理失败：${extractErrorMessage(error)}`;
 	}
 };
