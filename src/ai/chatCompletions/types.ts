@@ -56,6 +56,15 @@ export namespace ChatCompletions {
 		tool_call_id?: string;
 	};
 
+	export type ToolDefinition = {
+		type: "function";
+		function: {
+			name: string;
+			description?: string;
+			parameters?: Record<string, any>;
+		};
+	};
+
 	export type ToolCall = {
 		id: string;
 		type: "function";
@@ -65,14 +74,16 @@ export namespace ChatCompletions {
 		};
 	};
 
-	export type ToolDefinition = {
-		type: "function";
-		function: {
-			name: string;
-			description?: string;
-			parameters?: Record<string, any>;
-		};
+	export type ExtraArgs = {
+		messages?: ChatCompletions.Message[];
+		[key: string]: any;
 	};
+	export type ToolHandler = (
+		args: any,
+		extraArgs?: ExtraArgs,
+	) => any | Promise<any>;
+
+	export type ToolHandlers = Record<string, ChatCompletions.ToolHandler>;
 
 	export type Usage = {
 		prompt_tokens: number;
@@ -99,7 +110,7 @@ export namespace ChatCompletions {
 		/** 工具列表 */
 		tools?: ToolDefinition[];
 		/** 工具调用函数表，key 为工具名，value 为函数 */
-		toolHandlers?: Record<string, (args: any) => any | Promise<any>>;
+		toolHandlers?: ToolHandlers;
 		/** 是否使用流式传输，启用后函数返回异步迭代器 */
 		stream?: boolean;
 		/** 其他额外参数 */

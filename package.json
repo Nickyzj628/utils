@@ -1,6 +1,6 @@
 {
 	"name": "@nickyzj2023/utils",
-	"version": "1.0.74",
+	"version": "1.0.75",
 	"type": "module",
 	"main": "dist/index.mjs",
 	"module": "dist/index.mjs",
@@ -24,8 +24,8 @@
 		"url": "https://github.com/Nickyzj628/utils.git"
 	},
 	"devDependencies": {
-		"@types/node": "^25.9.1",
-		"tsdown": "^0.22.0",
+		"@types/node": "^25.9.3",
+		"tsdown": "^0.22.2",
 		"typedoc": "^0.28.19",
 		"typedoc-material-theme": "^1.4.1",
 		"typescript": "^6.0.3"

@@ -21,7 +21,8 @@ export const getModelName = async (
  */
 export const executeToolCall = async (
 	toolCall: ChatCompletions.ToolCall,
-	toolHandlers: Record<string, (args: any) => any | Promise<any>>,
+	toolHandlers: ChatCompletions.ToolHandlers,
+	extraArgs?: ChatCompletions.ExtraArgs,
 ): Promise<string> => {
 	const handler = toolHandlers[toolCall.function.name];
 	if (!handler) {
@@ -30,11 +31,11 @@ export const executeToolCall = async (
 
 	try {
 		const args = JSON.parse(toolCall.function.arguments);
-		const result = await handler(args);
+		const result = await handler(args, extraArgs);
 		return typeof result === "string" ? result : JSON.stringify(result);
 	} catch (error) {
-		// 需要在宿主代码中自行处理异常时可设置 Error.name = CustomError
-		if (error instanceof Error && error.name === "CustomError") {
+		// 需要在宿主代码中自行处理异常时，可以让 error name 和 tool name 保持一致
+		if (error instanceof Error && error.name === toolCall.function.name) {
 			throw error;
 		}
 		return `工具“${toolCall.function.name}”处理失败：${extractErrorMessage(error)}`;

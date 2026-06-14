@@ -51,7 +51,9 @@ const nonStreaming = async (
 		// 调用工具
 		if (toolCalls.length > 0 && Object.keys(toolHandlers).length > 0) {
 			for (const toolCall of toolCalls) {
-				const result = await executeToolCall(toolCall, toolHandlers);
+				const result = await executeToolCall(toolCall, toolHandlers, {
+					messages,
+				});
 				messages.push({
 					role: "tool",
 					content: result,
@@ -105,6 +107,7 @@ const streaming = async function* (
 			parser: async (res) => res,
 		});
 
+		// 拼接 content
 		for await (const chunk of parseSSE(response)) {
 			if (chunk.usage) {
 				usage = chunk.usage;
@@ -157,7 +160,7 @@ const streaming = async function* (
 		// 调用工具
 		const toolCalls = Array.from(toolCallsAcc.values());
 		if (
-			finishReason === "tool_calls" &&
+			finishReason !== "tool_calls" &&
 			toolCalls.length > 0 &&
 			Object.keys(toolHandlers).length > 0
 		) {
@@ -180,6 +183,10 @@ const streaming = async function* (
 		}
 
 		// 如果没有工具要调用了，则结束本轮对话
+		messages.push({
+			role: "assistant",
+			content: fullContent,
+		});
 		if (usage) {
 			yield { usage };
 		}
@@ -258,11 +265,9 @@ export async function chatCompletions(
 	extraBody: ChatCompletions.ExtraBody = {},
 ) {
 	const { stream, toolHandlers = {}, ...restExtraBody } = extraBody;
+	const fn = stream ? streaming : nonStreaming;
 
-	if (!stream) {
-		return nonStreaming(model, messages, toolHandlers, restExtraBody);
-	}
-	return streaming(model, messages, toolHandlers, restExtraBody);
+	return fn(model, messages, toolHandlers, restExtraBody);
 }
 
 /**
