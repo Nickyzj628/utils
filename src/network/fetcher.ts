@@ -1,5 +1,6 @@
 import { isNil, isObject } from "../is";
 import { mergeObjects } from "../object";
+import { extractErrorMessage } from "../string";
 
 // 合并标准 RequestInit 和扩展参数
 export type RequestInit = globalThis.RequestInit & {
@@ -87,17 +88,13 @@ export const fetcher = (baseUrl = "", baseOptions: RequestInit = {}) => {
 		// 发出请求
 		const response = await fetch(url, options);
 		if (!response.ok) {
-			// 如果后端给了报错详情，则先解析再抛出
-			const contentType = response.headers.get("Content-Type");
-			if (contentType?.startsWith("application/json")) {
-				const errorData = await response.json();
-				const error = new Error(
-					errorData.error?.message || response.statusText,
-				);
-				(error as any).data = errorData;
-				throw error;
-			}
-			throw new Error(response.statusText);
+			// 请求报错时，抛出的异常内容为 statusText > response.json()["error"|"message"|...] > response.text()
+			let message = response.statusText || (await response.text());
+			try {
+				const object = JSON.parse(message);
+				message = extractErrorMessage(object);
+			} catch {}
+			throw new Error(message);
 		}
 
 		const data = await (parser?.(response) ?? response.json());
