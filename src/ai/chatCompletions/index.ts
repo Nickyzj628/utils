@@ -269,10 +269,3 @@ export async function chatCompletions(
 
 	return fn(model, messages, toolHandlers, restExtraBody);
 }
-
-/**
- * 辅助定义一个 chatCompletions 支持的模型配置
- */
-export const defineModel = (
-	config: ChatCompletions.Model,
-): ChatCompletions.Model => config;
