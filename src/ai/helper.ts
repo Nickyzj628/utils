@@ -1,14 +1,45 @@
-import type { ChatCompletions } from "./chatCompletions";
+import type { AI } from "./types";
 
 /**
- * 辅助定义一个/chat/completions支持的模型传参，除了必须的baseUrl，还可传入：
- * - apiKey：线上模型必传的密钥，本地llama.cpp、vllm等后端可以不传
- * - model：模型代码（如deepseek-v4-flash），不传则会使用{baseUrl}/models接口的第一个模型
+ * 辅助定义一个POST /chat/completions支持的model参数
+ * @remarks 只有baseUrl字段是必须的，其他字段请查看AI.Model类型
  */
 export const defineModel = (
-	config: ChatCompletions.Model,
-): ChatCompletions.Model => config;
+	config: AI.Model,
+): AI.Model => config;
 
-export const defineTool = (config: ChatCompletions.ToolDefinition) => {
+/**
+ * 辅助定义一个POST /chat/completions支持的tools中的子元素
+ * @param handler 在AI请求调用工具时用到
+ */
+export const defineTool = (
+	name: AI.ToolDefinition["function"]["name"],
+	description: AI.ToolDefinition["function"]["description"],
+	properties: AI.ToolDefinition["function"]["parameters"]["properties"],
+	handler: AI.ToolDefinition["handler"],
+): AI.ToolDefinition => {
+	const _required: string[] = [];
+	const _properties = Object.entries(properties).reduce((result, [key, value]) => {
+		// 收集required的字段名
+		if ("required" in value) {
+			_required.push(value.required);
+			delete value.required;
+		}
+		result[key] = value;
+		return result;
+	}, {} as AI.ToolDefinition["function"]["parameters"]["properties"]);
 
+	return {
+		type: "function",
+		function: {
+			name,
+			description,
+			parameters: {
+				type: "object",
+				properties: _properties,
+				required: _required,
+			},
+		},
+		handler,
+	};
 };

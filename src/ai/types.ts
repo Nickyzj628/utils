@@ -71,14 +71,22 @@ export namespace AI {
         type: "function";
         function: {
             name: string;
-            description?: string;
-            parameters?: Record<string, any>;
+            description: string;
+            parameters: {
+                type: "object";
+                properties: Record<string, {
+                    type: string;
+                    description: string;
+                    [key: string]: string;
+                }>;
+                required?: string[];
+            };
         };
 
         // ================================
-        // chatCompletions函数响应AI的工具调用请求
+        // 工具的实际执行函数，chatCompletions响应AI的工具调用请求时用到
         // ================================
-        handler: (args: any) => any;
+        handler: (args: unknown) => unknown;
     };
 
     export type ToolCall = {
