@@ -1,125 +1,24 @@
+import type { AI } from "../types";
+
 export namespace ChatCompletions {
-	export type Model = {
-		/** 模型名称（如果不传，会尝试从 /models 读取模型） */
-		model?: string;
-		/** API 基础地址 */
-		baseUrl: string;
-		/** API 密钥（本地模型可不传） */
-		apiKey?: string;
-	};
-
-	export type TextContent = {
-		type: "text";
-		text: string;
-	};
-
-	export type ImageContent = {
-		type: "image_url";
-		image_url: {
-			url: string;
-		};
-	};
-
-	export type AudioContent = {
-		type: "input_audio";
-		input_audio: {
-			/** 使用公网可访问的音频文件 URL */
-			url?: string;
-			/** 使用 base64 */
-			data?: string;
-			format: string;
-		};
-	};
-
-	export type VideoContent = {
-		type: "video_url";
-		video_url: {
-			url: string;
-		};
-	};
-
-	export type ContentPart =
-		| TextContent
-		| ImageContent
-		| AudioContent
-		| VideoContent;
-
-	export type Message = {
-		role: "system" | "user" | "assistant" | "tool" | "function";
-		/** 字节的思考字段 */
-		reasoning_content?: string | null;
-		/** OpenRouter的思考字段 */
-		reasoning?: string | null;
-		content: string | ContentPart[];
-		name?: string;
-		tool_calls?: ToolCall[];
-		tool_call_id?: string;
-	};
-
-	export type ToolDefinition = {
-		type: "function";
-		function: {
-			name: string;
-			description?: string;
-			parameters?: Record<string, any>;
-		};
-	};
-
-	export type ToolCall = {
-		id: string;
-		type: "function";
-		function: {
-			name: string;
-			arguments: string;
-		};
-	};
-
-	export type ExtraArgs = {
-		messages?: ChatCompletions.Message[];
-		[key: string]: any;
-	};
-	export type ToolHandler = (
-		args: any,
-		extraArgs?: ExtraArgs,
-	) => any | Promise<any>;
-
-	export type ToolHandlers = Record<string, ChatCompletions.ToolHandler>;
-
-	export type Usage = {
-		prompt_tokens: number;
-		completion_tokens: number;
-		total_tokens: number;
-	};
-
-	/** 请求非流式 /chat/completions 的响应结果 */
-	export type Response = {
+	/** 非流式POST /chat/completions的响应结果 */
+	export type NonStreamResponse = {
 		id: string;
 		object: "chat.completion";
 		created: number;
 		model: string;
 		choices: Array<{
 			index: number;
-			message: Message;
+			message: AI.Message;
 			finish_reason: "stop" | "length" | "tool_calls" | "content_filter" | null;
 		}>;
 		usage: Usage;
 		system_fingerprint?: string;
 	};
 
-	export type ExtraBody = {
-		/** 工具列表 */
-		tools?: ToolDefinition[];
-		/** 工具调用函数表，key 为工具名，value 为函数 */
-		toolHandlers?: ToolHandlers;
-		/** 是否使用流式传输，启用后函数返回异步迭代器 */
-		stream?: boolean;
-		/** 其他额外参数 */
-		[key: string]: any;
-	};
-
-	/** 调用 chatCompletions 返回的结果，流式/非流式通用 */
-	export type Result = {
-		/** 模型的最终回复内容（多模态时取所有 text 拼接） */
+	/** 调用chatCompletions返回的结果，流式/非流式通用 */
+	export type NonStreamResult = {
+		/** 模型的最终回复内容（多模态时取所有text拼接） */
 		content: string;
 		/** Token 消耗情况 */
 		usage: Usage;
@@ -127,7 +26,13 @@ export namespace ChatCompletions {
 		[key: string]: any;
 	};
 
-	/** 流式响应中的单个 SSE 数据块（OpenAI 原始格式） */
+	export type Usage = {
+		prompt_tokens: number;
+		completion_tokens: number;
+		total_tokens: number;
+	};
+
+	/** 流式响应中的单个SSE数据块（OpenAI原始格式） */
 	export type StreamResponse = {
 		id: string;
 		object: "chat.completion.chunk";
@@ -135,32 +40,18 @@ export namespace ChatCompletions {
 		model: string;
 		choices: Array<{
 			index: number;
-			delta: {
-				role?: Message["role"];
-				content?: string | null;
-				/** 字节的思考字段 */
-				reasoning_content?: string | null;
-				/** OpenRouter的思考字段 */
-				reasoning?: string | null;
-				tool_calls?: Array<{
-					index: number;
-					id?: string;
-					type?: "function";
-					function?: {
-						name?: string;
-						arguments?: string;
-					};
-				}>;
+			delta: Pick<AI.Message, "role" | "reasoning" | "content"> & {
+				tool_calls?: Array<{ index: number } & Partial<AI.ToolCall>>;
 			};
 			finish_reason: "stop" | "length" | "tool_calls" | "content_filter" | null;
 		}>;
 		usage?: Usage;
 	};
 
-	/** 流式调用 chatCompletions 时迭代器产出的数据块 */
+	/** 流式调用chatCompletions时迭代器产出的数据块 */
 	export type StreamChunk = {
 		/** 模型流式返回的思考内容增量（仅在生成过程中出现） */
-		reasoningContent?: string;
+		reasoning?: string;
 		/** 模型流式返回的内容增量（仅在生成过程中出现） */
 		content?: string;
 		/** Token 消耗情况（仅在最后一帧出现） */

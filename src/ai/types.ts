@@ -97,10 +97,4 @@ export namespace AI {
             arguments: string;
         };
     };
-
-    export type Usage = {
-        prompt_tokens: number;
-        completion_tokens: number;
-        total_tokens: number;
-    };
 }

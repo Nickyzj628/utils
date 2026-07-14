@@ -1,19 +1,13 @@
-import type { fetcher } from "../../network";
 import { extractErrorMessage } from "../../string";
+import type { AI } from "../types";
 import type { ChatCompletions } from "./types";
 
 /**
- * 从 /models 获取模型名称
+ * 分离ToolDefinition中可以传给POST /chat/completions的字段、本地不外传字段
+ * @param toolDefinition 
  */
-export const getModelName = async (
-	api: ReturnType<typeof fetcher>,
-): Promise<string> => {
-	const res = await api.get<{ data: Array<{ id: string }> }>("/models");
-	const modelName = res.data[0]?.id;
-	if (!modelName) {
-		throw new Error("无法从 /models 获取模型名称");
-	}
-	return modelName;
+export const detachToolArguments = (toolDefinition: AI.ToolDefinition) => {
+	return []
 };
 
 /**

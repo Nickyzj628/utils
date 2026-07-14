@@ -1,17 +1,18 @@
 import { fetcher } from "../../network";
 import { parseSSE } from "../../network/parse-sse";
+import { getModelName } from "../helper";
+import type { AI } from "../types";
 import type { ChatCompletions } from "./types";
-import { executeToolCall, extractTextContent, getModelName } from "./utils";
+import { executeToolCall, extractTextContent } from "./utils";
 
 export type { ChatCompletions } from "./types";
 
 const nonStreaming = async (
-	model: ChatCompletions.Model,
-	messages: ChatCompletions.Message[],
-	toolHandlers: Record<string, (args: any) => any | Promise<any>>,
-	restExtraBody: Omit<ChatCompletions.ExtraBody, "toolHandlers" | "stream">,
-): Promise<ChatCompletions.Result> => {
-	const { baseUrl, apiKey = "", model: modelName } = model;
+	model: AI.Model,
+	messages: AI.Message[],
+	tools?: AI.ToolDefinition[],
+): Promise<ChatCompletions.NonStreamResult> => {
+	const { baseUrl, apiKey = "", model: modelName, ...misc } = model;
 
 	const api = fetcher(baseUrl, {
 		headers: {
@@ -22,7 +23,6 @@ const nonStreaming = async (
 	const body = {
 		model: modelName ?? (await getModelName(api)),
 		messages,
-		...restExtraBody,
 	};
 
 	// 循环请求，直到模型回复用户
@@ -45,8 +45,7 @@ const nonStreaming = async (
 			...restMessage
 		} = message;
 
-		const reasoningContent =
-			restMessage?.reasoning_content || restMessage?.reasoning;
+		const reasoning = restMessage?.reasoning || restMessage?.reasoning_content;
 
 		// 调用工具
 		if (toolCalls.length > 0 && Object.keys(toolHandlers).length > 0) {
@@ -66,7 +65,7 @@ const nonStreaming = async (
 		// 如果没有工具要调用了，则结束本轮对话
 		return {
 			content: extractTextContent(content),
-			reasoningContent,
+			reasoningContent: reasoning,
 			usage,
 			...restResponse,
 			...restMessage,
@@ -75,10 +74,8 @@ const nonStreaming = async (
 };
 
 const streaming = async function* (
-	model: ChatCompletions.Model,
-	messages: ChatCompletions.Message[],
-	toolHandlers: Record<string, (args: any) => any | Promise<any>>,
-	restExtraBody: Omit<ChatCompletions.ExtraBody, "toolHandlers" | "stream">,
+	model: AI.Model,
+	messages: AI.Message[],
 ): AsyncGenerator<ChatCompletions.StreamChunk> {
 	const { baseUrl, apiKey = "", model: modelName } = model;
 
@@ -250,22 +247,24 @@ const streaming = async function* (
  * }
  */
 export function chatCompletions(
-	model: ChatCompletions.Model,
-	messages: ChatCompletions.Message[],
-	extraBody: ChatCompletions.ExtraBody & { stream: true },
+	model: AI.Model,
+	messages: AI.Message[],
+	options: { stream: true },
 ): Promise<AsyncGenerator<ChatCompletions.StreamChunk>>;
 export function chatCompletions(
-	model: ChatCompletions.Model,
-	messages: ChatCompletions.Message[],
-	extraBody?: ChatCompletions.ExtraBody,
-): Promise<ChatCompletions.Result>;
+	model: AI.Model,
+	messages: AI.Message[],
+): Promise<ChatCompletions.NonStreamResult>;
 export async function chatCompletions(
-	model: ChatCompletions.Model,
-	messages: ChatCompletions.Message[],
-	extraBody: ChatCompletions.ExtraBody = {},
+	model: AI.Model,
+	messages: AI.Message[],
+	options?: {
+		stream?: boolean;
+		tools?: AI.ToolDefinition[];
+	},
 ) {
-	const { stream, toolHandlers = {}, ...restExtraBody } = extraBody;
+	const { stream, tools = [] } = options ?? {};
 	const fn = stream ? streaming : nonStreaming;
 
-	return fn(model, messages, toolHandlers, restExtraBody);
+	return fn(model, messages, tools);
 }

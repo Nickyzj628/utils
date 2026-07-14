@@ -1,3 +1,4 @@
+import type { fetcher } from "../network";
 import type { AI } from "./types";
 
 /**
@@ -42,4 +43,18 @@ export const defineTool = (
 		},
 		handler,
 	};
+};
+
+/**
+ * 从GET /models获取模型名称
+ */
+export const getModelName = async (
+	api: ReturnType<typeof fetcher>,
+): Promise<string> => {
+	const res = await api.get<{ data: Array<{ id: string }> }>("/models");
+	const modelName = res.data[0]?.id;
+	if (!modelName) {
+		throw new Error("无法从/models获取模型名称");
+	}
+	return modelName;
 };
