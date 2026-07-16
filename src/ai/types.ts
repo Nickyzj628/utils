@@ -26,6 +26,7 @@ export namespace AI {
         content: string | ContentPart[];
         tool_calls?: ToolCall[];
         tool_call_id?: string;
+        [key: string]: unknown;
     };
 
     export type TextContent = {
@@ -86,7 +87,7 @@ export namespace AI {
         // ================================
         // 工具的实际执行函数，chatCompletions响应AI的工具调用请求时用到
         // ================================
-        handler: (args: unknown) => unknown;
+        handler: (...args: unknown[]) => unknown;
     };
 
     export type ToolCall = {

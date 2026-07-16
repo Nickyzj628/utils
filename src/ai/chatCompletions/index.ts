@@ -3,7 +3,7 @@ import { parseSSE } from "../../network/parse-sse";
 import { getModelName } from "../helper";
 import type { AI } from "../types";
 import type { ChatCompletions } from "./types";
-import { executeToolCall, extractTextContent } from "./utils";
+import { detachToolArguments, executeToolCall, extractReasoning, extractTextContent } from "./utils";
 
 export type { ChatCompletions } from "./types";
 
@@ -12,7 +12,7 @@ const nonStreaming = async (
 	messages: AI.Message[],
 	tools?: AI.ToolDefinition[],
 ): Promise<ChatCompletions.NonStreamResult> => {
-	const { baseUrl, apiKey = "", model: modelName, ...misc } = model;
+	const { baseUrl, apiKey = "", model: modelName, ...rest } = model;
 
 	const api = fetcher(baseUrl, {
 		headers: {
@@ -23,11 +23,13 @@ const nonStreaming = async (
 	const body = {
 		model: modelName ?? (await getModelName(api)),
 		messages,
+		tools: tools?.map((tool) => detachToolArguments(tool)[0]),
+		...rest.customBody,
 	};
 
 	// 循环请求，直到模型回复用户
 	while (true) {
-		const response = await api.post<ChatCompletions.Response>(
+		const response = await api.post<ChatCompletions.NonStreamResponse>(
 			"/chat/completions",
 			body,
 		);
@@ -44,13 +46,12 @@ const nonStreaming = async (
 			tool_calls: toolCalls = [],
 			...restMessage
 		} = message;
-
-		const reasoning = restMessage?.reasoning || restMessage?.reasoning_content;
+		const reasoning = extractReasoning(message);
 
 		// 调用工具
-		if (toolCalls.length > 0 && Object.keys(toolHandlers).length > 0) {
+		if (toolCalls.length && tools?.length) {
 			for (const toolCall of toolCalls) {
-				const result = await executeToolCall(toolCall, toolHandlers, {
+				const result = await executeToolCall(toolCall, tools, {
 					messages,
 				});
 				messages.push({
@@ -65,7 +66,7 @@ const nonStreaming = async (
 		// 如果没有工具要调用了，则结束本轮对话
 		return {
 			content: extractTextContent(content),
-			reasoningContent: reasoning,
+			reasoning,
 			usage,
 			...restResponse,
 			...restMessage,
