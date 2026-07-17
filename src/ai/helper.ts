@@ -1,13 +1,16 @@
-import type { fetcher } from "../network";
+// ================================
+// 这里存放供外部使用的辅助工具
+// ================================
+
+import { fetcher } from "../network";
+import { pickBy } from "../object";
 import type { AI } from "./types";
 
 /**
  * 辅助定义一个POST /chat/completions支持的model参数
  * @remarks 只有baseUrl字段是必须的，其他字段请查看AI.Model类型
  */
-export const defineModel = (
-	config: AI.Model,
-): AI.Model => config;
+export const defineModel = (config: AI.Model): AI.Model => config;
 
 /**
  * 辅助定义一个POST /chat/completions支持的tools中的子元素
@@ -20,15 +23,16 @@ export const defineTool = (
 	handler: AI.ToolDefinition["handler"],
 ): AI.ToolDefinition => {
 	const _required: string[] = [];
-	const _properties = Object.entries(properties).reduce((result, [key, value]) => {
-		// 收集required的字段名
-		if ("required" in value) {
-			_required.push(value.required);
-			delete value.required;
+	const _properties = pickBy(properties, (key) => {
+		if (key === "required") {
+			_required.push(key);
+			return false;
 		}
-		result[key] = value;
-		return result;
-	}, {} as AI.ToolDefinition["function"]["parameters"]["properties"]);
+		return true;
+	}) as Omit<
+		AI.ToolDefinition["function"]["parameters"]["properties"],
+		"required"
+	>;
 
 	return {
 		type: "function",
@@ -48,10 +52,10 @@ export const defineTool = (
 /**
  * 从GET /models获取模型名称
  */
-export const getModelName = async (
-	api: ReturnType<typeof fetcher>,
-): Promise<string> => {
-	const res = await api.get<{ data: Array<{ id: string }> }>("/models");
+export const getModelName = async (baseUrl: string): Promise<string> => {
+	const res = await fetcher(baseUrl).get<{ data: Array<{ id: string }> }>(
+		"/v1/models",
+	);
 	const modelName = res.data[0]?.id;
 	if (!modelName) {
 		throw new Error("无法从/models获取模型名称");

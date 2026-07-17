@@ -3,11 +3,15 @@ import { mergeObjects } from "../object";
 import { extractErrorMessage } from "../string";
 
 // 合并标准 RequestInit 和扩展参数
-export type RequestInit = globalThis.RequestInit & {
+export type RequestInit = Omit<globalThis.RequestInit, "body"> & {
 	/**
 	 * searchParams 查询参数对象
 	 */
 	params?: Record<string, any>;
+	/**
+	 * 请求体支持任意类型
+	 */
+	body?: any;
 	/**
 	 * 响应解析器，默认的解析方法为 response.json()
 	 */

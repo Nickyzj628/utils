@@ -1,9 +1,20 @@
-//#region src/ai/chatCompletions/types.d.ts
-declare namespace ChatCompletions {
+//#region src/ai/types.d.ts
+declare namespace AI {
   type Model = {
-    /** 模型名称（如果不传，会尝试从 /models 读取模型） */model?: string; /** API 基础地址 */
-    baseUrl: string; /** API 密钥（本地模型可不传） */
-    apiKey?: string;
+    baseUrl: string; /** 不传则自动使用{baseUrl}/models接口的第一个模型 */
+    model?: string;
+    apiKey?: string; /** POST /chat/completions时注入自定义请求体 */
+    customBody?: Record<string, any>; /** 模型支持的消息输入类型，如果填了，则会在调用chatCompletions前校验上下文，含有不支持的输入时抑制请求 */
+    inputs?: ["text" | "image" | "video" | "audio" | "file"]; /** 模型的最大上下文（输入+输出），如果填了，则会在调用chatCompletions后选择性调用compact（当前上下文>最大上下文*80%时） */
+    context?: number;
+  };
+  type Message = {
+    role: "system" | "user" | "assistant" | "tool" | "function"; /** OpenRouter的思考内容字段，其他供应商的会尽可能合并到该字段内 */
+    reasoning?: string | null;
+    content: string | ContentPart[];
+    tool_calls?: ToolCall[];
+    tool_call_id?: string;
+    [key: string]: unknown;
   };
   type TextContent = {
     type: "text";
@@ -18,7 +29,7 @@ declare namespace ChatCompletions {
   type AudioContent = {
     type: "input_audio";
     input_audio: {
-      /** 使用公网可访问的音频文件 URL */url?: string; /** 使用 base64 */
+      /** 使用公网可访问的音频链接 */url?: string; /** 使用base64 */
       data?: string;
       format: string;
     };
@@ -30,22 +41,22 @@ declare namespace ChatCompletions {
     };
   };
   type ContentPart = TextContent | ImageContent | AudioContent | VideoContent;
-  type Message = {
-    role: "system" | "user" | "assistant" | "tool" | "function"; /** 字节的思考字段 */
-    reasoning_content?: string | null; /** OpenRouter的思考字段 */
-    reasoning?: string | null;
-    content: string | ContentPart[];
-    name?: string;
-    tool_calls?: ToolCall[];
-    tool_call_id?: string;
-  };
   type ToolDefinition = {
     type: "function";
     function: {
       name: string;
-      description?: string;
-      parameters?: Record<string, any>;
+      description: string;
+      parameters: {
+        type: "object";
+        properties: Record<string, {
+          type: string;
+          description?: string; /** 在此处设置的required，发出请求前会自动提到外面去 */
+          required?: boolean;
+        }>;
+        required?: string[];
+      };
     };
+    handler: (...args: any) => any;
   };
   type ToolCall = {
     id: string;
@@ -55,44 +66,36 @@ declare namespace ChatCompletions {
       arguments: string;
     };
   };
-  type ExtraArgs = {
-    messages?: ChatCompletions.Message[];
-    [key: string]: any;
-  };
-  type ToolHandler = (args: any, extraArgs?: ExtraArgs) => any | Promise<any>;
-  type ToolHandlers = Record<string, ChatCompletions.ToolHandler>;
-  type Usage = {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
-  /** 请求非流式 /chat/completions 的响应结果 */
-  type Response = {
+}
+//#endregion
+//#region src/ai/chatCompletions/types.d.ts
+declare namespace ChatCompletions {
+  /** 非流式POST /chat/completions的响应结果 */
+  type NonStreamResponse = {
     id: string;
     object: "chat.completion";
     created: number;
     model: string;
     choices: Array<{
       index: number;
-      message: Message;
+      message: AI.Message;
       finish_reason: "stop" | "length" | "tool_calls" | "content_filter" | null;
     }>;
     usage: Usage;
     system_fingerprint?: string;
   };
-  type ExtraBody = {
-    /** 工具列表 */tools?: ToolDefinition[]; /** 工具调用函数表，key 为工具名，value 为函数 */
-    toolHandlers?: ToolHandlers; /** 是否使用流式传输，启用后函数返回异步迭代器 */
-    stream?: boolean; /** 其他额外参数 */
-    [key: string]: any;
-  };
-  /** 调用 chatCompletions 返回的结果，流式/非流式通用 */
-  type Result = {
-    /** 模型的最终回复内容（多模态时取所有 text 拼接） */content: string; /** Token 消耗情况 */
+  /** 调用chatCompletions返回的结果，流式/非流式通用 */
+  type NonStreamResult = {
+    /** 模型的最终回复内容（多模态时取所有text拼接） */content: string; /** Token 消耗情况 */
     usage: Usage; /** 原始响应中的其他字段 */
     [key: string]: any;
   };
-  /** 流式响应中的单个 SSE 数据块（OpenAI 原始格式） */
+  type Usage = {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+  /** 流式响应中的单个SSE数据块（OpenAI原始格式） */
   type StreamResponse = {
     id: string;
     object: "chat.completion.chunk";
@@ -100,28 +103,18 @@ declare namespace ChatCompletions {
     model: string;
     choices: Array<{
       index: number;
-      delta: {
-        role?: Message["role"];
-        content?: string | null; /** 字节的思考字段 */
-        reasoning_content?: string | null; /** OpenRouter的思考字段 */
-        reasoning?: string | null;
+      delta: Pick<AI.Message, "role" | "reasoning" | "content"> & {
         tool_calls?: Array<{
           index: number;
-          id?: string;
-          type?: "function";
-          function?: {
-            name?: string;
-            arguments?: string;
-          };
-        }>;
+        } & Partial<AI.ToolCall>>;
       };
       finish_reason: "stop" | "length" | "tool_calls" | "content_filter" | null;
     }>;
     usage?: Usage;
   };
-  /** 流式调用 chatCompletions 时迭代器产出的数据块 */
+  /** 流式调用chatCompletions时迭代器产出的数据块 */
   type StreamChunk = {
-    /** 模型流式返回的思考内容增量（仅在生成过程中出现） */reasoningContent?: string; /** 模型流式返回的内容增量（仅在生成过程中出现） */
+    /** 模型流式返回的思考内容增量（仅在生成过程中出现） */reasoning?: string; /** 模型流式返回的内容增量（仅在生成过程中出现） */
     content?: string; /** Token 消耗情况（仅在最后一帧出现） */
     usage?: Usage;
   };
@@ -129,22 +122,23 @@ declare namespace ChatCompletions {
 //#endregion
 //#region src/ai/chatCompletions/index.d.ts
 /**
- * 兼容 OpenAI API 的聊天补全函数
+ * 兼容OpenAI API的聊天补全函数
  * - 自动处理工具调用
- * - 同时支持普通响应和流式响应
+ * - 支持普通/流式响应
  *
- * @param model 模型配置，包含 model、baseUrl、apiKey
- * @param messages OpenAI API 兼容的消息数组
- * @param extraBody 可选的额外参数，如 tools、toolHandlers、temperature、stream 等
- * @returns 普通模式下返回 `{ content, usage, ... }`；`stream: true` 时返回异步迭代器
+ * @param model 模型配置，包含model、baseUrl、apiKey
+ * @param messages OpenAI API兼容的消息数组
+ * @param extraBody 可选的额外参数，如tools、temperature、stream等
+ * @returns 普通模式下返回`{ content, usage, ... }`；`stream: true`时返回异步迭代器
  *
  * @example
  * // 最简调用
- * // 未填写模型名，会自动使用/v1/models的第一个模型
- * const { content, usage } = await chatCompletions(
+ * // 未填写模型名，会自动使用/v1/models返回的第一个模型
+ * const { reasoning, content, usage } = await chatCompletions(
  *   { baseUrl: "http://127.0.0.1:11434/v1" },
  *   [{ role: "user", content: "你好" }],
  * );
+ * console.log(reasoning); // "The user said..."
  * console.log(content); // "你好！有什么我可以帮你的吗？"
  * console.log(usage);   // { prompt_tokens: 13, completion_tokens: 9, total_tokens: 22 }
  *
@@ -160,11 +154,9 @@ declare namespace ChatCompletions {
  *         name: "getWeather",
  *         description: "查询城市天气情况",
  *         parameters: { type: "object", properties: { city: { type: "string" } } },
+ *         handler: (args) => `${args.city}今日晴转多云，25°C`,
  *       },
  *     }],
- *     toolHandlers: {
- *       getWeather: (args) => `${args.city}今日晴转多云，25°C`,
- *     },
  *   },
  * );
  *
@@ -183,14 +175,30 @@ declare namespace ChatCompletions {
  *   }
  * }
  */
-declare function chatCompletions(model: ChatCompletions.Model, messages: ChatCompletions.Message[], extraBody: ChatCompletions.ExtraBody & {
+declare function chatCompletions(model: AI.Model, messages: AI.Message[], options: {
   stream: true;
+  tools?: AI.ToolDefinition[];
 }): Promise<AsyncGenerator<ChatCompletions.StreamChunk>>;
-declare function chatCompletions(model: ChatCompletions.Model, messages: ChatCompletions.Message[], extraBody?: ChatCompletions.ExtraBody): Promise<ChatCompletions.Result>;
+declare function chatCompletions(model: AI.Model, messages: AI.Message[], options?: {
+  stream?: boolean;
+  tools?: AI.ToolDefinition[];
+}): Promise<ChatCompletions.NonStreamResult>;
+//#endregion
+//#region src/ai/helper.d.ts
 /**
- * 辅助定义一个 chatCompletions 支持的模型配置
+ * 辅助定义一个POST /chat/completions支持的model参数
+ * @remarks 只有baseUrl字段是必须的，其他字段请查看AI.Model类型
  */
-declare const defineModel: (config: ChatCompletions.Model) => ChatCompletions.Model;
+declare const defineModel: (config: AI.Model) => AI.Model;
+/**
+ * 辅助定义一个POST /chat/completions支持的tools中的子元素
+ * @param handler 在AI请求调用工具时用到
+ */
+declare const defineTool: (name: AI.ToolDefinition["function"]["name"], description: AI.ToolDefinition["function"]["description"], properties: AI.ToolDefinition["function"]["parameters"]["properties"], handler: AI.ToolDefinition["handler"]) => AI.ToolDefinition;
+/**
+ * 从GET /models获取模型名称
+ */
+declare const getModelName: (baseUrl: string) => Promise<string>;
 //#endregion
 //#region src/dom/logger.d.ts
 /**
@@ -348,11 +356,15 @@ type Primitive = number | string | boolean | symbol | bigint | undefined | null;
 declare const isPrimitive: (value: any) => value is Primitive;
 //#endregion
 //#region src/network/fetcher.d.ts
-type RequestInit = globalThis.RequestInit & {
+type RequestInit = Omit<globalThis.RequestInit, "body"> & {
   /**
    * searchParams 查询参数对象
    */
   params?: Record<string, any>;
+  /**
+   * 请求体支持任意类型
+   */
+  body?: any;
   /**
    * 响应解析器，默认的解析方法为 response.json()
    */
@@ -818,4 +830,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { CamelToSnake, Capitalize, type ChatCompletions, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactStr, debounce, decapitalize, defineModel, extractErrorMessage, fetcher, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { AI, CamelToSnake, Capitalize, type ChatCompletions, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactStr, debounce, decapitalize, defineModel, defineTool, extractErrorMessage, fetcher, getModelName, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };

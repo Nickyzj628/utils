@@ -3,35 +3,25 @@ import { parseSSE } from "../../network/parse-sse";
 import { getModelName } from "../helper";
 import type { AI } from "../types";
 import type { ChatCompletions } from "./types";
-import { detachToolArguments, executeToolCall, extractReasoning, extractTextContent } from "./utils";
+import {
+	detachToolArguments,
+	executeToolCall,
+	extractReasoning,
+	extractTextContent,
+} from "./utils";
 
 export type { ChatCompletions } from "./types";
 
 const nonStreaming = async (
-	model: AI.Model,
+	api: ReturnType<typeof fetcher>,
 	messages: AI.Message[],
 	tools: AI.ToolDefinition[] = [],
 ): Promise<ChatCompletions.NonStreamResult> => {
-	const { baseUrl, apiKey = "", model: modelName, ...rest } = model;
-
-	const api = fetcher(baseUrl, {
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
-		},
-	});
-
-	const body = {
-		model: modelName ?? (await getModelName(api)),
-		messages,
-		tools: tools?.map((tool) => detachToolArguments(tool)[0]),
-		...rest.customBody,
-	};
-
 	// 循环请求，直到模型回复用户
 	while (true) {
 		const response = await api.post<ChatCompletions.NonStreamResponse>(
 			"/chat/completions",
-			body,
+			{},
 		);
 
 		const { choices, usage, ...restResponse } = response;
@@ -52,7 +42,6 @@ const nonStreaming = async (
 		if (toolCalls.length > 0 && tools.length > 0) {
 			for (const toolCall of toolCalls) {
 				const result = await executeToolCall(toolCall, tools, {
-					model,
 					messages,
 				});
 				messages.push({
@@ -76,26 +65,10 @@ const nonStreaming = async (
 };
 
 const streaming = async function* (
-	model: AI.Model,
+	api: ReturnType<typeof fetcher>,
 	messages: AI.Message[],
 	tools: AI.ToolDefinition[] = [],
 ): AsyncGenerator<ChatCompletions.StreamChunk> {
-	const { baseUrl, apiKey = "", model: modelName, ...rest } = model;
-
-	const api = fetcher(baseUrl, {
-		headers: {
-			Authorization: `Bearer ${apiKey}`,
-		},
-	});
-
-	const body = {
-		model: modelName ?? (await getModelName(api)),
-		messages,
-		stream: true,
-		tools: tools?.map((tool) => detachToolArguments(tool)[0]),
-		...rest.customBody,
-	};
-
 	// 不断请求直到大模型确定回复
 	while (true) {
 		const toolCallsAcc = new Map<number, AI.ToolCall>();
@@ -104,11 +77,15 @@ const streaming = async function* (
 		let usage: ChatCompletions.Usage | undefined;
 
 		// 用parser拿到原始Response，使用parseSSE逐行读取
-		const response = await api.post<Response>("/chat/completions", body, {
-			parser: async (res) => res,
-		});
+		const response = await api.post<Response>(
+			"/chat/completions",
+			{ stream: true },
+			{
+				parser: async (res) => res,
+			},
+		);
 
-		// 拼接 content
+		// 拼接content
 		for await (const chunk of parseSSE(response)) {
 			if (chunk.usage) {
 				usage = chunk.usage;
@@ -132,7 +109,7 @@ const streaming = async function* (
 				yield { content };
 			}
 
-			// 流式传输的 toolCall 需要拼接
+			// 流式传输的toolCall需要先拼接
 			if (toolCalls) {
 				for (const toolCall of toolCalls) {
 					const existing = toolCallsAcc.get(toolCall.index) ?? {
@@ -157,11 +134,10 @@ const streaming = async function* (
 				finishReason = choice.finish_reason;
 			}
 		}
-
 		// 调用工具
 		const toolCalls = Array.from(toolCallsAcc.values());
 		if (
-			finishReason !== "tool_calls" &&
+			finishReason === "tool_calls" &&
 			toolCalls.length > 0 &&
 			tools.length > 0
 		) {
@@ -173,7 +149,6 @@ const streaming = async function* (
 
 			for (const toolCall of toolCalls) {
 				const result = await executeToolCall(toolCall, tools, {
-					model,
 					messages,
 				});
 				messages.push({
@@ -183,6 +158,7 @@ const streaming = async function* (
 				});
 			}
 
+			// 继续while循环
 			continue;
 		}
 
@@ -199,22 +175,23 @@ const streaming = async function* (
 };
 
 /**
- * 兼容 OpenAI API 的聊天补全函数
+ * 兼容OpenAI API的聊天补全函数
  * - 自动处理工具调用
- * - 同时支持普通响应和流式响应
+ * - 支持普通/流式响应
  *
- * @param model 模型配置，包含 model、baseUrl、apiKey
- * @param messages OpenAI API 兼容的消息数组
- * @param extraBody 可选的额外参数，如 tools、toolHandlers、temperature、stream 等
- * @returns 普通模式下返回 `{ content, usage, ... }`；`stream: true` 时返回异步迭代器
+ * @param model 模型配置，包含model、baseUrl、apiKey
+ * @param messages OpenAI API兼容的消息数组
+ * @param extraBody 可选的额外参数，如tools、temperature、stream等
+ * @returns 普通模式下返回`{ content, usage, ... }`；`stream: true`时返回异步迭代器
  *
  * @example
  * // 最简调用
- * // 未填写模型名，会自动使用/v1/models的第一个模型
- * const { content, usage } = await chatCompletions(
+ * // 未填写模型名，会自动使用/v1/models返回的第一个模型
+ * const { reasoning, content, usage } = await chatCompletions(
  *   { baseUrl: "http://127.0.0.1:11434/v1" },
  *   [{ role: "user", content: "你好" }],
  * );
+ * console.log(reasoning); // "The user said..."
  * console.log(content); // "你好！有什么我可以帮你的吗？"
  * console.log(usage);   // { prompt_tokens: 13, completion_tokens: 9, total_tokens: 22 }
  *
@@ -230,11 +207,9 @@ const streaming = async function* (
  *         name: "getWeather",
  *         description: "查询城市天气情况",
  *         parameters: { type: "object", properties: { city: { type: "string" } } },
+ *         handler: (args) => `${args.city}今日晴转多云，25°C`,
  *       },
  *     }],
- *     toolHandlers: {
- *       getWeather: (args) => `${args.city}今日晴转多云，25°C`,
- *     },
  *   },
  * );
  *
@@ -256,11 +231,18 @@ const streaming = async function* (
 export function chatCompletions(
 	model: AI.Model,
 	messages: AI.Message[],
-	options: { stream: true },
+	options: {
+		stream: true;
+		tools?: AI.ToolDefinition[];
+	},
 ): Promise<AsyncGenerator<ChatCompletions.StreamChunk>>;
 export function chatCompletions(
 	model: AI.Model,
 	messages: AI.Message[],
+	options?: {
+		stream?: boolean;
+		tools?: AI.ToolDefinition[];
+	},
 ): Promise<ChatCompletions.NonStreamResult>;
 export async function chatCompletions(
 	model: AI.Model,
@@ -270,8 +252,22 @@ export async function chatCompletions(
 		tools?: AI.ToolDefinition[];
 	},
 ) {
+	const { baseUrl, apiKey = "", model: modelName, ...rest } = model;
 	const { stream, tools = [] } = options ?? {};
+
+	const api = fetcher(baseUrl, {
+		headers: {
+			Authorization: `Bearer ${apiKey}`,
+		},
+		body: {
+			model: modelName ?? (await getModelName(baseUrl)),
+			messages,
+			tools: tools?.map((tool) => detachToolArguments(tool)[0]),
+			...rest.customBody,
+		},
+	});
+
 	const fn = stream ? streaming : nonStreaming;
 
-	return fn(model, messages, tools);
+	return fn(api, messages, tools);
 }
