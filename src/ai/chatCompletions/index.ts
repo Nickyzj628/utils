@@ -10,7 +10,7 @@ export type { ChatCompletions } from "./types";
 const nonStreaming = async (
 	model: AI.Model,
 	messages: AI.Message[],
-	tools?: AI.ToolDefinition[],
+	tools: AI.ToolDefinition[] = [],
 ): Promise<ChatCompletions.NonStreamResult> => {
 	const { baseUrl, apiKey = "", model: modelName, ...rest } = model;
 
@@ -49,9 +49,10 @@ const nonStreaming = async (
 		const reasoning = extractReasoning(message);
 
 		// 调用工具
-		if (toolCalls.length && tools?.length) {
+		if (toolCalls.length > 0 && tools.length > 0) {
 			for (const toolCall of toolCalls) {
 				const result = await executeToolCall(toolCall, tools, {
+					model,
 					messages,
 				});
 				messages.push({
@@ -77,8 +78,9 @@ const nonStreaming = async (
 const streaming = async function* (
 	model: AI.Model,
 	messages: AI.Message[],
+	tools: AI.ToolDefinition[] = [],
 ): AsyncGenerator<ChatCompletions.StreamChunk> {
-	const { baseUrl, apiKey = "", model: modelName } = model;
+	const { baseUrl, apiKey = "", model: modelName, ...rest } = model;
 
 	const api = fetcher(baseUrl, {
 		headers: {
@@ -90,17 +92,18 @@ const streaming = async function* (
 		model: modelName ?? (await getModelName(api)),
 		messages,
 		stream: true,
-		...restExtraBody,
+		tools: tools?.map((tool) => detachToolArguments(tool)[0]),
+		...rest.customBody,
 	};
 
 	// 不断请求直到大模型确定回复
 	while (true) {
-		const toolCallsAcc = new Map<number, ChatCompletions.ToolCall>();
+		const toolCallsAcc = new Map<number, AI.ToolCall>();
 		let fullContent = "";
 		let finishReason: string | null = null;
 		let usage: ChatCompletions.Usage | undefined;
 
-		// 用 parser 拿到原始 Response，使用 pareSSE 逐行读取
+		// 用parser拿到原始Response，使用parseSSE逐行读取
 		const response = await api.post<Response>("/chat/completions", body, {
 			parser: async (res) => res,
 		});
@@ -119,9 +122,9 @@ const streaming = async function* (
 			const { delta } = choice;
 			const { content, tool_calls: toolCalls } = delta;
 
-			const reasoningContent = delta.reasoning_content || delta.reasoning;
-			if (reasoningContent) {
-				yield { reasoningContent };
+			const reasoning = extractReasoning(delta);
+			if (reasoning) {
+				yield { reasoning };
 			}
 
 			if (content) {
@@ -160,7 +163,7 @@ const streaming = async function* (
 		if (
 			finishReason !== "tool_calls" &&
 			toolCalls.length > 0 &&
-			Object.keys(toolHandlers).length > 0
+			tools.length > 0
 		) {
 			messages.push({
 				role: "assistant",
@@ -169,7 +172,10 @@ const streaming = async function* (
 			});
 
 			for (const toolCall of toolCalls) {
-				const result = await executeToolCall(toolCall, toolHandlers);
+				const result = await executeToolCall(toolCall, tools, {
+					model,
+					messages,
+				});
 				messages.push({
 					role: "tool",
 					content: result,
