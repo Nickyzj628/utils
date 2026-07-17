@@ -171,11 +171,11 @@
 <li><a href="" aria-current="page">StreamChunk</a></li></ul>
 <h1>Type Alias StreamChunk</h1></div>
 <section class="tsd-panel tsd-comment">
-<div class="tsd-comment tsd-typography"><p>流式调用 chatCompletions 时迭代器产出的数据块</p>
+<div class="tsd-comment tsd-typography"><p>流式调用chatCompletions时迭代器产出的数据块</p>
 </div></section>
-<div class="tsd-signature"><span class="tsd-signature-keyword">type</span> <span class="tsd-kind-type-alias">StreamChunk</span> <span class="tsd-signature-symbol">=</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#content">content</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#reasoningcontent">reasoningContent</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#usage">usage</a><span class="tsd-signature-symbol">?:</span> <a href="ai.ChatCompletions.Usage.html" class="tsd-signature-type tsd-kind-type-alias">Usage</a><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-signature-keyword">type</span> <span class="tsd-kind-type-alias">StreamChunk</span> <span class="tsd-signature-symbol">=</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#content">content</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#reasoning">reasoning</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#usage">usage</a><span class="tsd-signature-symbol">?:</span> <a href="ai.ChatCompletions.Usage.html" class="tsd-signature-type tsd-kind-type-alias">Usage</a><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/a4a7f15891b18edfd37e240532c6a1376c600cba/src/ai/chatCompletions/types.ts#L161">ai/chatCompletions/types.ts:161</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/33a0bc67328f675d7a0fe65bdb74b4d763dfb1aa/src/ai/chatCompletions/types.ts#L52">ai/chatCompletions/types.ts:52</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -184,7 +184,7 @@
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-index-list"><a href="#content" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>content?</span></a>
-<a href="#reasoningcontent" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>reasoning<wbr/>Content?</span></a>
+<a href="#reasoning" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>reasoning?</span></a>
 <a href="#usage" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>usage?</span></a>
 </div></section></div></details></section></section>
 <details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -196,21 +196,21 @@
 <div class="tsd-comment tsd-typography"><p>模型流式返回的内容增量（仅在生成过程中出现）</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/a4a7f15891b18edfd37e240532c6a1376c600cba/src/ai/chatCompletions/types.ts#L165">ai/chatCompletions/types.ts:165</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/33a0bc67328f675d7a0fe65bdb74b4d763dfb1aa/src/ai/chatCompletions/types.ts#L56">ai/chatCompletions/types.ts:56</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
-<h3 class="tsd-anchor-link" id="reasoningcontent"><code class="tsd-tag">Optional</code><span>reasoning<wbr/>Content</span><a href="#reasoningcontent" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">reasoningContent</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
+<h3 class="tsd-anchor-link" id="reasoning"><code class="tsd-tag">Optional</code><span>reasoning</span><a href="#reasoning" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">reasoning</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>模型流式返回的思考内容增量（仅在生成过程中出现）</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/a4a7f15891b18edfd37e240532c6a1376c600cba/src/ai/chatCompletions/types.ts#L163">ai/chatCompletions/types.ts:163</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/33a0bc67328f675d7a0fe65bdb74b4d763dfb1aa/src/ai/chatCompletions/types.ts#L54">ai/chatCompletions/types.ts:54</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="usage"><code class="tsd-tag">Optional</code><span>usage</span><a href="#usage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">usage</span><span class="tsd-signature-symbol">?:</span> <a href="ai.ChatCompletions.Usage.html" class="tsd-signature-type tsd-kind-type-alias">Usage</a></div>
 <div class="tsd-comment tsd-typography"><p>Token 消耗情况（仅在最后一帧出现）</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/a4a7f15891b18edfd37e240532c6a1376c600cba/src/ai/chatCompletions/types.ts#L167">ai/chatCompletions/types.ts:167</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/33a0bc67328f675d7a0fe65bdb74b4d763dfb1aa/src/ai/chatCompletions/types.ts#L58">ai/chatCompletions/types.ts:58</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -227,7 +227,7 @@
 <h3>On This Page</h3></summary>
 <div class="tsd-accordion-details">
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#content"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>content</span></a><a href="#reasoningcontent"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>reasoning<wbr/>Content</span></a><a href="#usage"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>usage</span></a></div></details></div></details></div>
+<div><a href="#content"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>content</span></a><a href="#reasoning"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>reasoning</span></a><a href="#usage"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>usage</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html">@nickyzj2023/utils</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">
