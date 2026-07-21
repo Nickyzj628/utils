@@ -1,3 +1,5 @@
+# utils
+
 男生自用全新前端工具库，0依赖
 
 ## 安装到你的项目里
@@ -21,9 +23,11 @@ import { fetcher, to } from "@nickyzj2023/utils";
 
 const api = fetcher("https://api.example.com");
 
-const [error, data] = await to(api.get<Blog>("/blogs/hello-world"));
+const [error, data] = await to(
+  api.get<Blog>("/blogs/hello-world")
+);
 if (error) {
-  console.error(error);
+  console.log(error);
   return;
 }
 

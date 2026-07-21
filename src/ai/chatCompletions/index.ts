@@ -16,7 +16,10 @@ const nonStreaming = async (
 	api: ReturnType<typeof fetcher>,
 	messages: AI.Message[],
 	tools: AI.ToolDefinition[] = [],
+	options?: Pick<ChatCompletions.Options, "onToolHandled">,
 ): Promise<ChatCompletions.NonStreamResult> => {
+	const { onToolHandled } = options ?? {};
+
 	// 循环请求，直到模型回复用户
 	while (true) {
 		const response = await api.post<ChatCompletions.NonStreamResponse>(
@@ -49,6 +52,11 @@ const nonStreaming = async (
 					content: result,
 					tool_call_id: toolCall.id,
 				});
+				onToolHandled?.(
+					toolCall.function.name,
+					toolCall.function.arguments,
+					result,
+				);
 			}
 			continue;
 		}
@@ -68,7 +76,10 @@ const streaming = async function* (
 	api: ReturnType<typeof fetcher>,
 	messages: AI.Message[],
 	tools: AI.ToolDefinition[] = [],
+	options?: Pick<ChatCompletions.Options, "onToolHandled">,
 ): AsyncGenerator<ChatCompletions.StreamChunk> {
+	const { onToolHandled } = options ?? {};
+
 	// 不断请求直到大模型确定回复
 	while (true) {
 		const toolCallsAcc = new Map<number, AI.ToolCall>();
@@ -134,6 +145,7 @@ const streaming = async function* (
 				finishReason = choice.finish_reason;
 			}
 		}
+
 		// 调用工具
 		const toolCalls = Array.from(toolCallsAcc.values());
 		if (
@@ -156,6 +168,11 @@ const streaming = async function* (
 					content: result,
 					tool_call_id: toolCall.id,
 				});
+				onToolHandled?.(
+					toolCall.function.name,
+					toolCall.function.arguments,
+					result,
+				);
 			}
 
 			// 继续while循环
@@ -231,29 +248,33 @@ const streaming = async function* (
 export function chatCompletions(
 	model: AI.Model,
 	messages: AI.Message[],
-	options: {
+	options: ChatCompletions.Options & {
 		stream: true;
-		tools?: AI.ToolDefinition[];
 	},
 ): Promise<AsyncGenerator<ChatCompletions.StreamChunk>>;
 export function chatCompletions(
 	model: AI.Model,
 	messages: AI.Message[],
-	options?: {
-		stream?: boolean;
-		tools?: AI.ToolDefinition[];
-	},
+	options?: ChatCompletions.Options,
 ): Promise<ChatCompletions.NonStreamResult>;
 export async function chatCompletions(
 	model: AI.Model,
 	messages: AI.Message[],
-	options?: {
-		stream?: boolean;
-		tools?: AI.ToolDefinition[];
-	},
+	options?: ChatCompletions.Options,
 ) {
-	const { baseUrl, apiKey = "", model: modelName, ...rest } = model;
-	const { stream, tools = [] } = options ?? {};
+	const {
+		baseUrl,
+		apiKey = "",
+		model: modelName,
+		customBody,
+		...restModelConfig
+	} = model;
+
+	const {
+		stream,
+		tools = [],
+		...restOptions
+	} = options ?? {};
 
 	const api = fetcher(baseUrl, {
 		headers: {
@@ -263,11 +284,14 @@ export async function chatCompletions(
 			model: modelName ?? (await getModelName(baseUrl)),
 			messages,
 			tools: tools?.map((tool) => detachToolArguments(tool)[0]),
-			...rest.customBody,
+			...customBody,
 		},
 	});
 
 	const fn = stream ? streaming : nonStreaming;
 
-	return fn(api, messages, tools);
+	return fn(api, messages, tools, {
+		...restOptions,
+		...restModelConfig,
+	});
 }

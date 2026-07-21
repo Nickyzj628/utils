@@ -1,6 +1,14 @@
 import type { AI } from "../types";
 
 export namespace ChatCompletions {
+	/** chatCompletions的第三个参数 */
+	export type Options = {
+		stream?: boolean;
+		tools?: AI.ToolDefinition[];
+		/** 工具运行结束后（无论成功失败）的回调，可用于打印日志 */
+		onToolHandled?: (name: string, args: string, result: any) => void;
+	};
+
 	/** 非流式POST /chat/completions的响应结果 */
 	export type NonStreamResponse = {
 		id: string;
