@@ -4,10 +4,19 @@ declare namespace AI {
     baseUrl: string; /** 不传则自动使用{baseUrl}/models接口的第一个模型 */
     model?: string;
     apiKey?: string; /** POST /chat/completions时注入自定义请求体 */
-    customBody?: Record<string, any>; /** 模型支持的消息输入类型，如果填了，则会在调用chatCompletions前校验上下文，含有不支持的输入时抑制请求 */
-    inputs?: ["text" | "image" | "video" | "audio" | "file"]; /** 模型的最大上下文（输入+输出），如果填了，则会在调用chatCompletions后选择性调用compact（当前上下文>最大上下文*80%时） */
+    customBody?: Record<string, any>;
+    /**
+     * 模型支持的消息输入类型
+     * @default ["text"]
+     * @remarks 会在调用chatCompletions前校验上下文，含有不支持的输入时抑制请求 */
+    inputs?: InputType[];
+    /**
+     * 模型的最大上下文（输入+输出）
+     * @default 128000
+     * @remarks 会在调用chatCompletions后智能调用compact（如当前上下文>最大上下文*80%时），可以在chatCompletions里自定义compact执行时机 */
     context?: number;
   };
+  type InputType = "text" | "image" | "video" | "audio" | "file";
   type Message = {
     role: "system" | "user" | "assistant" | "tool" | "function"; /** OpenRouter的思考内容字段，其他供应商的会尽可能合并到该字段内 */
     reasoning?: string | null;
@@ -70,6 +79,12 @@ declare namespace AI {
 //#endregion
 //#region src/ai/chatCompletions/types.d.ts
 declare namespace ChatCompletions {
+  /** chatCompletions的第三个参数 */
+  type Options = {
+    stream?: boolean;
+    tools?: AI.ToolDefinition[]; /** 工具运行结束后（无论成功失败）的回调，可用于打印日志 */
+    onToolHandled?: (name: string, args: string, result: any) => void;
+  };
   /** 非流式POST /chat/completions的响应结果 */
   type NonStreamResponse = {
     id: string;
@@ -175,14 +190,10 @@ declare namespace ChatCompletions {
  *   }
  * }
  */
-declare function chatCompletions(model: AI.Model, messages: AI.Message[], options: {
+declare function chatCompletions(model: AI.Model, messages: AI.Message[], options: ChatCompletions.Options & {
   stream: true;
-  tools?: AI.ToolDefinition[];
 }): Promise<AsyncGenerator<ChatCompletions.StreamChunk>>;
-declare function chatCompletions(model: AI.Model, messages: AI.Message[], options?: {
-  stream?: boolean;
-  tools?: AI.ToolDefinition[];
-}): Promise<ChatCompletions.NonStreamResult>;
+declare function chatCompletions(model: AI.Model, messages: AI.Message[], options?: ChatCompletions.Options): Promise<ChatCompletions.NonStreamResult>;
 //#endregion
 //#region src/ai/helper.d.ts
 /**
