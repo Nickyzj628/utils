@@ -65,3 +65,46 @@ export const extractTextContent = (content: AI.Message["content"]) => {
 		.map((part) => part.text)
 		.join("\n");
 };
+
+/**
+ * Message.content.type => AI.inputs
+ */
+const contentPartToInputType = (
+	part: AI.ContentPart,
+): AI.InputType | undefined => {
+	switch (part.type) {
+		case "text":
+			return "text";
+		case "image_url":
+			return "image";
+		case "input_audio":
+			return "audio";
+		case "video_url":
+			return "video";
+	}
+};
+
+/**
+ * 检查上下文中是否含有模型不支持的消息类型
+ */
+export const checkHasUnsupportedInput = (model: AI.Model, messages: AI.Message[]) => {
+	const { inputs = ["text"] } = model;
+
+	return messages.some((message) => {
+		const { content } = message;
+		// 应该没有模型不支持文字消息吧？
+		if (typeof content === "string") {
+			return;
+		}
+		// 检查多模态消息
+		if (Array.isArray(content)) {
+			for (const part of content) {
+				const type = contentPartToInputType(part);
+				// 解析不出的消息类型 / 模型不支持的消息 => true(不支持)
+				return !type || !inputs.includes(type);
+			}
+		}
+		// 兜底
+		return true;
+	});
+};

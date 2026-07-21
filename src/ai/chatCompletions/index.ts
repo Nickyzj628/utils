@@ -4,10 +4,11 @@ import { getModelName } from "../helper";
 import type { AI } from "../types";
 import type { ChatCompletions } from "./types";
 import {
+	checkHasUnsupportedInput,
 	detachToolArguments,
 	executeToolCall,
 	extractReasoning,
-	extractTextContent,
+	extractTextContent
 } from "./utils";
 
 export type { ChatCompletions } from "./types";
@@ -267,15 +268,19 @@ export async function chatCompletions(
 		apiKey = "",
 		model: modelName,
 		customBody,
+		inputs,
 		...restModelConfig
 	} = model;
 
-	const {
-		stream,
-		tools = [],
-		...restOptions
-	} = options ?? {};
+	const { stream, tools = [], ...restOptions } = options ?? {};
 
+	// 检查上下文是否含有模型不支持的消息类型
+	const hasUnsupportedInput = checkHasUnsupportedInput(model, messages);
+	if (hasUnsupportedInput) {
+		throw new Error("当前上下文含有模型不支持的输入类型");
+	}
+
+	// 组装请求头
 	const api = fetcher(baseUrl, {
 		headers: {
 			Authorization: `Bearer ${apiKey}`,

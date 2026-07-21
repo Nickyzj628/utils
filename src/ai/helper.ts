@@ -10,7 +10,11 @@ import type { AI } from "./types";
  * 辅助定义一个POST /chat/completions支持的model参数
  * @remarks 只有baseUrl字段是必须的，其他字段请查看AI.Model类型
  */
-export const defineModel = (config: AI.Model): AI.Model => config;
+export const defineModel = (config: AI.Model): AI.Model => ({
+	inputs: ["text"],
+	context: 128000,
+	...config,
+});
 
 /**
  * 辅助定义一个POST /chat/completions支持的tools中的子元素

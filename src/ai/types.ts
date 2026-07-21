@@ -11,13 +11,21 @@ export namespace AI {
 		customBody?: Record<string, any>;
 
 		// ================================
-		// 可有可无的补充配置
+		// 可有可无的辅助配置
 		// ================================
-		/** 模型支持的消息输入类型，如果填了，则会在调用chatCompletions前校验上下文，含有不支持的输入时抑制请求 */
-		inputs?: ["text" | "image" | "video" | "audio" | "file"];
-		/** 模型的最大上下文（输入+输出），如果填了，则会在调用chatCompletions后选择性调用compact（当前上下文>最大上下文*80%时） */
+		/** 
+		 * 模型支持的消息输入类型
+		 * @default ["text"]
+		 * @remarks 会在调用chatCompletions前校验上下文，含有不支持的输入时抑制请求 */
+		inputs?: InputType[];
+		/** 
+		 * 模型的最大上下文（输入+输出）
+		 * @default 128000
+		 * @remarks 会在调用chatCompletions后智能调用compact（如当前上下文>最大上下文*80%时），可以在chatCompletions里自定义compact执行时机 */
 		context?: number;
 	};
+
+	export type InputType = "text" | "image" | "video" | "audio" | "file";
 
 	export type Message = {
 		role: "system" | "user" | "assistant" | "tool" | "function";
