@@ -4,7 +4,7 @@ import { getModelName } from "../helper";
 import type { AI } from "../types";
 import type { ChatCompletions } from "./types";
 import {
-	checkHasUnsupportedInput,
+	checkUnsupportedInput,
 	detachToolArguments,
 	executeToolCall,
 	extractReasoning,
@@ -275,9 +275,9 @@ export async function chatCompletions(
 	const { stream, tools = [], ...restOptions } = options ?? {};
 
 	// 检查上下文是否含有模型不支持的消息类型
-	const hasUnsupportedInput = checkHasUnsupportedInput(model, messages);
-	if (hasUnsupportedInput) {
-		throw new Error("当前上下文含有模型不支持的输入类型");
+	const unsupportedInput = checkUnsupportedInput(model, messages);
+	if (unsupportedInput) {
+		throw new Error(`当前上下文含有模型不支持的输入类型：${unsupportedInput}`);
 	}
 
 	// 组装请求头

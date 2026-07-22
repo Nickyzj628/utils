@@ -87,24 +87,26 @@ const contentPartToInputType = (
 /**
  * 检查上下文中是否含有模型不支持的消息类型
  */
-export const checkHasUnsupportedInput = (model: AI.Model, messages: AI.Message[]) => {
+export const checkUnsupportedInput = (model: AI.Model, messages: AI.Message[]) => {
 	const { inputs = ["text"] } = model;
 
-	return messages.some((message) => {
+	for (const message of messages) {
 		const { content } = message;
 		// 应该没有模型不支持文字消息吧？
 		if (typeof content === "string") {
-			return;
+			continue;
 		}
 		// 检查多模态消息
 		if (Array.isArray(content)) {
 			for (const part of content) {
 				const type = contentPartToInputType(part);
 				// 解析不出的消息类型 / 模型不支持的消息 => true(不支持)
-				return !type || !inputs.includes(type);
+				if (!type || !inputs.includes(type)) {
+					return type || "unknown";
+				}
 			}
 		}
-		// 兜底
-		return true;
-	});
+	}
+
+	return "";
 };

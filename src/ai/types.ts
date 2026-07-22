@@ -21,7 +21,7 @@ export namespace AI {
 		/** 
 		 * 模型的最大上下文（输入+输出）
 		 * @default 128000
-		 * @remarks 会在调用chatCompletions后智能调用compact（如当前上下文>最大上下文*80%时），可以在chatCompletions里自定义compact执行时机 */
+		 * @remarks 会在调用chatCompletions后智能调用compact（如当前上下文>最大上下文*80%时），详见chatCompletions.autoCompact配置 */
 		context?: number;
 	};
 
