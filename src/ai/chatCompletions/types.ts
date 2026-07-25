@@ -8,9 +8,7 @@ export namespace ChatCompletions {
 		/** 工具运行结束后（无论成功失败）的回调，可用于打印日志 */
 		onToolHandled?: (name: string, args: string, result: any) => void;
 		/** 自动压缩上下文 */
-		autoCompact?: {
-			
-		};
+		autoCompact?: {};
 	};
 
 	/** 非流式POST /chat/completions的响应结果 */

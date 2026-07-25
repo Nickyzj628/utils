@@ -13,12 +13,12 @@ export namespace AI {
 		// ================================
 		// 可有可无的辅助配置
 		// ================================
-		/** 
+		/**
 		 * 模型支持的消息输入类型
 		 * @default ["text"]
 		 * @remarks 会在调用chatCompletions前校验上下文，含有不支持的输入时抑制请求 */
 		inputs?: InputType[];
-		/** 
+		/**
 		 * 模型的最大上下文（输入+输出）
 		 * @default 128000
 		 * @remarks 会在调用chatCompletions后智能调用compact（如当前上下文>最大上下文*80%时），详见chatCompletions.autoCompact配置 */

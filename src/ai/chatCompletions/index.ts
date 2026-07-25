@@ -8,7 +8,7 @@ import {
 	detachToolArguments,
 	executeToolCall,
 	extractReasoning,
-	extractTextContent
+	extractTextContent,
 } from "./utils";
 
 export type { ChatCompletions } from "./types";
@@ -193,43 +193,14 @@ const streaming = async function* (
 };
 
 /**
- * 兼容OpenAI API的聊天补全函数
+ * 兼容OpenAI API的聊天补全函数（流式模式）
  * - 自动处理工具调用
- * - 支持普通/流式响应
+ * - 传入 `stream: true` 时返回异步迭代器，逐块产出内容与 usage
  *
  * @param model 模型配置，包含model、baseUrl、apiKey
  * @param messages OpenAI API兼容的消息数组
- * @param extraBody 可选的额外参数，如tools、temperature、stream等
- * @returns 普通模式下返回`{ content, usage, ... }`；`stream: true`时返回异步迭代器
- *
- * @example
- * // 最简调用
- * // 未填写模型名，会自动使用/v1/models返回的第一个模型
- * const { reasoning, content, usage } = await chatCompletions(
- *   { baseUrl: "http://127.0.0.1:11434/v1" },
- *   [{ role: "user", content: "你好" }],
- * );
- * console.log(reasoning); // "The user said..."
- * console.log(content); // "你好！有什么我可以帮你的吗？"
- * console.log(usage);   // { prompt_tokens: 13, completion_tokens: 9, total_tokens: 22 }
- *
- * @example
- * // 工具调用
- * const { content, usage } = await chatCompletions(
- *   { baseUrl: "http://127.0.0.1:11434/v1", model: "model.gguf", apiKey: "sk-local-no-need-key" },
- *   [{ role: "user", content: "查询上海天气" }],
- *   {
- *     tools: [{
- *       type: "function",
- *       function: {
- *         name: "getWeather",
- *         description: "查询城市天气情况",
- *         parameters: { type: "object", properties: { city: { type: "string" } } },
- *         handler: (args) => `${args.city}今日晴转多云，25°C`,
- *       },
- *     }],
- *   },
- * );
+ * @param options 额外参数，须包含 `stream: true`，也可含 tools、temperature 等
+ * @returns 异步迭代器，逐块产出 `{ content?, reasoning?, usage? }`
  *
  * @example
  * // 流式传输
@@ -253,6 +224,45 @@ export function chatCompletions(
 		stream: true;
 	},
 ): Promise<AsyncGenerator<ChatCompletions.StreamChunk>>;
+/**
+ * 兼容OpenAI API的聊天补全函数（普通模式）
+ * - 自动处理工具调用
+ * - 默认返回完整结果，非流式
+ *
+ * @param model 模型配置，包含model、baseUrl、apiKey
+ * @param messages OpenAI API兼容的消息数组
+ * @param options 可选的额外参数，如tools、temperature等
+ * @returns `{ content, usage, ... }` 完整结果
+ *
+ * @example
+ * // 最简调用
+ * // 未填写模型名，会自动使用/v1/models返回的第一个模型
+ * const { reasoning, content, usage } = await chatCompletions(
+ *   { baseUrl: "http://127.0.0.1:11434/v1" },
+ *   [{ role: "user", content: "你好" }],
+ * );
+ * console.log(reasoning); // "The user said..."
+ * console.log(content); // "你好！有什么我可以帮你的吗？"
+ * console.log(usage);   // { prompt_tokens: [redacted], completion_tokens: [redacted], total_tokens: [redacted] }
+ *
+ * @example
+ * // 工具调用
+ * const { content, usage } = await chatCompletions(
+ *   { baseUrl: "http://127.0.0.1:11434/v1", model: "model.gguf", apiKey: "sk-loc**********-key" },
+ *   [{ role: "user", content: "查询上海天气" }],
+ *   {
+ *     tools: [{
+ *       type: "function",
+ *       function: {
+ *         name: "getWeather",
+ *         description: "查询城市天气情况",
+ *         parameters: { type: "object", properties: { city: { type: "string" } } },
+ *         handler: (args) => `${args.city}今日晴转多云，25°C`,
+ *       },
+ *     }],
+ *   },
+ * );
+ */
 export function chatCompletions(
 	model: AI.Model,
 	messages: AI.Message[],

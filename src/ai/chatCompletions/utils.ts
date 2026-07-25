@@ -87,7 +87,10 @@ const contentPartToInputType = (
 /**
  * 检查上下文中是否含有模型不支持的消息类型
  */
-export const checkUnsupportedInput = (model: AI.Model, messages: AI.Message[]) => {
+export const checkUnsupportedInput = (
+	model: AI.Model,
+	messages: AI.Message[],
+) => {
 	const { inputs = ["text"] } = model;
 
 	for (const message of messages) {

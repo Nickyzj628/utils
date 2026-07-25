@@ -67,7 +67,6 @@ export const getModelName = async (baseUrl: string): Promise<string> => {
 	return modelName;
 };
 
-
 /**
  * 根据上下文里的中/英文/多模态消息，估算出可能消耗的token
  * - 单词 ≈ 1.5token
@@ -75,6 +74,10 @@ export const getModelName = async (baseUrl: string): Promise<string> => {
  * - 图片/音频/视频/文件 ≈ 10000token（不好估算，取个较大的值）
  */
 export const estimateTokens = (messages?: AI.Message[]) => {
+	if (!messages?.length) {
+		return 0;
+	}
+
 	// 用Intl.Segmenter按词切分
 	const segmenter = new Intl.Segmenter([], { granularity: "word" });
 	const estimateTextTokens = (text: string) => {
@@ -87,7 +90,7 @@ export const estimateTokens = (messages?: AI.Message[]) => {
 		return Math.ceil(words * 1.5 + others / 4);
 	};
 
-	const tokens = messages?.reduce((acc, message) => {
+	const tokens = messages.reduce((acc, message) => {
 		const { content, tool_calls, ...metadata } = message;
 
 		if (typeof content === "string") {

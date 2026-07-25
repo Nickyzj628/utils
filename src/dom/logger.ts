@@ -66,18 +66,11 @@ function createLogger(
 /**
  * 带额外信息的 console.log
  *
- * **直接调用**：使用默认选项打印消息
- * @param messages - 日志消息，支持多条
- *
  * **预配置**：先传入选项返回 logger 函数，再调用打印
  * @param options - 配置选项
  * @returns 配置后的 logger 函数
  *
  * @example
- * // 直接调用（默认显示时间和文件名）
- * logger("调试信息"); // "[14:30:00] [index.ts:15:2] 调试信息"
- * logger("消息1", "消息2"); // "[14:30:00] [index.ts:15:2] 消息1 消息2"
- *
  * // 预配置后调用
  * const myLogger = logger({ withTime: true, withFileName: true });
  * myLogger("一段消息", "另一段消息"); // "[18:59:47] [index.ts:137:2] 一段消息 另一段消息"
@@ -87,6 +80,17 @@ function createLogger(
  * plainLogger("纯文件名前缀"); // "[index.ts:15:2] 纯文件名前缀"
  */
 export function logger(options?: LoggerOptions): (...messages: any[]) => void;
+/**
+ * 带额外信息的 console.log
+ *
+ * **直接调用**：使用默认选项打印消息
+ * @param messages - 日志消息，支持多条
+ *
+ * @example
+ * // 直接调用（默认显示时间和文件名）
+ * logger("调试信息"); // "[14:30:00] [index.ts:15:2] 调试信息"
+ * logger("消息1", "消息2"); // "[14:30:00] [index.ts:15:2] 消息1 消息2"
+ */
 export function logger(...messages: any[]): void;
 export function logger(
 	first?: LoggerOptions | any,

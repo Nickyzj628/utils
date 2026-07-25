@@ -13,7 +13,7 @@ declare namespace AI {
     /**
      * 模型的最大上下文（输入+输出）
      * @default 128000
-     * @remarks 会在调用chatCompletions后智能调用compact（如当前上下文>最大上下文*80%时），可以在chatCompletions里自定义compact执行时机 */
+     * @remarks 会在调用chatCompletions后智能调用compact（如当前上下文>最大上下文*80%时），详见chatCompletions.autoCompact配置 */
     context?: number;
   };
   type InputType = "text" | "image" | "video" | "audio" | "file";
@@ -83,7 +83,8 @@ declare namespace ChatCompletions {
   type Options = {
     stream?: boolean;
     tools?: AI.ToolDefinition[]; /** 工具运行结束后（无论成功失败）的回调，可用于打印日志 */
-    onToolHandled?: (name: string, args: string, result: any) => void;
+    onToolHandled?: (name: string, args: string, result: any) => void; /** 自动压缩上下文 */
+    autoCompact?: {};
   };
   /** 非流式POST /chat/completions的响应结果 */
   type NonStreamResponse = {
@@ -137,43 +138,14 @@ declare namespace ChatCompletions {
 //#endregion
 //#region src/ai/chatCompletions/index.d.ts
 /**
- * 兼容OpenAI API的聊天补全函数
+ * 兼容OpenAI API的聊天补全函数（流式模式）
  * - 自动处理工具调用
- * - 支持普通/流式响应
+ * - 传入 `stream: true` 时返回异步迭代器，逐块产出内容与 usage
  *
  * @param model 模型配置，包含model、baseUrl、apiKey
  * @param messages OpenAI API兼容的消息数组
- * @param extraBody 可选的额外参数，如tools、temperature、stream等
- * @returns 普通模式下返回`{ content, usage, ... }`；`stream: true`时返回异步迭代器
- *
- * @example
- * // 最简调用
- * // 未填写模型名，会自动使用/v1/models返回的第一个模型
- * const { reasoning, content, usage } = await chatCompletions(
- *   { baseUrl: "http://127.0.0.1:11434/v1" },
- *   [{ role: "user", content: "你好" }],
- * );
- * console.log(reasoning); // "The user said..."
- * console.log(content); // "你好！有什么我可以帮你的吗？"
- * console.log(usage);   // { prompt_tokens: 13, completion_tokens: 9, total_tokens: 22 }
- *
- * @example
- * // 工具调用
- * const { content, usage } = await chatCompletions(
- *   { baseUrl: "http://127.0.0.1:11434/v1", model: "model.gguf", apiKey: "sk-local-no-need-key" },
- *   [{ role: "user", content: "查询上海天气" }],
- *   {
- *     tools: [{
- *       type: "function",
- *       function: {
- *         name: "getWeather",
- *         description: "查询城市天气情况",
- *         parameters: { type: "object", properties: { city: { type: "string" } } },
- *         handler: (args) => `${args.city}今日晴转多云，25°C`,
- *       },
- *     }],
- *   },
- * );
+ * @param options 额外参数，须包含 `stream: true`，也可含 tools、temperature 等
+ * @returns 异步迭代器，逐块产出 `{ content?, reasoning?, usage? }`
  *
  * @example
  * // 流式传输
@@ -193,7 +165,96 @@ declare namespace ChatCompletions {
 declare function chatCompletions(model: AI.Model, messages: AI.Message[], options: ChatCompletions.Options & {
   stream: true;
 }): Promise<AsyncGenerator<ChatCompletions.StreamChunk>>;
+/**
+ * 兼容OpenAI API的聊天补全函数（普通模式）
+ * - 自动处理工具调用
+ * - 默认返回完整结果，非流式
+ *
+ * @param model 模型配置，包含model、baseUrl、apiKey
+ * @param messages OpenAI API兼容的消息数组
+ * @param options 可选的额外参数，如tools、temperature等
+ * @returns `{ content, usage, ... }` 完整结果
+ *
+ * @example
+ * // 最简调用
+ * // 未填写模型名，会自动使用/v1/models返回的第一个模型
+ * const { reasoning, content, usage } = await chatCompletions(
+ *   { baseUrl: "http://127.0.0.1:11434/v1" },
+ *   [{ role: "user", content: "你好" }],
+ * );
+ * console.log(reasoning); // "The user said..."
+ * console.log(content); // "你好！有什么我可以帮你的吗？"
+ * console.log(usage);   // { prompt_tokens: [redacted], completion_tokens: [redacted], total_tokens: [redacted] }
+ *
+ * @example
+ * // 工具调用
+ * const { content, usage } = await chatCompletions(
+ *   { baseUrl: "http://127.0.0.1:11434/v1", model: "model.gguf", apiKey: "sk-loc**********-key" },
+ *   [{ role: "user", content: "查询上海天气" }],
+ *   {
+ *     tools: [{
+ *       type: "function",
+ *       function: {
+ *         name: "getWeather",
+ *         description: "查询城市天气情况",
+ *         parameters: { type: "object", properties: { city: { type: "string" } } },
+ *         handler: (args) => `${args.city}今日晴转多云，25°C`,
+ *       },
+ *     }],
+ *   },
+ * );
+ */
 declare function chatCompletions(model: AI.Model, messages: AI.Message[], options?: ChatCompletions.Options): Promise<ChatCompletions.NonStreamResult>;
+//#endregion
+//#region src/ai/compact/types.d.ts
+declare namespace Compact {
+  type ReplacerOfToolResultContent = (content: AI.Message["content"]) => AI.Message["content"];
+  type ReplacerOfMediaContent = (content: AI.Message["content"]) => AI.Message["content"];
+  type SummarizeOptions = {
+    /** 不总结最新的X%条消息 */keepPercent: number; /** 用什么模型总结 */
+    model: AI.Model; /** 用于指导大模型如何总结消息的提示词 */
+    systemPrompt: string;
+  };
+}
+//#endregion
+//#region src/ai/compact/index.d.ts
+/**
+ * 自动优化上下文，类似AI Coding Agent的/compact命令
+ */
+declare const compact: (messages: AI.Message[], model: AI.Model, options?: {
+  /** 提供token消耗情况时，能更准确地判断上下文是否达到阈值 */usage?: ChatCompletions.Usage;
+  /**
+   * 上下文>总上下文*ratio时压缩工具调用结果
+   * @default 0.6
+   */
+  ratioOfCompactToolResult?: number;
+  /**
+   * 如何压缩工具调用结果，例如让其他模型返回精简后的工具结果
+   * @default (content) => "（已被消费）"
+   */
+  replacerOfToolResultContent?: Compact.ReplacerOfToolResultContent;
+  /**
+   * 上下文>总上下文*ratio时压缩图片/音频/视频消息
+   * @default 0.7
+   */
+  ratioToCompactMedia?: number;
+  /**
+   * 如何压缩媒体消息，例如让其他模型用自然语言简短描述一遍
+   * @default (content) => "（已被丢弃）"
+   */
+  replacerOfMediaContent?: Compact.ReplacerOfMediaContent;
+  /**
+   * 上下文>总上下文*ratio时总结消息
+   * @default 0.8
+   * @remarks 如果总结成功，会把summarizeOptions.keepPercent(默认0.2(20%))以外的消息压成一条消息；如果总结失败，会采取兜底压缩方法：硬删除summarizeOptions.keepPercent以外的消息
+   */
+  ratioToSummarize?: number;
+  /**
+   * 总结消息时的配置项
+   * @default { keepPercent: 0.2, model: undefined, systemPrompt: "总结历史消息" }
+   */
+  summarizeOptions?: Compact.SummarizeOptions;
+}) => Promise<void>;
 //#endregion
 //#region src/ai/helper.d.ts
 /**
@@ -210,6 +271,13 @@ declare const defineTool: (name: AI.ToolDefinition["function"]["name"], descript
  * 从GET /models获取模型名称
  */
 declare const getModelName: (baseUrl: string) => Promise<string>;
+/**
+ * 根据上下文里的中/英文/多模态消息，估算出可能消耗的token
+ * - 单词 ≈ 1.5token
+ * - 标点/空白等非词字符每 4 个 ≈ 1token
+ * - 图片/音频/视频/文件 ≈ 10000token（不好估算，取个较大的值）
+ */
+declare const estimateTokens: (messages?: AI.Message[]) => number;
 //#endregion
 //#region src/dom/logger.d.ts
 /**
@@ -230,18 +298,11 @@ interface LoggerOptions {
 /**
  * 带额外信息的 console.log
  *
- * **直接调用**：使用默认选项打印消息
- * @param messages - 日志消息，支持多条
- *
  * **预配置**：先传入选项返回 logger 函数，再调用打印
  * @param options - 配置选项
  * @returns 配置后的 logger 函数
  *
  * @example
- * // 直接调用（默认显示时间和文件名）
- * logger("调试信息"); // "[14:30:00] [index.ts:15:2] 调试信息"
- * logger("消息1", "消息2"); // "[14:30:00] [index.ts:15:2] 消息1 消息2"
- *
  * // 预配置后调用
  * const myLogger = logger({ withTime: true, withFileName: true });
  * myLogger("一段消息", "另一段消息"); // "[18:59:47] [index.ts:137:2] 一段消息 另一段消息"
@@ -251,6 +312,17 @@ interface LoggerOptions {
  * plainLogger("纯文件名前缀"); // "[index.ts:15:2] 纯文件名前缀"
  */
 declare function logger(options?: LoggerOptions): (...messages: any[]) => void;
+/**
+ * 带额外信息的 console.log
+ *
+ * **直接调用**：使用默认选项打印消息
+ * @param messages - 日志消息，支持多条
+ *
+ * @example
+ * // 直接调用（默认显示时间和文件名）
+ * logger("调试信息"); // "[14:30:00] [index.ts:15:2] 调试信息"
+ * logger("消息1", "消息2"); // "[14:30:00] [index.ts:15:2] 消息1 消息2"
+ */
 declare function logger(...messages: any[]): void;
 //#endregion
 //#region src/function/loop-until.d.ts
@@ -841,4 +913,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { AI, CamelToSnake, Capitalize, type ChatCompletions, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactStr, debounce, decapitalize, defineModel, defineTool, extractErrorMessage, fetcher, getModelName, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { AI, CamelToSnake, Capitalize, type ChatCompletions, type Compact, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compact, compactStr, debounce, decapitalize, defineModel, defineTool, estimateTokens, extractErrorMessage, fetcher, getModelName, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
