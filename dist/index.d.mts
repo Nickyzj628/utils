@@ -211,7 +211,7 @@ declare namespace Compact {
   type ReplacerOfToolResultContent = (content: AI.Message["content"]) => AI.Message["content"];
   type ReplacerOfMediaContent = (content: AI.Message["content"]) => AI.Message["content"];
   type SummarizeOptions = {
-    /** 不总结最新的X%条消息 */keepPercent: number; /** 用什么模型总结 */
+    /** 保留最新的X条消息不做总结 */keepCount: number; /** 用什么模型总结 */
     model: AI.Model; /** 用于指导大模型如何总结消息的提示词 */
     systemPrompt: string;
   };
@@ -227,7 +227,7 @@ declare const compactMessages: (messages: AI.Message[], model: AI.Model, options
    * 上下文>总上下文*ratio时压缩工具调用结果
    * @default 0.6
    */
-  ratioOfCompactToolResult?: number;
+  ratioToCompactToolResult?: number;
   /**
    * 如何压缩工具调用结果，例如让其他模型返回精简后的工具结果
    * @default (content) => "（已被消费）"
@@ -237,7 +237,7 @@ declare const compactMessages: (messages: AI.Message[], model: AI.Model, options
    * 上下文>总上下文*ratio时压缩图片/音频/视频消息
    * @default 0.7
    */
-  ratioOfCompactMedia?: number;
+  ratioToCompactMedia?: number;
   /**
    * 如何压缩媒体消息，例如让其他模型用自然语言简短描述一遍
    * @default (content) => "（已被丢弃）"
@@ -246,14 +246,14 @@ declare const compactMessages: (messages: AI.Message[], model: AI.Model, options
   /**
    * 上下文>总上下文*ratio时总结消息
    * @default 0.8
-   * @remarks 如果总结成功，会把summarizeOptions.keepPercent(默认0.2(20%))以外的消息压成一条消息；如果总结失败，会采取兜底压缩方法：硬删除summarizeOptions.keepPercent以外的消息
+   * @remarks 如果总结成功，会把summarizeOptions.keepCount(默认10)以前的消息压成一条消息；如果总结失败，会采取兜底压缩方法：硬删除summarizeOptions.keepCount以前的消息
    */
-  ratioOfSummarize?: number;
+  ratioToSummarize?: number;
   /**
    * 总结消息时的配置项
-   * @default { keepPercent: 0.2, model: undefined, systemPrompt: "总结历史消息" }
+   * @default { keepCount: 10, model: undefined, systemPrompt: "总结历史消息" }
    */
-  summarizeOptions?: Compact.SummarizeOptions;
+  summarizeOptions?: Partial<Compact.SummarizeOptions>;
 }) => Promise<void>;
 //#endregion
 //#region src/ai/helper.d.ts
@@ -827,6 +827,28 @@ declare const qs: {
   }) => string;
 };
 //#endregion
+//#region src/string/xml.d.ts
+/**
+ * 创建XML标签包裹的文本
+ * @param tagName 标签名
+ * @param content 标签内容
+ * @returns `<tagName>\ncontent\n</tagName>`
+ * @example
+ * createXMLTag("summary", "摘要内容") // "<summary>\n摘要内容\n</summary>"
+ */
+declare const createXMLTag: (tagName: string, content: string) => string;
+/**
+ * 检测文本中是否含有XML标签
+ * @param text 待检测文本
+ * @param allowedTags 允许的标签名白名单（不区分大小写），不传时任何XML标签都会返回true
+ * @returns 含有不在白名单中的XML标签时返回true
+ * @example
+ * hasXmlTags("纯文本") // false
+ * hasXmlTags("<summary>摘要</summary>", ["summary"]) // false
+ * hasXmlTags("<system-reminder>提醒</system-reminder>", ["summary"]) // true
+ */
+declare const hasXmlTags: (text: string, allowedTags?: string[]) => boolean;
+//#endregion
 //#region src/time/debounce.d.ts
 /**
  * 防抖：在指定时间内只执行最后一次调用
@@ -913,4 +935,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { AI, CamelToSnake, Capitalize, type ChatCompletions, type Compact, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactMessages, compactStr, debounce, decapitalize, defineModel, defineTool, estimateTokens, extractErrorMessage, fetcher, getModelName, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { AI, CamelToSnake, Capitalize, type ChatCompletions, type Compact, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactMessages, compactStr, createXMLTag, debounce, decapitalize, defineModel, defineTool, estimateTokens, extractErrorMessage, fetcher, getModelName, getRealURL, hasXmlTags, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };

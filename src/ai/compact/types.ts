@@ -10,8 +10,8 @@ export namespace Compact {
 	) => AI.Message["content"];
 
 	export type SummarizeOptions = {
-		/** 不总结最新的X%条消息 */
-		keepPercent: number;
+		/** 保留最新的X条消息不做总结 */
+		keepCount: number;
 		/** 用什么模型总结 */
 		model: AI.Model;
 		/** 用于指导大模型如何总结消息的提示词 */
