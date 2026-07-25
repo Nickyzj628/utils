@@ -170,9 +170,9 @@
 <li><a href="../modules/ai.Compact.html">Compact</a></li>
 <li><a href="" aria-current="page">SummarizeOptions</a></li></ul>
 <h1>Type Alias SummarizeOptions</h1></div>
-<div class="tsd-signature"><span class="tsd-signature-keyword">type</span> <span class="tsd-kind-type-alias">SummarizeOptions</span> <span class="tsd-signature-symbol">=</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#keeppercent">keepPercent</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#model">model</a><span class="tsd-signature-symbol">:</span> <a href="ai.AI.Model.html" class="tsd-signature-type tsd-kind-type-alias">Model</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#systemprompt">systemPrompt</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
+<div class="tsd-signature"><span class="tsd-signature-keyword">type</span> <span class="tsd-kind-type-alias">SummarizeOptions</span> <span class="tsd-signature-symbol">=</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#keepcount">keepCount</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#model">model</a><span class="tsd-signature-symbol">:</span> <a href="ai.AI.Model.html" class="tsd-signature-type tsd-kind-type-alias">Model</a><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#systemprompt">systemPrompt</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/7cc7742b2aec16518f5ed8ac010a88b6a1dccf8f/src/ai/compact/types.ts#L12">ai/compact/types.ts:12</a></li></ul></aside>
+<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/82121dbaa823c0645d536e20b283bd2df6d416ed/src/ai/compact/types.ts#L12">ai/compact/types.ts:12</a></li></ul></aside>
 <section class="tsd-panel-group tsd-index-group">
 <section class="tsd-panel tsd-index-panel">
 <details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
@@ -180,7 +180,7 @@
 <div class="tsd-accordion-details">
 <section class="tsd-index-section">
 <h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-index-list"><a href="#keeppercent" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>keep<wbr/>Percent</span></a>
+<div class="tsd-index-list"><a href="#keepcount" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>keep<wbr/>Count</span></a>
 <a href="#model" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a>
 <a href="#systemprompt" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>system<wbr/>Prompt</span></a>
 </div></section></div></details></section></section>
@@ -188,26 +188,26 @@
 <h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
 <section>
 <section class="tsd-panel tsd-member">
-<h3 class="tsd-anchor-link" id="keeppercent"><span>keep<wbr/>Percent</span><a href="#keeppercent" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
-<div class="tsd-signature"><span class="tsd-kind-property">keepPercent</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
-<div class="tsd-comment tsd-typography"><p>不总结最新的X%条消息</p>
+<h3 class="tsd-anchor-link" id="keepcount"><span>keep<wbr/>Count</span><a href="#keepcount" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">keepCount</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>保留最新的X条消息不做总结</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/7cc7742b2aec16518f5ed8ac010a88b6a1dccf8f/src/ai/compact/types.ts#L14">ai/compact/types.ts:14</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/82121dbaa823c0645d536e20b283bd2df6d416ed/src/ai/compact/types.ts#L14">ai/compact/types.ts:14</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="model"><span>model</span><a href="#model" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">model</span><span class="tsd-signature-symbol">:</span> <a href="ai.AI.Model.html" class="tsd-signature-type tsd-kind-type-alias">Model</a></div>
 <div class="tsd-comment tsd-typography"><p>用什么模型总结</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/7cc7742b2aec16518f5ed8ac010a88b6a1dccf8f/src/ai/compact/types.ts#L16">ai/compact/types.ts:16</a></li></ul></aside></section>
+<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/82121dbaa823c0645d536e20b283bd2df6d416ed/src/ai/compact/types.ts#L16">ai/compact/types.ts:16</a></li></ul></aside></section>
 <section class="tsd-panel tsd-member">
 <h3 class="tsd-anchor-link" id="systemprompt"><span>system<wbr/>Prompt</span><a href="#systemprompt" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
 <div class="tsd-signature"><span class="tsd-kind-property">systemPrompt</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 <div class="tsd-comment tsd-typography"><p>用于指导大模型如何总结消息的提示词</p>
 </div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/7cc7742b2aec16518f5ed8ac010a88b6a1dccf8f/src/ai/compact/types.ts#L18">ai/compact/types.ts:18</a></li></ul></aside></section></section></details></div>
+<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/82121dbaa823c0645d536e20b283bd2df6d416ed/src/ai/compact/types.ts#L18">ai/compact/types.ts:18</a></li></ul></aside></section></section></details></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
@@ -224,7 +224,7 @@
 <h3>On This Page</h3></summary>
 <div class="tsd-accordion-details">
 <details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
-<div><a href="#keeppercent"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>keep<wbr/>Percent</span></a><a href="#model"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a><a href="#systemprompt"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>system<wbr/>Prompt</span></a></div></details></div></details></div>
+<div><a href="#keepcount"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>keep<wbr/>Count</span></a><a href="#model"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>model</span></a><a href="#systemprompt"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>system<wbr/>Prompt</span></a></div></details></div></details></div>
 <div class="site-menu">
 <nav class="tsd-navigation"><a href="../modules.html">@nickyzj2023/utils</a>
 <ul class="tsd-small-nested-navigation" id="tsd-nav-container">

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>pickBy | @nickyzj2023/utils</title><meta name="description" content="Documentation for @nickyzj2023/utils"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><style>
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>createXMLTag | @nickyzj2023/utils</title><meta name="description" content="Documentation for @nickyzj2023/utils"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><style>
 @media (prefers-color-scheme: dark) {
   :root {
     --md-sys-color-primary: #f6be46;
@@ -166,41 +166,35 @@
 <div class="col-content">
 <div class="tsd-page-title">
 <ul class="tsd-breadcrumb" aria-label="Breadcrumb">
-<li><a href="../modules/object.html">object</a></li>
-<li><a href="" aria-current="page">pickBy</a></li></ul>
-<h1>Function pickBy</h1></div>
+<li><a href="../modules/string.html">string</a></li>
+<li><a href="" aria-current="page">createXMLTag</a></li></ul>
+<h1>Function createXMLTag</h1></div>
 <section class="tsd-panel">
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="pickby"><span class="tsd-kind-call-signature">pickBy</span><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#pickbyt">T</a> <span class="tsd-signature-keyword">extends</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">obj</span><span class="tsd-signature-symbol">:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#pickbyt">T</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">shouldPick</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">key</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-keyword">keyof</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#pickbyt">T</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#pickbyt">T</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-keyword">keyof</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#pickbyt">T</a><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#pickbyt">T</a><span class="tsd-signature-symbol">&gt;</span><a href="#pickby" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="createxmltag"><span class="tsd-kind-call-signature">createXMLTag</span><span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">tagName</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">content</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><a href="#createxmltag" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>从对象中选取满足条件的键值对，返回仅包含这些键的新对象</p>
+<div class="tsd-comment tsd-typography"><p>创建XML标签包裹的文本</p>
 </div>
-<section class="tsd-panel">
-<h4>Type Parameters</h4>
-<ul class="tsd-type-parameter-list">
-<li><span id="pickbyt"><span class="tsd-kind-type-parameter">T</span> <span class="tsd-signature-keyword">extends</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></span>
-<div class="tsd-comment tsd-typography"><p>源对象的类型</p>
-</div></li></ul></section>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">obj</span>: <a class="tsd-signature-type tsd-kind-type-parameter" href="#pickbyt">T</a></span>
-<div class="tsd-comment tsd-typography"><p>源对象</p>
+<li><span><span class="tsd-kind-parameter">tagName</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>标签名</p>
 </div></li>
-<li><span><span class="tsd-kind-parameter">shouldPick</span>: <span class="tsd-signature-symbol">(</span><span class="tsd-kind-parameter">key</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-keyword">keyof</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#pickbyt">T</a><span class="tsd-signature-symbol">,</span> <span class="tsd-kind-parameter">value</span><span class="tsd-signature-symbol">:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#pickbyt">T</a><span class="tsd-signature-symbol">[</span><span class="tsd-signature-keyword">keyof</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#pickbyt">T</a><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">)</span> <span class="tsd-signature-symbol">=&gt;</span> <span class="tsd-signature-type">boolean</span></span>
-<div class="tsd-comment tsd-typography"><p>判断函数，返回 <code>true</code> 时保留该字段</p>
+<li><span><span class="tsd-kind-parameter">content</span>: <span class="tsd-signature-type">string</span></span>
+<div class="tsd-comment tsd-typography"><p>标签内容</p>
 </div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#pickbyt">T</a><span class="tsd-signature-symbol">&gt;</span></h4><p>仅包含满足条件的键值对的新对象</p>
+<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4><p><code>&lt;tagName&gt;\ncontent\n&lt;/tagName&gt;</code></p>
 
 <div class="tsd-comment tsd-typography">
 <div class="tsd-tag-example">
-<h4 class="tsd-anchor-link" id="example">Example<a href="#example" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">user</span><span class="hl-2"> = {</span><br/><span class="hl-2"> </span><span class="hl-5">id:</span><span class="hl-2"> </span><span class="hl-9">1</span><span class="hl-2">,</span><br/><span class="hl-2"> </span><span class="hl-5">name:</span><span class="hl-2"> </span><span class="hl-3">&quot;Alice&quot;</span><span class="hl-2">,</span><br/><span class="hl-2"> </span><span class="hl-5">age:</span><span class="hl-2"> </span><span class="hl-9">25</span><span class="hl-2">,</span><br/><span class="hl-2"> </span><span class="hl-5">password:</span><span class="hl-2"> </span><span class="hl-3">&quot;secret&quot;</span><br/><span class="hl-2">};</span><br/><span class="hl-0">// { id: 1, age: 25 }</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">numericFields</span><span class="hl-2"> = </span><span class="hl-1">pickBy</span><span class="hl-2">(</span><span class="hl-5">user</span><span class="hl-2">, (</span><span class="hl-5">key</span><span class="hl-2">, </span><span class="hl-5">value</span><span class="hl-2">) </span><span class="hl-6">=&gt;</span><span class="hl-2"> </span><span class="hl-6">typeof</span><span class="hl-2"> </span><span class="hl-5">value</span><span class="hl-2"> === </span><span class="hl-3">&quot;number&quot;</span><span class="hl-2">);</span>
+<h4 class="tsd-anchor-link" id="example">Example<a href="#example" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-1">createXMLTag</span><span class="hl-2">(</span><span class="hl-3">&quot;summary&quot;</span><span class="hl-2">, </span><span class="hl-3">&quot;摘要内容&quot;</span><span class="hl-2">) </span><span class="hl-0">// &quot;&lt;summary&gt;\n摘要内容\n&lt;/summary&gt;&quot;</span>
 </code><button type="button">Copy</button></pre>
 
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/82121dbaa823c0645d536e20b283bd2df6d416ed/src/object/pick.ts#L55">object/pick.ts:55</a></li></ul></aside></div></li></ul></section></div>
+<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/82121dbaa823c0645d536e20b283bd2df6d416ed/src/string/xml.ts#L9">string/xml.ts:9</a></li></ul></aside></div></li></ul></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
