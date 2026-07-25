@@ -221,7 +221,7 @@ declare namespace Compact {
 /**
  * 自动优化上下文，类似AI Coding Agent的/compact命令
  */
-declare const compact: (messages: AI.Message[], model: AI.Model, options?: {
+declare const compactMessages: (messages: AI.Message[], model: AI.Model, options?: {
   /** 提供token消耗情况时，能更准确地判断上下文是否达到阈值 */usage?: ChatCompletions.Usage;
   /**
    * 上下文>总上下文*ratio时压缩工具调用结果
@@ -237,7 +237,7 @@ declare const compact: (messages: AI.Message[], model: AI.Model, options?: {
    * 上下文>总上下文*ratio时压缩图片/音频/视频消息
    * @default 0.7
    */
-  ratioToCompactMedia?: number;
+  ratioOfCompactMedia?: number;
   /**
    * 如何压缩媒体消息，例如让其他模型用自然语言简短描述一遍
    * @default (content) => "（已被丢弃）"
@@ -248,7 +248,7 @@ declare const compact: (messages: AI.Message[], model: AI.Model, options?: {
    * @default 0.8
    * @remarks 如果总结成功，会把summarizeOptions.keepPercent(默认0.2(20%))以外的消息压成一条消息；如果总结失败，会采取兜底压缩方法：硬删除summarizeOptions.keepPercent以外的消息
    */
-  ratioToSummarize?: number;
+  ratioOfSummarize?: number;
   /**
    * 总结消息时的配置项
    * @default { keepPercent: 0.2, model: undefined, systemPrompt: "总结历史消息" }
@@ -913,4 +913,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { AI, CamelToSnake, Capitalize, type ChatCompletions, type Compact, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compact, compactStr, debounce, decapitalize, defineModel, defineTool, estimateTokens, extractErrorMessage, fetcher, getModelName, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { AI, CamelToSnake, Capitalize, type ChatCompletions, type Compact, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactMessages, compactStr, debounce, decapitalize, defineModel, defineTool, estimateTokens, extractErrorMessage, fetcher, getModelName, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };

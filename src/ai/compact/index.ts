@@ -113,7 +113,7 @@ const hardDeleteOldMessages = (messages: AI.Message[], keepPercent: number) => {
 /**
  * 自动优化上下文，类似AI Coding Agent的/compact命令
  */
-export const compact = async (
+export const compactMessages = async (
 	messages: AI.Message[],
 	model: AI.Model,
 	options?: {
@@ -135,7 +135,7 @@ export const compact = async (
 		 * 上下文>总上下文*ratio时压缩图片/音频/视频消息
 		 * @default 0.7
 		 */
-		ratioToCompactMedia?: number;
+		ratioOfCompactMedia?: number;
 		/**
 		 * 如何压缩媒体消息，例如让其他模型用自然语言简短描述一遍
 		 * @default (content) => "（已被丢弃）"
@@ -147,7 +147,7 @@ export const compact = async (
 		 * @default 0.8
 		 * @remarks 如果总结成功，会把summarizeOptions.keepPercent(默认0.2(20%))以外的消息压成一条消息；如果总结失败，会采取兜底压缩方法：硬删除summarizeOptions.keepPercent以外的消息
 		 */
-		ratioToSummarize?: number;
+		ratioOfSummarize?: number;
 		/**
 		 * 总结消息时的配置项
 		 * @default { keepPercent: 0.2, model: undefined, systemPrompt: "总结历史消息" }
@@ -161,10 +161,10 @@ export const compact = async (
 		ratioOfCompactToolResult = 0.6,
 		replacerOfToolResultContent = () => "已被消费",
 
-		ratioToCompactMedia = 0.7,
+		ratioOfCompactMedia = 0.7,
 		replacerOfMediaContent = () => "已被丢弃",
 
-		ratioToSummarize = 0.8,
+		ratioOfSummarize = 0.8,
 		summarizeOptions,
 	} = options ?? {};
 	const context = model?.context ?? 128000;
@@ -176,12 +176,12 @@ export const compact = async (
 	}
 
 	// 上下文 > 总上下文*70% => 压缩图片/音频/视频消息
-	if (tokens > context * ratioToCompactMedia) {
+	if (tokens > context * ratioOfCompactMedia) {
 		softDeleteOldMediaMessages(messages, replacerOfMediaContent);
 	}
 
 	// 上下文 > 总上下文*80% => 总结消息
-	if (tokens > context * ratioToSummarize) {
+	if (tokens > context * ratioOfSummarize) {
 		const { keepPercent = 0.2, systemPrompt = "总结历史消息" } =
 			summarizeOptions ?? {};
 
