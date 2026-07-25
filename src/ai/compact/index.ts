@@ -152,7 +152,7 @@ export const compactMessages = async (
 		 * 总结消息时的配置项
 		 * @default { keepPercent: 0.2, model: undefined, systemPrompt: "总结历史消息" }
 		 */
-		summarizeOptions?: Compact.SummarizeOptions;
+		summarizeOptions?: Partial<Compact.SummarizeOptions>;
 	},
 ) => {
 	const {
