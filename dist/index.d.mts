@@ -832,11 +832,12 @@ declare const qs: {
  * 创建XML标签包裹的文本
  * @param tagName 标签名
  * @param content 标签内容
+ * @param props 标签属性
  * @returns `<tagName>\ncontent\n</tagName>`
  * @example
- * createXMLTag("summary", "摘要内容") // "<summary>\n摘要内容\n</summary>"
+ * createXMLText("summary", "摘要内容", { updated: "xxx" }) // "<summary updated="xxx">\n摘要内容\n</summary>"
  */
-declare const createXMLTag: (tagName: string, content: string) => string;
+declare const createXMLText: (tagName: string, content: any, props?: Record<string, any>) => string;
 /**
  * 检测文本中是否含有XML标签
  * @param text 待检测文本
@@ -935,4 +936,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { AI, CamelToSnake, Capitalize, type ChatCompletions, type Compact, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactMessages, compactStr, createXMLTag, debounce, decapitalize, defineModel, defineTool, estimateTokens, extractErrorMessage, fetcher, getModelName, getRealURL, hasXmlTags, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { AI, CamelToSnake, Capitalize, type ChatCompletions, type Compact, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactMessages, compactStr, createXMLText, debounce, decapitalize, defineModel, defineTool, estimateTokens, extractErrorMessage, fetcher, getModelName, getRealURL, hasXmlTags, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };

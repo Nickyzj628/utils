@@ -1,6 +1,6 @@
 import { logger } from "../../dom";
 import { to } from "../../network";
-import { createXMLTag } from "../../string";
+import { createXMLText } from "../../string";
 import { type ChatCompletions, chatCompletions } from "../chatCompletions";
 import { estimateTokens } from "../helper";
 import type { AI } from "../types";
@@ -139,7 +139,7 @@ const summarizeMessages = async (
 	}
 	messages.splice(firstIndex, 0, {
 		role: "user",
-		content: createXMLTag("summary", summarized.content),
+		content: createXMLText("summary", summarized.content),
 	});
 };
 

@@ -2,12 +2,22 @@
  * 创建XML标签包裹的文本
  * @param tagName 标签名
  * @param content 标签内容
+ * @param props 标签属性
  * @returns `<tagName>\ncontent\n</tagName>`
  * @example
- * createXMLTag("summary", "摘要内容") // "<summary>\n摘要内容\n</summary>"
+ * createXMLText("summary", "摘要内容", { updated: "xxx" }) // "<summary updated="xxx">\n摘要内容\n</summary>"
  */
-export const createXMLTag = (tagName: string, content: string): string =>
-	`<${tagName}>\n${content}\n</${tagName}>`;
+export const createXMLText = (
+	tagName: string,
+	content: any,
+	props: Record<string, any> = {},
+): string => {
+	const propStrs = Object.entries(props).map(
+		([key, value]) => `${key}="${value}"`,
+	);
+
+	return `<${tagName}${propStrs.length > 0 ? ` ${propStrs.join(" ")}` : ""}>\n${content}\n</${tagName}>`;
+};
 
 /**
  * 检测文本中是否含有XML标签
