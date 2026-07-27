@@ -275,7 +275,7 @@ declare const getModelName: (baseUrl: string) => Promise<string>;
  * 根据上下文里的中/英文/多模态消息，估算出可能消耗的token
  * - 单词 ≈ 1.5token
  * - 标点/空白等非词字符每 4 个 ≈ 1token
- * - 图片/音频/视频/文件 ≈ 10000token（不好估算，取个较大的值）
+ * - 图片/音频/视频/文件 ≈ 4096token（不好估算，取个较大的值）
  */
 declare const estimateTokens: (messages?: AI.Message[]) => number;
 //#endregion
@@ -831,7 +831,7 @@ declare const qs: {
 /**
  * 创建XML标签包裹的文本
  * @param tagName 标签名
- * @param content 标签内容
+ * @param content 标签内容，支持嵌套createXMLText()
  * @param props 标签属性
  * @returns `<tagName>\ncontent\n</tagName>`
  * @example

@@ -1,7 +1,7 @@
 /**
  * 创建XML标签包裹的文本
  * @param tagName 标签名
- * @param content 标签内容
+ * @param content 标签内容，支持嵌套createXMLText()
  * @param props 标签属性
  * @returns `<tagName>\ncontent\n</tagName>`
  * @example
