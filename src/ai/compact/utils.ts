@@ -1,11 +1,11 @@
-import { hasXmlTags } from "../../string";
+import { extractXmlTags } from "../../string";
 import type { AI } from "../types";
 
 /**
  * 判断消息是否可被总结
  * @remarks
  * - 跳过系统消息
- * - 跳过content含有第三方XML标签的消息（允许纯文本、`<summary>`标签、多模态消息）
+ * - 跳过content含有第三方XML标签的消息（允许`<summary>`标签、纯文本、多模态消息）
  */
 export const isSummarizableMessage = (message: AI.Message): boolean => {
 	if (message.role === "system") {
@@ -25,7 +25,8 @@ export const isSummarizableMessage = (message: AI.Message): boolean => {
 		return false;
 	}
 
-	return !hasXmlTags(text, ["summary"]);
+	const tags = extractXmlTags(text);
+	return tags.length === 0 || tags.every((tag) => tag === "summary");
 };
 
 /**
