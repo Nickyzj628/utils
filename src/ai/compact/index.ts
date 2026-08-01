@@ -17,13 +17,15 @@ const softDeleteToolResults = (
 	messages: AI.Message[],
 	replacer: Compact.ReplacerOfToolResultContent,
 ) => {
-	const deletedCount = messages.reduce((result, message) => {
-		if (message.role === "tool") {
+	// 传入的messages是顶层切分后的"可压缩区"（已排除倒数keepCount条），全量处理即可
+	// 注意：软删除只替换content不删除消息，不会拆散assistant(tool_calls) + tool配对组
+	let deletedCount = 0;
+	for (const message of messages) {
+		if (message?.role === "tool") {
 			message.content = replacer(message.content);
-			result++;
+			deletedCount++;
 		}
-		return result;
-	}, 0);
+	}
 
 	if (deletedCount > 0) {
 		logger(`软删除了${deletedCount}条工具调用结果消息`);
@@ -36,16 +38,18 @@ const softDeleteOldMediaMessages = (
 ) => {
 	const mediaTypes = ["image_url", "input_audio", "video_url"];
 
-	const deletedCount = messages.reduce((result, message) => {
+	// 传入的messages是顶层切分后的"可压缩区"（已排除倒数keepCount条），全量处理即可
+	let deletedCount = 0;
+	for (const message of messages) {
 		if (
+			message &&
 			Array.isArray(message.content) &&
 			message.content.some((part) => mediaTypes.includes(part.type))
 		) {
 			message.content = replacer(message.content);
-			result++;
+			deletedCount++;
 		}
-		return result;
-	}, 0);
+	}
 
 	if (deletedCount > 0) {
 		logger(`软删除了${deletedCount}条旧图片/音频/视频消息`);
@@ -56,27 +60,23 @@ const summarizeMessages = async (
 	messages: AI.Message[],
 	options: Compact.SummarizeOptions,
 ) => {
-	const { model, keepCount, systemPrompt } = options ?? {};
+	const { model, systemPrompt } = options ?? {};
 
-	// 保留最近keepCount条消息不做总结
-	let endIndex = messages.length - keepCount;
+	// 传入的messages是顶层切分后的"可压缩区"（已排除倒数keepCount条，
+	// 且切点已由alignToolGroupBoundary对齐），无需再计算边界
 
 	// 消息太少时不需要总结
-	if (endIndex <= 0) {
+	if (messages.length === 0) {
 		logger("消息太少，无需总结");
 		return;
 	}
 
-	// 对齐配对组边界，避免拆散assistant(tool_calls) + tool
-	endIndex = alignToolGroupBoundary(messages, endIndex);
-
 	// 收集可以被总结的消息
 	// - 跳过系统消息
 	// - 跳过content含有第三方XML标签的消息（允许纯文本、<summary>标签、多模态消息）
-	// - 跳过倒数keepCount条消息
 	const summarizableIndices: number[] = [];
 	const summarizingMessages: AI.Message[] = [];
-	for (let i = 0; i < endIndex; i++) {
+	for (let i = 0; i < messages.length; i++) {
 		const message = messages[i];
 		if (!message) {
 			continue;
@@ -85,7 +85,7 @@ const summarizeMessages = async (
 		// assistant(tool_calls) + tool配对组需整体可总结，避免拆散导致API 400
 		if (hasToolCalls(message)) {
 			let j = i + 1;
-			while (j < endIndex && messages[j]?.role === "tool") {
+			while (j < messages.length && messages[j]?.role === "tool") {
 				j++;
 			}
 			const group = messages.slice(i, j);
@@ -120,13 +120,7 @@ const summarizeMessages = async (
 		{ role: "user", content: "开始总结上下文" },
 	);
 
-	const [error, summarized] = await to(
-		chatCompletions(model, summarizingMessages),
-	);
-	if (error) {
-		logger(`总结失败：${error.message}`);
-		return;
-	}
+	const summarized = await chatCompletions(model, summarizingMessages);
 
 	// 替换原始消息数组中被总结的消息
 	// 从后往前删除以避免索引偏移，在首个被总结消息的位置插入摘要
@@ -143,22 +137,18 @@ const summarizeMessages = async (
 	});
 };
 
-const hardDeleteOldMessages = (messages: AI.Message[], keepCount: number) => {
-	// 从第一条user消息开始
+const hardDeleteOldMessages = (messages: AI.Message[]) => {
+	// 传入的messages是顶层切分后的"可压缩区"（已排除倒数keepCount条）
+	// 从第一条user消息开始删除，保留开头的system消息
 	const startIndex = messages.findIndex((message) => message.role === "user");
-	// 保留最近keepCount条消息
-	let endIndex = messages.length - keepCount;
 
-	// 消息太少，没有可删除的余量
-	if (endIndex <= startIndex) {
+	// 压缩区里没有user消息时，没有可删除的余量
+	if (startIndex < 0) {
 		logger("消息太少，无需硬删除");
 		return;
 	}
 
-	// 对齐配对组边界，避免拆散assistant(tool_calls) + tool
-	endIndex = alignToolGroupBoundary(messages, endIndex);
-
-	const deletedCount = endIndex - startIndex;
+	const deletedCount = messages.length - startIndex;
 	messages.splice(startIndex, deletedCount);
 	logger(`硬删除了${deletedCount}条较早的消息`);
 };
@@ -172,6 +162,13 @@ export const compactMessages = async (
 	options?: {
 		/** 提供token消耗情况时，能更准确地判断上下文是否达到阈值 */
 		usage?: ChatCompletions.Usage;
+
+		/**
+		 * 各种压缩方式统一保留的最近消息条数
+		 * @default 10
+		 * @remarks 压缩工具调用结果、压缩媒体消息、总结消息、硬删除兜底都会保留最近keepCount条消息不处理
+		 */
+		keepCount?: number;
 
 		/**
 		 * 上下文>总上下文*ratio时压缩工具调用结果
@@ -198,18 +195,20 @@ export const compactMessages = async (
 		/**
 		 * 上下文>总上下文*ratio时总结消息
 		 * @default 0.8
-		 * @remarks 如果总结成功，会把summarizeOptions.keepCount(默认10)以前的消息压成一条消息；如果总结失败，会采取兜底压缩方法：硬删除summarizeOptions.keepCount以前的消息
+		 * @remarks 如果总结成功，会把keepCount(默认10，见顶层选项)以前的消息压成一条消息；如果总结失败，会采取兜底压缩方法：硬删除keepCount以前的消息
 		 */
 		ratioToSummarize?: number;
 		/**
 		 * 总结消息时的配置项
-		 * @default { keepCount: 10, model: undefined, systemPrompt: "总结历史消息" }
+		 * @default { model: undefined, systemPrompt: "总结历史消息" }
 		 */
 		summarizeOptions?: Partial<Compact.SummarizeOptions>;
 	},
-) => {
+): Promise<Compact.CompactResult> => {
 	const {
 		usage,
+
+		keepCount = 10,
 
 		ratioToCompactToolResult = 0.6,
 		replacerOfToolResultContent = () => "已被消费",
@@ -223,30 +222,53 @@ export const compactMessages = async (
 	const context = model?.context ?? 128000;
 	const tokens = usage?.total_tokens ?? estimateTokens(messages);
 
+	const result: Compact.CompactResult = {
+		hasCompactedToolResult: false,
+		hasCompactedMedia: false,
+		hasSummarized: false,
+		hasDeletedOldMessages: false,
+	};
+
+	// 顶层只做一次keepCount切分，内部各压缩方式只处理"可压缩区"，无需各自关心keepCount：
+	// - compressible：前段可压缩区，所有压缩方式只作用于这部分
+	// - reserved：倒数keepCount条保留区，原样保留
+	// 切点先用alignToolGroupBoundary对齐，避免拆散assistant(tool_calls) + tool配对组
+	let endIndex = Math.max(0, messages.length - keepCount);
+	endIndex = alignToolGroupBoundary(messages, endIndex);
+	const compressible = messages.slice(0, endIndex);
+	const reserved = messages.slice(endIndex);
+
 	// 上下文 > 总上下文*60% => 压缩工具调用结果
 	if (tokens > context * ratioToCompactToolResult) {
-		softDeleteToolResults(messages, replacerOfToolResultContent);
+		softDeleteToolResults(compressible, replacerOfToolResultContent);
+		result.hasCompactedToolResult = true;
 	}
 
 	// 上下文 > 总上下文*70% => 压缩图片/音频/视频消息
 	if (tokens > context * ratioToCompactMedia) {
-		softDeleteOldMediaMessages(messages, replacerOfMediaContent);
+		softDeleteOldMediaMessages(compressible, replacerOfMediaContent);
+		result.hasCompactedMedia = true;
 	}
 
 	// 上下文 > 总上下文*80% => 总结消息
 	if (tokens > context * ratioToSummarize) {
-		const { keepCount = 10, systemPrompt = "总结历史消息" } =
-			summarizeOptions ?? {};
+		const { systemPrompt = "总结历史消息" } = summarizeOptions ?? {};
 
 		const [error] = await to(
-			summarizeMessages(messages, { model, keepCount, systemPrompt }),
+			summarizeMessages(compressible, { model, systemPrompt }),
 		);
-		if (!error) {
-			// summarize已经总结足够多的消息，无需兜底
-			return;
+		result.hasSummarized = true;
+		if (error) {
+			// 总结失败，作为兜底硬删除压缩区较早的消息
+			logger(`总结失败（${error.message}），改用硬删除兜底`);
+			hardDeleteOldMessages(compressible);
+			result.hasDeletedOldMessages = true;
 		}
 
-		// 作为兜底，硬删除较早的消息
-		hardDeleteOldMessages(messages, keepCount);
+		// 总结/硬删除会改变压缩区的长度，需把处理后的压缩区+保留区合并回原数组
+		// （软删除只改content，对象引用共享，无需重组）
+		messages.splice(0, messages.length, ...compressible, ...reserved);
 	}
+
+	return result;
 };

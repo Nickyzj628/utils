@@ -211,9 +211,21 @@ declare namespace Compact {
   type ReplacerOfToolResultContent = (content: AI.Message["content"]) => AI.Message["content"];
   type ReplacerOfMediaContent = (content: AI.Message["content"]) => AI.Message["content"];
   type SummarizeOptions = {
-    /** 保留最新的X条消息不做总结 */keepCount: number; /** 用什么模型总结 */
-    model: AI.Model; /** 用于指导大模型如何总结消息的提示词 */
+    /** 用什么模型总结 */model: AI.Model; /** 用于指导大模型如何总结消息的提示词 */
     systemPrompt: string;
+  };
+  /**
+   * compactMessages 的返回值，告知调用方各压缩动作是否执行
+   * @remarks
+   * 这些字段是"操作级"标志：为 true 只代表对应操作已执行，不代表一定产生了效果。
+   * 例如 hasSummarized 为 true 只代表进入了总结流程，是否真的总结成功，
+   * 应由调用方检查消息数组里是否出现含 `<summary>` 标签的消息来判断。
+   */
+  type CompactResult = {
+    /** 是否执行了压缩工具调用结果 */hasCompactedToolResult: boolean; /** 是否执行了压缩图片/音频/视频消息 */
+    hasCompactedMedia: boolean; /** 是否执行了总结消息操作（是否真的总结，请检查消息中是否出现`<summary>`标签） */
+    hasSummarized: boolean; /** 是否执行了兜底硬删除较早消息 */
+    hasDeletedOldMessages: boolean;
   };
 }
 //#endregion
@@ -223,6 +235,12 @@ declare namespace Compact {
  */
 declare const compactMessages: (messages: AI.Message[], model: AI.Model, options?: {
   /** 提供token消耗情况时，能更准确地判断上下文是否达到阈值 */usage?: ChatCompletions.Usage;
+  /**
+   * 各种压缩方式统一保留的最近消息条数
+   * @default 10
+   * @remarks 压缩工具调用结果、压缩媒体消息、总结消息、硬删除兜底都会保留最近keepCount条消息不处理
+   */
+  keepCount?: number;
   /**
    * 上下文>总上下文*ratio时压缩工具调用结果
    * @default 0.6
@@ -246,15 +264,15 @@ declare const compactMessages: (messages: AI.Message[], model: AI.Model, options
   /**
    * 上下文>总上下文*ratio时总结消息
    * @default 0.8
-   * @remarks 如果总结成功，会把summarizeOptions.keepCount(默认10)以前的消息压成一条消息；如果总结失败，会采取兜底压缩方法：硬删除summarizeOptions.keepCount以前的消息
+   * @remarks 如果总结成功，会把keepCount(默认10，见顶层选项)以前的消息压成一条消息；如果总结失败，会采取兜底压缩方法：硬删除keepCount以前的消息
    */
   ratioToSummarize?: number;
   /**
    * 总结消息时的配置项
-   * @default { keepCount: 10, model: undefined, systemPrompt: "总结历史消息" }
+   * @default { model: undefined, systemPrompt: "总结历史消息" }
    */
   summarizeOptions?: Partial<Compact.SummarizeOptions>;
-}) => Promise<void>;
+}) => Promise<Compact.CompactResult>;
 //#endregion
 //#region src/ai/helper.d.ts
 /**
