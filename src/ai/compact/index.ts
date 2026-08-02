@@ -219,7 +219,7 @@ export const compactMessages = async (
 		ratioToSummarize = 0.8,
 		summarizeOptions,
 	} = options ?? {};
-	const context = model?.context ?? 128000;
+	const context = model?.context ?? 131072;
 	const tokens = usage?.total_tokens ?? estimateTokens(messages);
 
 	const result: Compact.CompactResult = {
