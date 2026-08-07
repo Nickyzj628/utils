@@ -1,6 +1,6 @@
 {
 	"name": "@nickyzj2023/utils",
-	"version": "1.0.85",
+	"version": "1.0.86",
 	"type": "module",
 	"main": "dist/index.mjs",
 	"module": "dist/index.mjs",
@@ -17,7 +17,8 @@
 	"scripts": {
 		"build": "tsdown",
 		"docs": "typedoc",
-		"check": "biome check --diagnostic-level=error --write src/"
+		"check": "biome check --diagnostic-level=error --write src/",
+		"prepublish": "pnpm run check && pnpm run build && pnpm run docs"
 	},
 	"repository": {
 		"type": "git",

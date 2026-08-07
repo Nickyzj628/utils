@@ -211,10 +211,10 @@ export const compactMessages = async (
 		keepCount = 10,
 
 		ratioToCompactToolResult = 0.6,
-		replacerOfToolResultContent = () => "已被消费",
+		replacerOfToolResultContent = () => "（工具结果已消费）",
 
 		ratioToCompactMedia = 0.7,
-		replacerOfMediaContent = () => "已被丢弃",
+		replacerOfMediaContent = () => "（消息已过期）",
 
 		ratioToSummarize = 0.8,
 		summarizeOptions,
