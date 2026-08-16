@@ -298,13 +298,6 @@ export async function chatCompletions(
 			...customBody,
 		},
 	});
-	console.log(
-		JSON.stringify(
-			tools?.map((tool) => detachToolArguments(tool)[0]),
-			null,
-			2,
-		),
-	);
 
 	const fn = stream ? streaming : nonStreaming;
 
