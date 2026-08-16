@@ -3,7 +3,6 @@
 // ================================
 
 import { fetcher } from "../network";
-import { pickBy } from "../object";
 import type { AI } from "./types";
 
 /**
@@ -26,17 +25,22 @@ export const defineTool = (
 	properties: AI.ToolDefinition["function"]["parameters"]["properties"],
 	handler: AI.ToolDefinition["handler"],
 ): AI.ToolDefinition => {
+	// 收集property内部填写的required: true，推到外面的required数组
 	const _required: string[] = [];
-	const _properties = pickBy(properties, (key) => {
-		if (key === "required") {
-			_required.push(key);
-			return false;
-		}
-		return true;
-	}) as Omit<
-		AI.ToolDefinition["function"]["parameters"]["properties"],
-		"required"
-	>;
+	const _properties = Object.entries(properties).reduce(
+		(result, [key, property]) => {
+			if ("required" in property) {
+				_required.push(key);
+				delete property.required;
+			}
+			result[key] = property;
+			return result;
+		},
+		{} as Omit<
+			AI.ToolDefinition["function"]["parameters"]["properties"],
+			"required"
+		>,
+	);
 
 	return {
 		type: "function",
