@@ -653,6 +653,33 @@ declare const to: <T, E = Error>(promise: Promise<T>) => Promise<[null, T] | [E,
  */
 declare const randomInt: (min: number, max: number) => number;
 //#endregion
+//#region src/object/diff.d.ts
+type DiffResults = {
+  type: "CREATE" | "UPDATE" | "DELETE";
+  path: string[];
+  value: any;
+}[];
+/**
+ * 比较2个对象，返回两者间的差异（CREATE/UPDATE/DELETE）
+ *
+ * @template T 第一个对象
+ * @template U 第二个对象
+ * @param obj1 要比较的第一个对象
+ * @param obj2 要比较的第二个对象
+ * @param currentPath 当前递归所在的路径
+ *
+ * @example
+ * const obj1 = { a: 1, b: 2 };
+ * const obj2 = { b: 3, c: { d: 4 } };
+ * // [
+ * //   { type: 'DELETE', path: [ 'a' ], value: 1 },
+ * //   { type: 'UPDATE', path: [ 'b' ], value: 3 },
+ * //   { type: 'CREATE', path: [ 'c' ], value: { d: 4 } }
+ * // ]
+ * const result = diffObjects(obj1, obj2);
+ */
+declare const diffObjects: <T extends Record<string, any>, U extends Record<string, any>>(obj1: T, obj2: U, currentPath?: string[], visited?: WeakMap<object, WeakSet<object>>) => DiffResults;
+//#endregion
 //#region src/object/map.d.ts
 type DeepMapKeys<T> = T extends Array<infer U> ? Array<DeepMapKeys<U>> : T extends object ? {
   [key: string]: DeepMapKeys<T[keyof T]>;
@@ -1024,4 +1051,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { AI, CamelToSnake, Capitalize, type ChatCompletions, type Compact, Decapitalize, DeepMapKeys, DeepMapValues, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactMessages, compactStr, createXMLText, debounce, decapitalize, defineModel, defineTool, estimateTokens, extractErrorMessage, extractXmlTags, fetcher, getModelName, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { AI, CamelToSnake, Capitalize, type ChatCompletions, type Compact, Decapitalize, DeepMapKeys, DeepMapValues, DiffResults, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, chatCompletions, compactMessages, compactStr, createXMLText, debounce, decapitalize, defineModel, defineTool, diffObjects, estimateTokens, extractErrorMessage, extractXmlTags, fetcher, getModelName, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };

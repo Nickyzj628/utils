@@ -1,3 +1,4 @@
+export * from "./diff";
 export * from "./map";
 export * from "./merge";
 export * from "./omit";

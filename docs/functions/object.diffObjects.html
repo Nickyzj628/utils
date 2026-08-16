@@ -1,4 +1,4 @@
-<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>mergeObjects | @nickyzj2023/utils</title><meta name="description" content="Documentation for @nickyzj2023/utils"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><style>
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>diffObjects | @nickyzj2023/utils</title><meta name="description" content="Documentation for @nickyzj2023/utils"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><style>
 @media (prefers-color-scheme: dark) {
   :root {
     --md-sys-color-primary: #f6be46;
@@ -167,41 +167,46 @@
 <div class="tsd-page-title">
 <ul class="tsd-breadcrumb" aria-label="Breadcrumb">
 <li><a href="../modules/object.html">object</a></li>
-<li><a href="" aria-current="page">mergeObjects</a></li></ul>
-<h1>Function mergeObjects</h1></div>
+<li><a href="" aria-current="page">diffObjects</a></li></ul>
+<h1>Function diffObjects</h1></div>
 <section class="tsd-panel">
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="mergeobjects"><span class="tsd-kind-call-signature">mergeObjects</span><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#mergeobjectst">T</a> <span class="tsd-signature-keyword">extends</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#mergeobjectsu">U</a> <span class="tsd-signature-keyword">extends</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">obj1</span><span class="tsd-signature-symbol">:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#mergeobjectst">T</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">obj2</span><span class="tsd-signature-symbol">:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#mergeobjectsu">U</a><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#mergeobjectst">T</a> <span class="tsd-signature-symbol">&amp;</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#mergeobjectsu">U</a><a href="#mergeobjects" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="diffobjects"><span class="tsd-kind-call-signature">diffObjects</span><span class="tsd-signature-symbol">&lt;</span><a class="tsd-signature-type tsd-kind-type-parameter" href="#diffobjectst">T</a> <span class="tsd-signature-keyword">extends</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#diffobjectsu">U</a> <span class="tsd-signature-keyword">extends</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">obj1</span><span class="tsd-signature-symbol">:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#diffobjectst">T</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">obj2</span><span class="tsd-signature-symbol">:</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#diffobjectsu">U</a><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">currentPath</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">visited</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">WeakMap</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">WeakSet</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <a href="../types/object.DiffResults.html" class="tsd-signature-type tsd-kind-type-alias">DiffResults</a><a href="#diffobjects" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
-<div class="tsd-comment tsd-typography"><p>深度合并两个对象，规则如下：</p>
-<ol>
-<li>原始值覆盖：如果两个值都是原始类型，则用后者覆盖;</li>
-<li>数组拼接：如果两个值都是数组，则拼接为大数组；</li>
-<li>对象递归合并：如果两个值都是对象，则进行递归深度合并；</li>
-</ol>
+<div class="tsd-comment tsd-typography"><p>比较2个对象，返回两者间的差异（CREATE/UPDATE/DELETE）</p>
 </div>
 <section class="tsd-panel">
 <h4>Type Parameters</h4>
 <ul class="tsd-type-parameter-list">
-<li><span id="mergeobjectst"><span class="tsd-kind-type-parameter">T</span> <span class="tsd-signature-keyword">extends</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></span>
+<li><span id="diffobjectst"><span class="tsd-kind-type-parameter">T</span> <span class="tsd-signature-keyword">extends</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></span>
 <div class="tsd-comment tsd-typography"><p>第一个对象</p>
 </div></li>
-<li><span id="mergeobjectsu"><span class="tsd-kind-type-parameter">U</span> <span class="tsd-signature-keyword">extends</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></span>
+<li><span id="diffobjectsu"><span class="tsd-kind-type-parameter">U</span> <span class="tsd-signature-keyword">extends</span> <span class="tsd-signature-type">Record</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></span>
 <div class="tsd-comment tsd-typography"><p>第二个对象</p>
 </div></li></ul></section>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">obj1</span>: <a class="tsd-signature-type tsd-kind-type-parameter" href="#mergeobjectst">T</a></span>
-<div class="tsd-comment tsd-typography"><p>要合并的第一个对象，相同字段会被 obj2 覆盖</p>
+<li><span><span class="tsd-kind-parameter">obj1</span>: <a class="tsd-signature-type tsd-kind-type-parameter" href="#diffobjectst">T</a></span>
+<div class="tsd-comment tsd-typography"><p>要比较的第一个对象</p>
 </div></li>
-<li><span><span class="tsd-kind-parameter">obj2</span>: <a class="tsd-signature-type tsd-kind-type-parameter" href="#mergeobjectsu">U</a></span>
-<div class="tsd-comment tsd-typography"><p>要合并的第二个对象</p>
-</div></li></ul></div>
-<h4 class="tsd-returns-title">Returns <a class="tsd-signature-type tsd-kind-type-parameter" href="#mergeobjectst">T</a> <span class="tsd-signature-symbol">&amp;</span> <a class="tsd-signature-type tsd-kind-type-parameter" href="#mergeobjectsu">U</a></h4><aside class="tsd-sources">
+<li><span><span class="tsd-kind-parameter">obj2</span>: <a class="tsd-signature-type tsd-kind-type-parameter" href="#diffobjectsu">U</a></span>
+<div class="tsd-comment tsd-typography"><p>要比较的第二个对象</p>
+</div></li>
+<li><span><span class="tsd-kind-parameter">currentPath</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></span>
+<div class="tsd-comment tsd-typography"><p>当前递归所在的路径</p>
+</div></li>
+<li><span><span class="tsd-kind-parameter">visited</span>: <span class="tsd-signature-type">WeakMap</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">,</span> <span class="tsd-signature-type">WeakSet</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = ...</span></span></li></ul></div>
+<h4 class="tsd-returns-title">Returns <a href="../types/object.DiffResults.html" class="tsd-signature-type tsd-kind-type-alias">DiffResults</a></h4>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example">Example<a href="#example" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">obj1</span><span class="hl-2"> = { </span><span class="hl-5">a:</span><span class="hl-2"> </span><span class="hl-9">1</span><span class="hl-2">, </span><span class="hl-5">b:</span><span class="hl-2"> </span><span class="hl-9">2</span><span class="hl-2"> };</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">obj2</span><span class="hl-2"> = { </span><span class="hl-5">b:</span><span class="hl-2"> </span><span class="hl-9">3</span><span class="hl-2">, </span><span class="hl-5">c:</span><span class="hl-2"> { </span><span class="hl-5">d:</span><span class="hl-2"> </span><span class="hl-9">4</span><span class="hl-2"> } };</span><br/><span class="hl-0">// [</span><br/><span class="hl-0">//   { type: &#39;DELETE&#39;, path: [ &#39;a&#39; ], value: 1 },</span><br/><span class="hl-0">//   { type: &#39;UPDATE&#39;, path: [ &#39;b&#39; ], value: 3 },</span><br/><span class="hl-0">//   { type: &#39;CREATE&#39;, path: [ &#39;c&#39; ], value: { d: 4 } }</span><br/><span class="hl-0">// ]</span><br/><span class="hl-6">const</span><span class="hl-2"> </span><span class="hl-7">result</span><span class="hl-2"> = </span><span class="hl-1">diffObjects</span><span class="hl-2">(</span><span class="hl-5">obj1</span><span class="hl-2">, </span><span class="hl-5">obj2</span><span class="hl-2">);</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/c2bdf501fe6531ebf9f01edd7d478ef469d8a525/src/object/merge.ts#L14">object/merge.ts:14</a></li></ul></aside></div></li></ul></section></div>
+<li>Defined in object/diff.ts:28</li></ul></aside></div></li></ul></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
