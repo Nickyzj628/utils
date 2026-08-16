@@ -1,9 +1,11 @@
 //#region src/ai/types.d.ts
 declare namespace AI {
   type Model = {
-    baseUrl: string; /** 不传则自动使用{baseUrl}/models接口的第一个模型 */
+    baseUrl: string;
+    /** 不传则自动使用{baseUrl}/models接口的第一个模型 */
     model?: string;
-    apiKey?: string; /** POST /chat/completions时注入自定义请求体 */
+    apiKey?: string;
+    /** POST /chat/completions时注入自定义请求体 */
     customBody?: Record<string, any>;
     /**
      * 模型支持的消息输入类型
@@ -18,7 +20,8 @@ declare namespace AI {
   };
   type InputType = "text" | "image" | "video" | "audio" | "file";
   type Message = {
-    role: "system" | "user" | "assistant" | "tool" | "function"; /** OpenRouter的思考内容字段，其他供应商的会尽可能合并到该字段内 */
+    role: "system" | "user" | "assistant" | "tool" | "function";
+    /** OpenRouter的思考内容字段，其他供应商的会尽可能合并到该字段内 */
     reasoning?: string | null;
     content: string | ContentPart[];
     tool_calls?: ToolCall[];
@@ -38,7 +41,9 @@ declare namespace AI {
   type AudioContent = {
     type: "input_audio";
     input_audio: {
-      /** 使用公网可访问的音频链接 */url?: string; /** 使用base64 */
+      /** 使用公网可访问的音频链接 */
+      url?: string;
+      /** 使用base64 */
       data?: string;
       format: string;
     };
@@ -59,7 +64,8 @@ declare namespace AI {
         type: "object";
         properties: Record<string, {
           type: string;
-          description?: string; /** 在此处设置的required，发出请求前会自动提到外面去 */
+          description?: string;
+          /** 在此处设置的required，发出请求前会自动提到外面去 */
           required?: boolean;
         }>;
         required?: string[];
@@ -82,8 +88,10 @@ declare namespace ChatCompletions {
   /** chatCompletions的第三个参数 */
   type Options = {
     stream?: boolean;
-    tools?: AI.ToolDefinition[]; /** 工具运行结束后（无论成功失败）的回调，可用于打印日志 */
-    onToolHandled?: (name: string, args: string, result: any) => void; /** 自动压缩上下文 */
+    tools?: AI.ToolDefinition[];
+    /** 工具运行结束后（无论成功失败）的回调，可用于打印日志 */
+    onToolHandled?: (name: string, args: string, result: any) => void;
+    /** 自动压缩上下文 */
     autoCompact?: {};
   };
   /** 非流式POST /chat/completions的响应结果 */
@@ -102,8 +110,11 @@ declare namespace ChatCompletions {
   };
   /** 调用chatCompletions返回的结果，流式/非流式通用 */
   type NonStreamResult = {
-    /** 模型的最终回复内容（多模态时取所有text拼接） */content: string; /** Token 消耗情况 */
-    usage: Usage; /** 原始响应中的其他字段 */
+    /** 模型的最终回复内容（多模态时取所有text拼接） */
+    content: string;
+    /** Token 消耗情况 */
+    usage: Usage;
+    /** 原始响应中的其他字段 */
     [key: string]: any;
   };
   type Usage = {
@@ -130,8 +141,11 @@ declare namespace ChatCompletions {
   };
   /** 流式调用chatCompletions时迭代器产出的数据块 */
   type StreamChunk = {
-    /** 模型流式返回的思考内容增量（仅在生成过程中出现） */reasoning?: string; /** 模型流式返回的内容增量（仅在生成过程中出现） */
-    content?: string; /** Token 消耗情况（仅在最后一帧出现） */
+    /** 模型流式返回的思考内容增量（仅在生成过程中出现） */
+    reasoning?: string;
+    /** 模型流式返回的内容增量（仅在生成过程中出现） */
+    content?: string;
+    /** Token 消耗情况（仅在最后一帧出现） */
     usage?: Usage;
   };
 }
@@ -211,7 +225,9 @@ declare namespace Compact {
   type ReplacerOfToolResultContent = (content: AI.Message["content"]) => AI.Message["content"];
   type ReplacerOfMediaContent = (content: AI.Message["content"]) => AI.Message["content"];
   type SummarizeOptions = {
-    /** 用什么模型总结 */model: AI.Model; /** 用于指导大模型如何总结消息的提示词 */
+    /** 用什么模型总结 */
+    model: AI.Model;
+    /** 用于指导大模型如何总结消息的提示词 */
     systemPrompt: string;
   };
   /**
@@ -222,9 +238,15 @@ declare namespace Compact {
    * 应由调用方检查消息数组里是否出现含 `<summary>` 标签的消息来判断。
    */
   type CompactResult = {
-    /** 是否执行了压缩工具调用结果 */hasCompactedToolResult: boolean; /** 是否执行了压缩图片/音频/视频消息 */
-    hasCompactedMedia: boolean; /** 是否执行了总结消息操作（是否真的总结，请检查消息中是否出现`<summary>`标签） */
-    hasSummarized: boolean; /** 是否执行了兜底硬删除较早消息 */
+    /** 是否执行了压缩工具调用结果 */
+    hasCompactedToolResult: boolean;
+    /** 是否执行了压缩图片/音频/视频消息 */
+    hasCompactedMedia: boolean;
+    /** 是否执行了清理软删除残留的占位消息 */
+    hasClearedSoftDeletedMessages: boolean;
+    /** 是否执行了总结消息操作（是否真的总结，请检查消息中是否出现`<summary>`标签） */
+    hasSummarized: boolean;
+    /** 是否执行了兜底硬删除较早消息 */
     hasDeletedOldMessages: boolean;
   };
 }
@@ -234,7 +256,8 @@ declare namespace Compact {
  * 自动优化上下文，类似AI Coding Agent的/compact命令
  */
 declare const compactMessages: (messages: AI.Message[], model: AI.Model, options?: {
-  /** 提供token消耗情况时，能更准确地判断上下文是否达到阈值 */usage?: ChatCompletions.Usage;
+  /** 提供token消耗情况时，能更准确地判断上下文是否达到阈值 */
+  usage?: ChatCompletions.Usage;
   /**
    * 各种压缩方式统一保留的最近消息条数
    * @default 10
@@ -243,7 +266,7 @@ declare const compactMessages: (messages: AI.Message[], model: AI.Model, options
   keepCount?: number;
   /**
    * 上下文>总上下文*ratio时压缩工具调用结果
-   * @default 0.6
+   * @default 0.5
    */
   ratioToCompactToolResult?: number;
   /**
@@ -253,7 +276,7 @@ declare const compactMessages: (messages: AI.Message[], model: AI.Model, options
   replacerOfToolResultContent?: Compact.ReplacerOfToolResultContent;
   /**
    * 上下文>总上下文*ratio时压缩图片/音频/视频消息
-   * @default 0.7
+   * @default 0.6
    */
   ratioToCompactMedia?: number;
   /**
@@ -261,6 +284,16 @@ declare const compactMessages: (messages: AI.Message[], model: AI.Model, options
    * @default (content) => "（已被丢弃）"
    */
   replacerOfMediaContent?: Compact.ReplacerOfMediaContent;
+  /**
+   * 上下文>总上下文*ratio时清理软删除残留的占位消息
+   * @default 0.7
+   * @remarks
+   * 软删除（ratioToCompactToolResult/ratioToCompactMedia）只替换content不删消息，
+   * 该选项负责把残留的占位消息真正移除。信息在软删除时已丢失，清理不损失任何额外信息。
+   * 阈值应介于ratioToCompactMedia与ratioToSummarize之间：
+   * 太早则媒体软删还没执行、无残留可清；太晚则总结/硬删除兜底已处理整个压缩区，清理失去意义
+   */
+  ratioToClearSoftDeletedMessages?: number;
   /**
    * 上下文>总上下文*ratio时总结消息
    * @default 0.8
@@ -376,7 +409,8 @@ declare const loopUntil: <T>(fn: (count: number) => T | Promise<T>, options?: {
    * 最大循环次数
    * @default 5
    */
-  maxRetries?: number; /** 停止循环条件。如果未传递，则执行 maxRetries 次后退出并返回最后结果 */
+  maxRetries?: number;
+  /** 停止循环条件。如果未传递，则执行 maxRetries 次后退出并返回最后结果 */
   shouldStop?: (result: T) => boolean;
 }) => Promise<T>;
 //#endregion
@@ -529,7 +563,8 @@ declare const getRealURL: (originURL: string) => Promise<string>;
  * 图片压缩选项
  */
 type ImageCompressionOptions = {
-  /** 压缩比率，默认 0.92 */quality?: number;
+  /** 压缩比率，默认 0.92 */
+  quality?: number;
   /**
    * 自定义压缩函数，用于覆盖默认压缩行为
    * @param arrayBuffer 图片的 ArrayBuffer 数据
@@ -636,7 +671,7 @@ type DeepMapKeys<T> = T extends Array<infer U> ? Array<DeepMapKeys<U>> : T exten
  * console.log(result); // { A: { B: 1 } }
  */
 declare const mapKeys: <T>(obj: T, getNewKey: (key: string) => string) => DeepMapKeys<T>;
-type DeepMapValues<T, R> = T extends Array<infer U> ? Array<DeepMapValues<U, R>> : T extends object ? { [K in keyof T]: T[K] extends object ? DeepMapValues<T[K], R> : R } : R;
+type DeepMapValues<T, R> = T extends Array<infer U> ? Array<DeepMapValues<U, R>> : T extends object ? { [K in keyof T]: T[K] extends object ? DeepMapValues<T[K], R> : R; } : R;
 /**
  * 递归处理对象里的 value
  *
@@ -652,7 +687,8 @@ type DeepMapValues<T, R> = T extends Array<infer U> ? Array<DeepMapValues<U, R>>
  * console.log(result); // { a: 2, b: { c: 3 } }
  */
 declare const mapValues: <T, R = any>(obj: T, getNewValue: (value: any, key: string | number) => R, options?: {
-  /** 过滤函数，返回 true 表示保留该字段 */filter?: (value: any, key: string | number) => boolean;
+  /** 过滤函数，返回 true 表示保留该字段 */
+  filter?: (value: any, key: string | number) => boolean;
 }) => DeepMapValues<T, R>;
 //#endregion
 //#region src/object/merge.d.ts
@@ -807,9 +843,9 @@ declare const decapitalize: <S extends string>(s: S) => Decapitalize<S>;
  */
 declare const compactStr: (text?: string, options?: {
   /**
-   * 最大保留长度，超过该长度使用 "..." 替代
-    @default Infinity
-   */
+     * 最大保留长度，超过该长度使用 "..." 替代
+      @default Infinity
+     */
   maxLength?: number;
   /**
    * 是否将换行符替换为字面量"\n"
@@ -835,7 +871,8 @@ declare const extractErrorMessage: (error: unknown) => string;
  * qs.stringify({ a: 1, b: 2 }, { addQueryPrefix: true }) // "?a=1&b=2"
  */
 declare const qs: {
-  /** queryString -> queryParams */parse: (queryString: string) => Record<string, any>;
+  /** queryString -> queryParams */
+  parse: (queryString: string) => Record<string, any>;
   stringify: (params: Record<string, any>, options?: {
     /**
      * 是否在结果前添加“?”

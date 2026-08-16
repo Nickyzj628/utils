@@ -28,6 +28,8 @@ export namespace Compact {
 		hasCompactedToolResult: boolean;
 		/** 是否执行了压缩图片/音频/视频消息 */
 		hasCompactedMedia: boolean;
+		/** 是否执行了清理软删除残留的占位消息 */
+		hasClearedSoftDeletedMessages: boolean;
 		/** 是否执行了总结消息操作（是否真的总结，请检查消息中是否出现`<summary>`标签） */
 		hasSummarized: boolean;
 		/** 是否执行了兜底硬删除较早消息 */

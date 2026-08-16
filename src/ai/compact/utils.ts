@@ -36,24 +36,36 @@ export const hasToolCalls = (message: AI.Message | undefined) =>
 	message?.role === "assistant" && Array.isArray(message.tool_calls);
 
 /**
- * 调整切点 endIndex，确保它不会落在 assistant(tool_calls) + tool 配对组中间
- * @param messages 完整消息数组
- * @param endIndex 初始切点，会把消息分为 [, endIndex) 和 [endIndex, ) 两段
- * @returns 调整后的 endIndex，保证切点不会拆散配对组
- * @remarks OpenAI API 要求 assistant(tool_calls) 和 tool 消息通过 tool_call_id 一一配对。
- * 如果切点落在配对组中间，两段消息都会出现孤立消息，导致 API 返回 400
+ * 查找tool消息所属的 assistant(tool_calls) + tool 配对组范围
+ * @param messages 消息数组
+ * @param toolIndex tool消息的索引
+ * @returns 配对组范围 [startIndex, endIndex)（含组头assistant与其后连续的全部tool消息）；
+ * 找不到配对组头时返回 null
+ * @remarks 配对组约定：组头是assistant(tool_calls)，组内是紧随其后的连续tool消息。
+ * 删除或切分tool消息时都应整组处理，否则会留下孤立消息导致OpenAI API返回400。
+ * 组内任意一条tool消息都能定位到整组，供上层按整组范围批量操作
  */
-export const alignToolGroupBoundary = (
+export const findToolGroupRange = (
 	messages: AI.Message[],
-	endIndex: number,
-) => {
-	endIndex = Math.min(endIndex, messages.length);
-
-	// 切点处第一条保留消息是tool -> 其对应的assistant在被切掉的一侧，
-	// 将连续的tool都推入被切掉一侧，使整组配对留在同一段
-	while (messages[endIndex]?.role === "tool") {
-		endIndex++;
+	toolIndex: number,
+): [number, number] | null => {
+	// 组内连续tool消息往前推，组头应是assistant(tool_calls)
+	let groupStart = toolIndex;
+	while (groupStart > 0 && messages[groupStart - 1]?.role === "tool") {
+		groupStart--;
 	}
 
-	return endIndex;
+	// 找不到assistant(tool_calls)组头时返回null交给调用方兜底
+	// （hasToolCalls已处理undefined，groupStart为0时同样安全）
+	if (!hasToolCalls(messages[groupStart - 1])) {
+		return null;
+	}
+
+	// 组尾：组头后连续的所有tool消息，组范围是 [组头, 组尾)
+	let groupEnd = groupStart;
+	while (groupEnd < messages.length && messages[groupEnd]?.role === "tool") {
+		groupEnd++;
+	}
+
+	return [groupStart - 1, groupEnd];
 };

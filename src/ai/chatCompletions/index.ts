@@ -35,11 +35,7 @@ const nonStreaming = async (
 		}
 		messages.push(message);
 
-		const {
-			content = "",
-			tool_calls: toolCalls = [],
-			...restMessage
-		} = message;
+		const { content = "", tool_calls: toolCalls = [], ...restMessage } = message;
 		const reasoning = extractReasoning(message);
 
 		// 调用工具
