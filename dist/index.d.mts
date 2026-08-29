@@ -122,10 +122,8 @@ declare const withCache: <Args extends any[], Result>(fn: (this: {
   setTtl: SetTtl;
 }, ...args: Args) => Result, ttlSeconds?: number) => {
   (...args: Args): Result;
-  /** 手动清除缓存 */
-  clear: () => void;
-  /** 更新 TTL，同时刷新所有未过期缓存的时间 */
-  updateTtl: (seconds: number) => void;
+  clear(): void;
+  updateTtl(seconds: number): void;
 };
 //#endregion
 //#region src/is/is-nil.d.ts
