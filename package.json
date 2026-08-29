@@ -1,6 +1,6 @@
 {
 	"name": "@nickyzj2023/utils",
-	"version": "1.0.92",
+	"version": "1.0.93",
 	"type": "module",
 	"main": "dist/index.mjs",
 	"module": "dist/index.mjs",
@@ -18,18 +18,18 @@
 		"build": "tsdown",
 		"docs": "typedoc",
 		"check": "biome check --diagnostic-level=error --write src/",
-		"prepublish": "pnpm run check && pnpm run build && pnpm run docs"
+		"prepublishOnly": "pnpm run check && pnpm run build && pnpm run docs"
 	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/Nickyzj628/utils.git"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.8",
-		"@types/node": "^25.9.5",
+		"@biomejs/biome": "^2.5.11",
+		"@types/node": "^26.4.0",
 		"tsdown": "^0.22.14",
 		"typedoc": "^0.28.20",
 		"typedoc-material-theme": "^1.4.1",
-		"typescript": "^6.0.3"
+		"typescript": "^7.0.2"
 	}
 }

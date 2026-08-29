@@ -1,4 +1,3 @@
-export * from "./ai";
 export * from "./dom";
 export * from "./function";
 export * from "./hoc";

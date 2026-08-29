@@ -15,7 +15,7 @@ export type RequestInit = Omit<globalThis.RequestInit, "body"> & {
 	/**
 	 * 响应解析器，默认的解析方法为 response.json()
 	 */
-	parser?: (response: Response) => Promise<any>;
+	parser?: (response: Response) => any;
 };
 
 /**
