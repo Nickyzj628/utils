@@ -1,7 +1,6 @@
 {
 	"$schema": "https://typedoc.org/schema.json",
 	"entryPoints": [
-		"src/ai/index.ts",
 		"src/dom/index.ts",
 		"src/function/index.ts",
 		"src/hoc/index.ts",

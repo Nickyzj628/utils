@@ -18,7 +18,8 @@
 		"build": "tsdown",
 		"docs": "typedoc",
 		"check": "biome check --diagnostic-level=error --write src/",
-		"prepublishOnly": "pnpm run check && pnpm run build && pnpm run docs"
+		"typecheck": "tsc --noEmit",
+		"prepublishOnly": "pnpm run check && pnpm run typecheck && pnpm run build && pnpm run docs"
 	},
 	"repository": {
 		"type": "git",
@@ -30,6 +31,6 @@
 		"tsdown": "^0.22.14",
 		"typedoc": "^0.28.20",
 		"typedoc-material-theme": "^1.4.1",
-		"typescript": "^7.0.2"
+		"typescript": "~6.0.3"
 	}
 }
