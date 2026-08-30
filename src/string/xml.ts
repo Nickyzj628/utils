@@ -20,30 +20,50 @@ export const createXMLText = (
 };
 
 /**
- * 提取文本中检测到的XML标签列表
- * @param text 待检测文本
- * @param tags 可选：只提取属于该列表中的标签（不区分大小写）；不传或传空数组时提取全部标签
- * @returns 检测到的标签名数组（统一小写、按首次出现顺序去重），未检测到任何标签时返回空数组
- * @example
- * extractXmlTags("纯文本") // []
- * extractXmlTags("<summary>摘要</summary>", ["summary"]) // ["summary"]
- * extractXmlTags("<system-reminder>提醒</system-reminder>", ["summary", "system-reminder"]) // ["system-reminder"]
- * extractXmlTags("<system-reminder>提醒</system-reminder>", ["summary"]) // []
- * extractXmlTags("<summary>摘要</summary><foo>x</foo>") // ["summary", "foo"]
+ * 转义正则表达式的元字符，使标签名可安全拼入正则
+ * @param value 原始字符串
+ * @returns 转义后的字符串
  */
-export const extractXmlTags = (text: string, tags: string[] = []): string[] => {
-	// 目标标签转小写，用于不区分大小写的匹配
-	const targets = new Set(tags.map((tag) => tag.toLowerCase()));
-	// 用 Set 去重并保持首次出现顺序
-	const found = new Set<string>();
-	// 标签提取正则为唯一实现，src/ai/compact/utils.ts 直接复用本函数，无需内联正则
-	const tagPattern = /<\/?([a-zA-Z][\w-]*)/g;
-	for (const match of text.matchAll(tagPattern)) {
-		const tagName = (match[1] ?? "").toLowerCase();
-		// tags为空 => 提取任意XML标签；否则只提取目标列表中的标签
-		if (targets.size === 0 || targets.has(tagName)) {
-			found.add(tagName);
-		}
-	}
-	return [...found];
+const escapeRegExp = (value: string): string =>
+	value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * 判断文本中是否包含指定XML标签（不区分大小写，开/闭标签均可命中）
+ * @param text 待检测文本
+ * @param tag 目标标签名
+ * @returns 检测到目标标签时返回 true，否则返回 false
+ * @remarks 标签名不要求合法XML格式，但需避免标签名与后缀字符粘连（如 `<summary-x>` 不会命中 `summary`）
+ * @example
+ * hasXmlTag("纯文本", "summary") // false
+ * hasXmlTag("<summary>摘要</summary>", "summary") // true
+ * hasXmlTag("<SUMMARY x=\"1\">摘要</SUMMARY>", "summary") // true
+ */
+export const hasXmlTag = (text: string, tag: string): boolean => {
+	// 用 (?=[\s/>]) 限定标签名后必须紧跟空白、斜杠或右尖括号，避免误匹配 <summaryx>
+	const pattern = new RegExp(`<\\/?${escapeRegExp(tag)}(?=[\\s/>])`, "i");
+	return pattern.test(text);
+};
+
+/**
+ * 提取文本中第一个匹配标签的文本内容（不区分大小写）
+ * @param text 待检测文本
+ * @param tag 目标标签名
+ * @returns 成对标签的内容字符串；未检测到匹配的标签时返回 null
+ * @remarks 采用非贪婪匹配，标签嵌套时返回最内层内容；标签内容为空时返回空字符串
+ * @example
+ * extractXmlTagContent("<summary>摘要</summary>", "summary") // "摘要"
+ * extractXmlTagContent("<SUMMARY>摘要</SUMMARY>", "summary") // "摘要"
+ * extractXmlTagContent("<summary>摘要</summary>", "foo") // null
+ */
+export const extractXmlTagContent = (
+	text: string,
+	tag: string,
+): string | null => {
+	const pattern = new RegExp(
+		`<${escapeRegExp(tag)}(?:[^>]*)>([\\s\\S]*?)</${escapeRegExp(tag)}>`,
+		"i",
+	);
+	// 有匹配则返回内容（内容可能为空字符串），无匹配返回 null
+	const match = pattern.exec(text);
+	return match ? (match[1] ?? "") : null;
 };

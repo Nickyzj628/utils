@@ -35,7 +35,7 @@ pnpm run prepublish  # check && build && docs（发布前完整流程）
 | `src/network/` | `fetcher`、`to`（Go 风格 [err, data]）、`parseSSE`、`getRealURL`、`imageUrlToBase64` |
 | `src/number/` | `randomInt` |
 | `src/object/` | `pick` / `omit` / `mapKeys` / `mapValues` / `mergeObjects` 等 |
-| `src/string/` | `compactStr`、`qs`、`xml`（createXMLText/extractXmlTags）、大小写转换、`extractErrorMessage` |
+| `src/string/` | `compactStr`、`qs`、`xml`（createXMLText/hasXmlTag/extractXmlTagContent）、大小写转换、`extractErrorMessage` |
 | `src/time/` | `debounce` / `throttle` / `sleep` / `lockQueue`（已弃用，建议改用 Web Locks API） |
 
 新增模块需同步：`src/index.ts` 加导出、`typedoc.json` entryPoints 加模块入口。

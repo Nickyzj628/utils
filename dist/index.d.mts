@@ -589,18 +589,29 @@ declare const qs: {
  */
 declare const createXMLText: (tagName: string, content: any, props?: Record<string, any>) => string;
 /**
- * 提取文本中检测到的XML标签列表
+ * 判断文本中是否包含指定XML标签（不区分大小写，开/闭标签均可命中）
  * @param text 待检测文本
- * @param tags 可选：只提取属于该列表中的标签（不区分大小写）；不传或传空数组时提取全部标签
- * @returns 检测到的标签名数组（统一小写、按首次出现顺序去重），未检测到任何标签时返回空数组
+ * @param tag 目标标签名
+ * @returns 检测到目标标签时返回 true，否则返回 false
+ * @remarks 标签名不要求合法XML格式，但需避免标签名与后缀字符粘连（如 `<summary-x>` 不会命中 `summary`）
  * @example
- * extractXmlTags("纯文本") // []
- * extractXmlTags("<summary>摘要</summary>", ["summary"]) // ["summary"]
- * extractXmlTags("<system-reminder>提醒</system-reminder>", ["summary", "system-reminder"]) // ["system-reminder"]
- * extractXmlTags("<system-reminder>提醒</system-reminder>", ["summary"]) // []
- * extractXmlTags("<summary>摘要</summary><foo>x</foo>") // ["summary", "foo"]
+ * hasXmlTag("纯文本", "summary") // false
+ * hasXmlTag("<summary>摘要</summary>", "summary") // true
+ * hasXmlTag("<SUMMARY x=\"1\">摘要</SUMMARY>", "summary") // true
  */
-declare const extractXmlTags: (text: string, tags?: string[]) => string[];
+declare const hasXmlTag: (text: string, tag: string) => boolean;
+/**
+ * 提取文本中第一个匹配标签的文本内容（不区分大小写）
+ * @param text 待检测文本
+ * @param tag 目标标签名
+ * @returns 成对标签的内容字符串；未检测到匹配的标签时返回 null
+ * @remarks 采用非贪婪匹配，标签嵌套时返回最内层内容；标签内容为空时返回空字符串
+ * @example
+ * extractXmlTagContent("<summary>摘要</summary>", "summary") // "摘要"
+ * extractXmlTagContent("<SUMMARY>摘要</SUMMARY>", "summary") // "摘要"
+ * extractXmlTagContent("<summary>摘要</summary>", "foo") // null
+ */
+declare const extractXmlTagContent: (text: string, tag: string) => string | null;
 //#endregion
 //#region src/time/debounce.d.ts
 /**
@@ -719,4 +730,4 @@ declare const sleep: (time?: number) => Promise<unknown>;
  */
 declare const throttle: <T extends (...args: any[]) => any>(fn: T, delay?: number) => (this: any, ...args: Parameters<T>) => void;
 //#endregion
-export { CamelToSnake, Capitalize, Decapitalize, DeepMapKeys, DeepMapValues, DiffResults, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, compactStr, createXMLText, debounce, decapitalize, diffObjects, extractErrorMessage, extractXmlTags, fetcher, getRealURL, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };
+export { CamelToSnake, Capitalize, Decapitalize, DeepMapKeys, DeepMapValues, DiffResults, ImageCompressionOptions, LockQueue, LoggerOptions, Primitive, RequestInit, SetTtl, SnakeToCamel, camelToSnake, capitalize, compactStr, createXMLText, debounce, decapitalize, diffObjects, extractErrorMessage, extractXmlTagContent, fetcher, getRealURL, hasXmlTag, imageUrlToBase64, isNil, isObject, isPrimitive, logger, loopUntil, mapKeys, mapValues, mergeObjects, omit, omitBy, parseSSE, pick, pickBy, qs, randomInt, sleep, snakeToCamel, throttle, to, withCache };

@@ -1,6 +1,6 @@
 {
 	"name": "@nickyzj2023/utils",
-	"version": "1.0.93",
+	"version": "1.0.94",
 	"type": "module",
 	"main": "dist/index.mjs",
 	"module": "dist/index.mjs",
