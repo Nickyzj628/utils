@@ -172,19 +172,19 @@
 <section class="tsd-panel">
 <ul class="tsd-signatures">
 <li class="">
-<div class="tsd-signature tsd-anchor-link" id="compactstr"><span class="tsd-kind-call-signature">compactStr</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">text</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{</span><br/>        <span class="tsd-kind-property">disableCollapse</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">disableNewLineReplace</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">maxLength</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><a href="#compactstr" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
+<div class="tsd-signature tsd-anchor-link" id="compactstr"><span class="tsd-kind-call-signature">compactStr</span><span class="tsd-signature-symbol">(</span><br/>    <span class="tsd-kind-parameter">text</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">,</span><br/>    <span class="tsd-kind-parameter">options</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-symbol">{</span><br/>        <span class="tsd-kind-property">disableCollapse</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">disableNewLineReplace</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">maxLength</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>        <span class="tsd-kind-property">truncateMiddle</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-signature-symbol">}</span><span class="tsd-signature-symbol">,</span><br/><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><a href="#compactstr" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></div>
 <div class="tsd-description">
 <div class="tsd-comment tsd-typography"><p>将字符串压缩为单行精简格式</p>
 </div>
 <div class="tsd-parameters">
 <h4 class="tsd-parameters-title">Parameters</h4>
 <ul class="tsd-parameter-list">
-<li><span><span class="tsd-kind-parameter">text</span>: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></span></li>
-<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">options</span>: <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-kind-property">disableCollapse</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">disableNewLineReplace</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">maxLength</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></span>
+<li><span><span class="tsd-kind-parameter">text</span>: <span class="tsd-signature-type">string</span></span></li>
+<li><span><code class="tsd-tag">Optional</code><span class="tsd-kind-parameter">options</span>: <span class="tsd-signature-symbol">{</span><br/>    <span class="tsd-kind-property">disableCollapse</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">disableNewLineReplace</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">maxLength</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <span class="tsd-kind-property">truncateMiddle</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></span>
 <ul class="tsd-parameters">
 <li class="tsd-parameter">
 <h5><code class="tsd-tag">Optional</code><span class="tsd-kind-property">disableCollapse</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span></h5>
-<div class="tsd-comment tsd-typography"><p>是否合并连续的换行符/制表符为单个</p>
+<div class="tsd-comment tsd-typography"><p>禁止把连续的换行符/制表符合并为单个</p>
 </div>
 <div class="tsd-comment tsd-typography">
 <div class="tsd-tag-default">
@@ -194,7 +194,7 @@
 </div></div></li>
 <li class="tsd-parameter">
 <h5><code class="tsd-tag">Optional</code><span class="tsd-kind-property">disableNewLineReplace</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span></h5>
-<div class="tsd-comment tsd-typography"><p>是否将换行符替换为字面量&quot;\n&quot;</p>
+<div class="tsd-comment tsd-typography"><p>禁止把换行符替换为字面量&quot;\n&quot;</p>
 </div>
 <div class="tsd-comment tsd-typography">
 <div class="tsd-tag-default">
@@ -204,28 +204,43 @@
 </div></div></li>
 <li class="tsd-parameter">
 <h5><code class="tsd-tag">Optional</code><span class="tsd-kind-property">maxLength</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span></h5>
-<div class="tsd-comment tsd-typography"><p>最大保留长度，超过该长度使用 &quot;...&quot; 替代</p>
+<div class="tsd-comment tsd-typography"><p>最大保留长度，超过该长度的内容用&quot;...&quot;替代</p>
 </div>
 <div class="tsd-comment tsd-typography">
 <div class="tsd-tag-default">
 <h4 class="tsd-anchor-link" id="default-2">Default<a href="#default-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-6">Infinity</span>
 </code><button type="button">Copy</button></pre>
 
+</div></div></li>
+<li class="tsd-parameter">
+<h5><code class="tsd-tag">Optional</code><span class="tsd-kind-property">truncateMiddle</span><span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span></h5>
+<div class="tsd-comment tsd-typography"><p>是否截断中间内容，保留首尾</p>
+</div>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-default">
+<h4 class="tsd-anchor-link" id="default-3">Default<a href="#default-3" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-6">false</span>
+</code><button type="button">Copy</button></pre>
+
 </div></div></li></ul></li></ul></div>
 <h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
 <div class="tsd-comment tsd-typography">
 <div class="tsd-tag-example">
-<h4 class="tsd-anchor-link" id="example">Example<a href="#example" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-0">// &quot;Hello\nworld&quot;</span><br/><span class="hl-1">compactStr</span><span class="hl-2">(</span><span class="hl-3">`Hello,</span><br/><br/><span class="hl-3"> world</span><br/><br/><span class="hl-3">!`</span><span class="hl-2">);</span>
+<h4 class="tsd-anchor-link" id="example">Example<a href="#example" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-0">// 换行符被替换为字面量&quot;\n&quot;</span><br/><span class="hl-0">// &quot;Hello,\nworld!&quot;</span><br/><span class="hl-1">compactStr</span><span class="hl-2">(</span><span class="hl-3">&quot;Hello,</span><span class="hl-10">\n</span><span class="hl-3">world!&quot;</span><span class="hl-2">);</span>
 </code><button type="button">Copy</button></pre>
 
 </div>
 <div class="tsd-tag-example">
-<h4 class="tsd-anchor-link" id="example-1">Example<a href="#example-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-0">// &quot;Hello...world&quot;</span><br/><span class="hl-1">compactStr</span><span class="hl-2">(</span><span class="hl-3">&quot;Hello, beautiful world!&quot;</span><span class="hl-2">, { </span><span class="hl-5">maxLength:</span><span class="hl-2"> </span><span class="hl-9">15</span><span class="hl-2"> });</span>
+<h4 class="tsd-anchor-link" id="example-1">Example<a href="#example-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-0">// 超过maxLength时截断末尾</span><br/><span class="hl-0">// &quot;Hello, beautifu...&quot;</span><br/><span class="hl-1">compactStr</span><span class="hl-2">(</span><span class="hl-3">&quot;Hello, beautiful world!&quot;</span><span class="hl-2">, { </span><span class="hl-5">maxLength:</span><span class="hl-2"> </span><span class="hl-9">15</span><span class="hl-2"> });</span>
+</code><button type="button">Copy</button></pre>
+
+</div>
+<div class="tsd-tag-example">
+<h4 class="tsd-anchor-link" id="example-2">Example<a href="#example-2" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-0">// 超过maxLength时保留首尾</span><br/><span class="hl-0">// &quot;abcde...vwxyz&quot;</span><br/><span class="hl-1">compactStr</span><span class="hl-2">(</span><span class="hl-3">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span><span class="hl-2">, { </span><span class="hl-5">maxLength:</span><span class="hl-2"> </span><span class="hl-9">10</span><span class="hl-2">, </span><span class="hl-5">truncateMiddle:</span><span class="hl-2"> </span><span class="hl-6">true</span><span class="hl-2"> });</span>
 </code><button type="button">Copy</button></pre>
 
 </div></div><aside class="tsd-sources">
 <ul>
-<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/de485640b42454576878d902a9e0320fc2580d6c/src/string/compact.ts#L16">string/compact.ts:16</a></li></ul></aside></div></li></ul></section></div>
+<li>Defined in <a href="https://github.com/Nickyzj628/utils/blob/f27cc4b0382772d614cb5791372027122b5739d6/src/string/compact.ts#L19">string/compact.ts:19</a></li></ul></aside></div></li></ul></section></div>
 <div class="col-sidebar">
 <div class="page-menu">
 <div class="tsd-navigation settings">
