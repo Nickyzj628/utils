@@ -525,33 +525,41 @@ declare const decapitalize: <S extends string>(s: S) => Decapitalize<S>;
  * 将字符串压缩为单行精简格式
  *
  * @example
- * // "Hello\nworld"
- * compactStr(`Hello,
- *
- *  world
- *
- * !`);
+ * // 换行符被替换为字面量"\n"
+ * // "Hello,\nworld!"
+ * compactStr("Hello,\nworld!");
  *
  * @example
- * // "Hello...world"
+ * // 超过maxLength时截断末尾
+ * // "Hello, beautifu..."
  * compactStr("Hello, beautiful world!", { maxLength: 15 });
+ *
+ * @example
+ * // 超过maxLength时保留首尾
+ * // "abcde...vwxyz"
+ * compactStr("abcdefghijklmnopqrstuvwxyz", { maxLength: 10, truncateMiddle: true });
  */
-declare const compactStr: (text?: string, options?: {
+declare const compactStr: (text: string, options?: {
   /**
-     * 最大保留长度，超过该长度使用 "..." 替代
-      @default Infinity
-     */
+   * 最大保留长度，超过该长度的内容用"..."替代
+   * @default Infinity
+   */
   maxLength?: number;
   /**
-   * 是否将换行符替换为字面量"\n"
+   * 禁止把换行符替换为字面量"\n"
    * @default false
    */
   disableNewLineReplace?: boolean;
   /**
-   * 是否合并连续的换行符/制表符为单个
+   * 禁止把连续的换行符/制表符合并为单个
    * @default false
    */
   disableCollapse?: boolean;
+  /**
+   * 是否截断中间内容，保留首尾
+   * @default false
+   */
+  truncateMiddle?: boolean;
 }) => string;
 //#endregion
 //#region src/string/extract-error-message.d.ts
