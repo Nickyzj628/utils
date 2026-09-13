@@ -62,8 +62,11 @@ export type RequestInit = Omit<globalThis.RequestInit, "body"> & {
  */
 export const fetcher = (baseUrl = "", baseOptions: RequestInit = {}) => {
 	const myFetch = async <T>(path: string, requestOptions: RequestInit = {}) => {
-		// 构建完整 URL
-		const url = new URL(baseUrl ? `${baseUrl}${path}` : path);
+		// 构建完整URL
+		const fullPath = baseUrl
+			? `${baseUrl.replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`
+			: path;
+		const url = new URL(fullPath);
 
 		// 合并 options
 		const { params, parser, ...options } = mergeObjects(
