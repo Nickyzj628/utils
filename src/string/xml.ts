@@ -15,8 +15,8 @@ export const createXMLText = (
 	const propStrs = Object.entries(props).map(
 		([key, value]) => `${key}="${value}"`,
 	);
-
-	return `<${tagName}${propStrs.length > 0 ? ` ${propStrs.join(" ")}` : ""}>\n${content}\n</${tagName}>`;
+	const isLengthy = typeof content === "string" ? content.length > 15 : true;
+	return `<${tagName}${propStrs.length > 0 ? ` ${propStrs.join(" ")}` : ""}>${isLengthy ? "\n" : ""}${content}${isLengthy ? "\n" : ""}</${tagName}>`;
 };
 
 /**
