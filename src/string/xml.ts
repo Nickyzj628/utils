@@ -1,3 +1,5 @@
+import { isPrimitive } from "../is";
+
 /**
  * 创建XML标签包裹的文本
  * @param tagName 标签名
@@ -15,7 +17,7 @@ export const createXMLText = (
 	const propStrs = Object.entries(props).map(
 		([key, value]) => `${key}="${value}"`,
 	);
-	const isLengthy = typeof content === "string" ? content.length > 15 : true;
+	const isLengthy = isPrimitive(content) ? String(content).length > 15 : true;
 	return `<${tagName}${propStrs.length > 0 ? ` ${propStrs.join(" ")}` : ""}>${isLengthy ? "\n" : ""}${content}${isLengthy ? "\n" : ""}</${tagName}>`;
 };
 
